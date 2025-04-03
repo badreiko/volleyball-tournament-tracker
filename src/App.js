@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { FaVolleyballBall, FaTrophy, FaTable, FaChartBar, FaUsers, FaCalendarAlt, FaCheck, FaClock, FaExclamationTriangle } from 'react-icons/fa';
+import { FaVolleyballBall, FaUsers, FaTrophy, FaMedal, FaRegClock, FaCheck, FaHourglassHalf, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar } from 'react-icons/fa';
+import { translations, languageNames } from './translations';
 
 // Начальные данные команд
 const initialTeams = [
@@ -18,11 +19,39 @@ const initialTeams = [
 
 // Начальные данные матчей
 const initialMatches = [
-  { id: 'A1-A2', court: 1, time: '09:01', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
-  { id: 'A2-A3', court: 1, time: '10:40', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
-  { id: 'A1-A3', court: 2, time: '11:30', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
-  { id: 'QF-1A-1C', court: 1, time: '12:30', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
-  // Добавь остальные матчи из предыдущего кода, если нужно
+  // Групповой этап - Группа A
+  { id: 'A1-A2', court: 1, time: '09:00', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'A2-A3', court: 1, time: '09:40', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'A1-A3', court: 1, time: '10:20', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  
+  // Групповой этап - Группа B
+  { id: 'B1-B2', court: 2, time: '09:00', team1: 'B1', team2: 'B2', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'B2-B3', court: 2, time: '09:40', team1: 'B2', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'B1-B3', court: 2, time: '10:20', team1: 'B1', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  
+  // Групповой этап - Группа C
+  { id: 'C1-C2', court: 3, time: '09:00', team1: 'C1', team2: 'C2', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'C3-C4', court: 3, time: '09:40', team1: 'C3', team2: 'C4', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'C1-C3', court: 3, time: '10:20', team1: 'C1', team2: 'C3', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'C2-C4', court: 3, time: '11:00', team1: 'C2', team2: 'C4', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'C1-C4', court: 3, time: '11:40', team1: 'C1', team2: 'C4', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  { id: 'C2-C3', court: 3, time: '12:20', team1: 'C2', team2: 'C3', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
+  
+  // Четвертьфиналы
+  { id: 'QF-1A-2B', court: 1, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  { id: 'QF-1B-2A', court: 2, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  { id: 'QF-1C-WC', court: 1, time: '13:40', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  { id: 'QF-2C-3B', court: 2, time: '13:40', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  
+  // Полуфиналы
+  { id: 'SF-W1-W3', court: 1, time: '14:20', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'semifinal' },
+  { id: 'SF-W2-W4', court: 2, time: '14:20', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'semifinal' },
+  
+  // Матч за 3-е место
+  { id: 'F3-L1-L2', court: 2, time: '15:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place' },
+  
+  // Финал
+  { id: 'F-W1-W2', court: 1, time: '15:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final' }
 ];
 
 function App() {
@@ -30,12 +59,17 @@ function App() {
   const [matches, setMatches] = useState(() => JSON.parse(localStorage.getItem('matches')) || initialMatches);
   const [view, setView] = useState('matches'); // matches, groups, matchDetail
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'ru');
+  
+  // Получение текущих переводов
+  const t = translations[language];
 
   // Сохранение данных в localStorage
   useEffect(() => {
     localStorage.setItem('teams', JSON.stringify(teams));
     localStorage.setItem('matches', JSON.stringify(matches));
-  }, [teams, matches]);
+    localStorage.setItem('language', language);
+  }, [teams, matches, language]);
 
   // Обновление счета матча
   const updateMatchScore = (matchId, set, team, score) => {
@@ -89,14 +123,112 @@ function App() {
     ['A', 'B', 'C'].forEach(group => {
       groupRankings[group] = teams.filter(t => t.group === group).sort((a, b) => b.points - a.points || b.setsWon - a.setsWon);
     });
+    
+    // Находим лучшую третью команду (wildcard)
+    const thirdPlaceTeams = [
+      groupRankings['A'][2],
+      groupRankings['B'][2],
+      groupRankings['C'][2]
+    ].filter(Boolean).sort((a, b) => b.points - a.points || b.setsWon - a.setsWon);
+    const wildcard = thirdPlaceTeams[0]?.code;
+    
     setMatches(prevMatches => prevMatches.map(match => {
       if (match.round === 'quarterfinal') {
         const updatedMatch = { ...match };
-        if (match.id === 'QF-1A-1C') { updatedMatch.team1 = groupRankings['A'][0]?.code; updatedMatch.team2 = groupRankings['C'][0]?.code; }
+        
+        // Заполняем четвертьфиналы
+        if (match.id === 'QF-1A-2B') { 
+          updatedMatch.team1 = groupRankings['A'][0]?.code; 
+          updatedMatch.team2 = groupRankings['B'][1]?.code; 
+        }
+        else if (match.id === 'QF-1B-2A') { 
+          updatedMatch.team1 = groupRankings['B'][0]?.code; 
+          updatedMatch.team2 = groupRankings['A'][1]?.code; 
+        }
+        else if (match.id === 'QF-1C-WC') { 
+          updatedMatch.team1 = groupRankings['C'][0]?.code; 
+          updatedMatch.team2 = wildcard; 
+        }
+        else if (match.id === 'QF-2C-3B') { 
+          updatedMatch.team1 = groupRankings['C'][1]?.code; 
+          updatedMatch.team2 = groupRankings['B'][2]?.code; 
+        }
+        
+        // Если обе команды определены, меняем статус на 'not_started'
+        if (updatedMatch.team1 && updatedMatch.team2) {
+          updatedMatch.status = 'not_started';
+        }
+        
         return updatedMatch;
       }
+      
+      // Заполняем полуфиналы на основе результатов четвертьфиналов
+      if (match.round === 'semifinal') {
+        const updatedMatch = { ...match };
+        const completedQuarterfinals = updatedMatches.filter(m => m.round === 'quarterfinal' && m.status === 'completed');
+        
+        if (match.id === 'SF-W1-W3') {
+          const qf1 = completedQuarterfinals.find(m => m.id === 'QF-1A-2B');
+          const qf3 = completedQuarterfinals.find(m => m.id === 'QF-1C-WC');
+          if (qf1?.winner) updatedMatch.team1 = qf1.winner;
+          if (qf3?.winner) updatedMatch.team2 = qf3.winner;
+        }
+        else if (match.id === 'SF-W2-W4') {
+          const qf2 = completedQuarterfinals.find(m => m.id === 'QF-1B-2A');
+          const qf4 = completedQuarterfinals.find(m => m.id === 'QF-2C-3B');
+          if (qf2?.winner) updatedMatch.team1 = qf2.winner;
+          if (qf4?.winner) updatedMatch.team2 = qf4.winner;
+        }
+        
+        // Если обе команды определены, меняем статус на 'not_started'
+        if (updatedMatch.team1 && updatedMatch.team2) {
+          updatedMatch.status = 'not_started';
+        }
+        
+        return updatedMatch;
+      }
+      
+      // Заполняем финал и матч за 3-е место на основе результатов полуфиналов
+      if (match.round === 'final' || match.round === 'third_place') {
+        const updatedMatch = { ...match };
+        const completedSemifinals = updatedMatches.filter(m => m.round === 'semifinal' && m.status === 'completed');
+        
+        if (match.round === 'final' && match.id === 'F-W1-W2') {
+          const sf1 = completedSemifinals.find(m => m.id === 'SF-W1-W3');
+          const sf2 = completedSemifinals.find(m => m.id === 'SF-W2-W4');
+          if (sf1?.winner) updatedMatch.team1 = sf1.winner;
+          if (sf2?.winner) updatedMatch.team2 = sf2.winner;
+        }
+        else if (match.round === 'third_place' && match.id === 'F3-L1-L2') {
+          const sf1 = completedSemifinals.find(m => m.id === 'SF-W1-W3');
+          const sf2 = completedSemifinals.find(m => m.id === 'SF-W2-W4');
+          
+          // Проигравшие в полуфиналах
+          if (sf1?.status === 'completed') {
+            const loser = sf1.winner === sf1.team1 ? sf1.team2 : sf1.team1;
+            updatedMatch.team1 = loser;
+          }
+          if (sf2?.status === 'completed') {
+            const loser = sf2.winner === sf2.team1 ? sf2.team2 : sf2.team1;
+            updatedMatch.team2 = loser;
+          }
+        }
+        
+        // Если обе команды определены, меняем статус на 'not_started'
+        if (updatedMatch.team1 && updatedMatch.team2) {
+          updatedMatch.status = 'not_started';
+        }
+        
+        return updatedMatch;
+      }
+      
       return match;
     }));
+  };
+
+  // Переключение языка
+  const changeLanguage = (lang) => {
+    setLanguage(lang);
   };
 
   // Рендер матчей
@@ -104,20 +236,20 @@ function App() {
     <div className="p-4 overflow-x-auto">
       <h2 className="text-2xl font-bold mb-6 text-indigo-700 flex items-center">
         <FaVolleyballBall className="mr-3 text-indigo-600" /> 
-        <span>Матчи турнира</span>
+        <span>{t.matches}</span>
       </h2>
       <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-xl shadow-lg">
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+          <thead className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
             <tr>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Раунд</th>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Матч</th>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Корт</th>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Время</th>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Сет 1</th>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Сет 2</th>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Сет 3</th>
-              <th className="p-3 text-left text-sm md:text-base font-semibold">Статус</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.round}</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.match}</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.court}</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.time}</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.set1}</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.set2}</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.set3}</th>
+              <th className="py-3 px-4 text-left text-sm md:text-base">{t.status}</th>
             </tr>
           </thead>
           <tbody>
@@ -134,7 +266,7 @@ function App() {
                 statusIcon = <FaExclamationTriangle className="mr-1 text-orange-500" />;
                 statusClass = 'text-orange-600 font-semibold';
               } else {
-                statusIcon = <FaClock className="mr-1 text-gray-500" />;
+                statusIcon = <FaRegClock className="mr-1 text-gray-500" />;
                 statusClass = 'text-gray-600';
               }
               
@@ -154,10 +286,10 @@ function App() {
                 <tr key={match.id} className="border-b hover:bg-indigo-50 transition-colors duration-150 ease-in-out cursor-pointer" 
                     onClick={() => { setView('matchDetail'); setSelectedMatch(match); }}>
                   <td className="p-3 text-sm md:text-base">
-                    <span className={roundClass}>{match.round}</span>
+                    <span className={roundClass}>{t.roundNames[match.round]}</span>
                   </td>
                   <td className="p-3 text-sm md:text-base font-medium">{team1.name} <span className="text-gray-400">vs</span> {team2.name}</td>
-                  <td className="p-3 text-sm md:text-base">Корт {match.court}</td>
+                  <td className="p-3 text-sm md:text-base">{t.court} {match.court}</td>
                   <td className="p-3 text-sm md:text-base text-gray-700">
                     <div className="flex items-center">
                       <FaCalendarAlt className="mr-2 text-indigo-500" />
@@ -170,7 +302,7 @@ function App() {
                   <td className={`p-3 text-sm md:text-base ${statusClass}`}>
                     <div className="flex items-center">
                       {statusIcon}
-                      {match.status}
+                      {t.statusNames[match.status]}
                     </div>
                   </td>
                 </tr>
@@ -187,7 +319,7 @@ function App() {
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-6 text-indigo-700 flex items-center">
         <FaUsers className="mr-3 text-indigo-600" /> 
-        <span>Группы команд</span>
+        <span>{t.groups}</span>
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {['A', 'B', 'C'].map(group => {
@@ -219,7 +351,7 @@ function App() {
             <div key={group} className={`bg-gradient-to-r ${colors.lightBg} rounded-xl shadow-lg overflow-hidden`}>
               <div className={`bg-gradient-to-r ${colors.bg} p-4 text-white`}>
                 <h3 className="text-xl font-bold flex items-center">
-                  <FaTable className="mr-2" /> Группа {group}
+                  <FaTable className="mr-2" /> {t.group} {group}
                 </h3>
               </div>
               <div className="p-4">
@@ -298,7 +430,7 @@ function App() {
       statusIcon = <FaExclamationTriangle className="mr-2" />;
     } else {
       statusClass += ' bg-gray-100 text-gray-800';
-      statusIcon = <FaClock className="mr-2" />;
+      statusIcon = <FaRegClock className="mr-2" />;
     }
     
     return (
@@ -356,7 +488,7 @@ function App() {
             
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Сет 1</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.set1}</label>
                 <div className="flex items-center justify-between">
                   <input 
                     type="number" 
@@ -375,7 +507,7 @@ function App() {
               </div>
               
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Сет 2</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.set2}</label>
                 <div className="flex items-center justify-between">
                   <input 
                     type="number" 
@@ -395,7 +527,7 @@ function App() {
               
               {selectedMatch.round === 'final' && (
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Сет 3</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t.set3}</label>
                   <div className="flex items-center justify-between">
                     <input 
                       type="number" 
@@ -435,8 +567,22 @@ function App() {
       <header className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 flex justify-between items-center shadow-lg">
         <h1 className="text-xl md:text-2xl font-bold flex items-center">
           <FaVolleyballBall className="mr-3 animate-spin-slow" /> 
-          RVL Волейбольный Турнир
+          {t.appTitle}
         </h1>
+        <div className="flex items-center space-x-2">
+          <FaGlobe className="text-white" />
+          <select 
+            value={language} 
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="bg-transparent text-white border border-white rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white"
+          >
+            {Object.keys(languageNames).map(lang => (
+              <option key={lang} value={lang} className="bg-indigo-700 text-white">
+                {languageNames[lang]}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
 
       {/* Основной контент */}
@@ -455,7 +601,7 @@ function App() {
               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' 
               : 'hover:bg-indigo-50 text-gray-700'}`}
           >
-            <FaVolleyballBall className="mr-3" /> Матчи
+            <FaVolleyballBall className="mr-3" /> {t.matches}
           </button>
           <button 
             onClick={() => setView('groups')} 
@@ -463,14 +609,14 @@ function App() {
               ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' 
               : 'hover:bg-indigo-50 text-gray-700'}`}
           >
-            <FaUsers className="mr-3" /> Группы
+            <FaUsers className="mr-3" /> {t.groups}
           </button>
         </div>
         
         <div className="absolute bottom-6 left-0 right-0 px-6">
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg shadow-sm border border-indigo-100">
-            <h3 className="text-sm font-semibold text-indigo-700 mb-2">О приложении</h3>
-            <p className="text-xs text-gray-600">RVL Турнир - приложение для отслеживания результатов волейбольных матчей и турнирной таблицы.</p>
+            <h3 className="text-sm font-semibold text-indigo-700 mb-2">{t.aboutSection}</h3>
+            <p className="text-xs text-gray-600">{t.aboutApp}</p>
           </div>
         </div>
       </aside>
@@ -482,14 +628,14 @@ function App() {
           className={`p-2 flex flex-col items-center ${view === 'matches' ? 'text-indigo-600 font-semibold' : 'text-gray-600'}`}
         >
           <FaVolleyballBall className="text-xl mb-1" />
-          <span className="text-xs">Матчи</span>
+          <span className="text-xs">{t.matches}</span>
         </button>
         <button 
           onClick={() => setView('groups')} 
           className={`p-2 flex flex-col items-center ${view === 'groups' ? 'text-indigo-600 font-semibold' : 'text-gray-600'}`}
         >
           <FaUsers className="text-xl mb-1" />
-          <span className="text-xs">Группы</span>
+          <span className="text-xs">{t.groups}</span>
         </button>
       </nav>
     </div>
