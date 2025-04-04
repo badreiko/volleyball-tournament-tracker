@@ -3,12 +3,6 @@ import './App.css';
 import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar, FaMapMarkerAlt, FaLink } from 'react-icons/fa';
 import { translations, languageNames } from './translations';
 
-// Настройки турнира
-const tournamentSettings = {
-  useTotalPointsForTie: true, // true - использовать общие очки, false - всегда тайбрейк
-  tiebreakPoints: 5 // Количество очков для тайбрейка
-};
-
 // Начальные данные команд
 const initialTeams = [
   { code: 'A1', name: 'Zlatý jádro Kladno', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
@@ -87,83 +81,46 @@ function App() {
           updatedMatch[`set${set}${team === 'team1' ? 'Team1' : 'Team2'}`] = parseInt(score) || 0;
 
           if ((set === 2 && match.round !== 'final') || (set === 3 && match.round === 'final')) {
-            const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
+          const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
+          
+          if (match.round === 'final') {
+            // Для финала: нужно выиграть 2 сета (до 2 побед)
+            let team1Wins = (set1Team1 > set1Team2 ? 1 : 0) + 
+                           (set2Team1 > set2Team2 ? 1 : 0) + 
+                           (set3Team1 > set3Team2 ? 1 : 0);
+            let team2Wins = (set1Team2 > set1Team1 ? 1 : 0) + 
+                           (set2Team2 > set2Team1 ? 1 : 0) + 
+                           (set3Team2 > set3Team1 ? 1 : 0);
             
-            if (match.round === 'final') {
-              // Для финала: нужно выиграть 2 сета (до 2 побед)
-              let team1Wins = (set1Team1 > set1Team2 ? 1 : 0) + 
-                             (set2Team1 > set2Team2 ? 1 : 0) + 
-                             (set3Team1 > set3Team2 ? 1 : 0);
-              let team2Wins = (set1Team2 > set1Team1 ? 1 : 0) + 
-                             (set2Team2 > set2Team1 ? 1 : 0) + 
-                             (set3Team2 > set3Team1 ? 1 : 0);
-              
-              if (team1Wins >= 2) { 
-                updatedMatch.winner = match.team1; 
-                updatedMatch.status = 'completed'; 
-              }
-              else if (team2Wins >= 2) { 
-                updatedMatch.winner = match.team2; 
-                updatedMatch.status = 'completed'; 
-              }
-            } else {
-              // Для обычных матчей: учитываем только 2 сета
-              let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0);
-              let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0);
-              
-              if (team1Sets === 2) { 
-                updatedMatch.winner = match.team1; 
-                updatedMatch.status = 'completed'; 
-              }
-              else if (team2Sets === 2) { 
-                updatedMatch.winner = match.team2; 
-                updatedMatch.status = 'completed'; 
-              }
-              else if (team1Sets === 1 && team2Sets === 1) {
-                // Ничья по сетам (1:1)
-                if (tournamentSettings.useTotalPointsForTie) {
-                  // Используем общие очки для определения победителя
-                  const team1TotalPoints = set1Team1 + set2Team1;
-                  const team2TotalPoints = set1Team2 + set2Team2;
-                  
-                  if (team1TotalPoints > team2TotalPoints) {
-                    updatedMatch.winner = match.team1;
-                    updatedMatch.status = 'completed_by_points';
-                  } else if (team2TotalPoints > team1TotalPoints) {
-                    updatedMatch.winner = match.team2;
-                    updatedMatch.status = 'completed_by_points';
-                  } else {
-                    // Равные очки - требуется тайбрейк
-                    const team1Points = updatedMatch[`set${set}Team1`];
-                    const team2Points = updatedMatch[`set${set}Team2`];
-                    
-                    if (team1Points >= tournamentSettings.tiebreakPoints) {
-                      updatedMatch.winner = match.team1;
-                      updatedMatch.status = 'completed';
-                    } else if (team2Points >= tournamentSettings.tiebreakPoints) {
-                      updatedMatch.winner = match.team2;
-                      updatedMatch.status = 'completed';
-                    }
-                  }
-                } else {
-                  // Всегда тайбрейк при счете 1:1
-                  const team1Points = updatedMatch[`set${set}Team1`];
-                  const team2Points = updatedMatch[`set${set}Team2`];
-                  
-                  if (team1Points >= tournamentSettings.tiebreakPoints) {
-                    updatedMatch.winner = match.team1;
-                    updatedMatch.status = 'completed';
-                  } else if (team2Points >= tournamentSettings.tiebreakPoints) {
-                    updatedMatch.winner = match.team2;
-                    updatedMatch.status = 'completed';
-                  }
-                }
-              }
+            if (team1Wins >= 2) { 
+              updatedMatch.winner = match.team1; 
+              updatedMatch.status = 'completed'; 
             }
+            else if (team2Wins >= 2) { 
+              updatedMatch.winner = match.team2; 
+              updatedMatch.status = 'completed'; 
+            }
+          } else {
+            // Для обычных матчей: учитываем только 2 сета
+            let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0);
+            let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0);
             
-            if (updatedMatch.status === 'completed' || updatedMatch.status === 'completed_by_points') {
-              updateTeamStats(updatedMatch);
+            if (team1Sets === 2) { 
+              updatedMatch.winner = match.team1; 
+              updatedMatch.status = 'completed'; 
             }
+            else if (team2Sets === 2) { 
+              updatedMatch.winner = match.team2; 
+              updatedMatch.status = 'completed'; 
+            }
+            else if (team1Sets === 1 && team2Sets === 1) {
+              updatedMatch.status = 'tie';
+            }
+          }
+          
+          if (updatedMatch.status === 'completed' || updatedMatch.status === 'tie') {
+            updateTeamStats(updatedMatch);
+          }
           }
           return updatedMatch;
         }
@@ -809,34 +766,23 @@ function App() {
           
           {/* Содержимое */}
           <div className="p-6 max-h-[70vh] overflow-y-auto">
-            {/* Правила при счете 1:1 */}
-            <div className="mb-8 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-6 rounded-xl shadow-md border border-[#0B8E8D]/20">
-              <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.tieRules?.title}</h3>
-              
-              <div className="space-y-6">
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option1}</h4>
-                  <p className="text-gray-700">{t.tieRules?.option1Description}</p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option2}</h4>
-                  <p className="text-gray-700">{t.tieRules?.option2Description}</p>
-                </div>
-                
-                <div className="bg-[#FDD80F]/10 p-4 rounded-lg shadow-sm border border-[#FDD80F]/30">
-                  <h4 className="text-lg font-semibold text-[#06324F] mb-2">{t.tieRules?.currentRule}</h4>
-                  <p className="text-[#06324F] font-bold">
-                    {tournamentSettings.tiebreakPoints} очков
-                  </p>
-                </div>
+            {language === 'cs' ? (
+              <div className="prose prose-sm max-w-none">
+                <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800">{t.tournamentRules}</pre>
               </div>
-            </div>
-            
-            {/* Основные правила турнира */}
-            <div className="prose prose-sm max-w-none">
-              <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800">{t.tournamentRules}</pre>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-8 text-center">
+                <FaGlobe className="text-5xl text-[#0B8E8D] mb-4" />
+                <p className="text-lg font-medium text-gray-700 mb-2">{t.rules}</p>
+                <p className="text-gray-600">Правила доступны только на чешском языке</p>
+                <button 
+                  onClick={() => setLanguage('cs')}
+                  className="mt-4 px-4 py-2 bg-[#0B8E8D] text-white rounded-lg hover:bg-[#0B8E8D]/90 transition-colors"
+                >
+                  Переключиться на чешский
+                </button>
+              </div>
+            )}
           </div>
           
           {/* Кнопка закрытия */}
