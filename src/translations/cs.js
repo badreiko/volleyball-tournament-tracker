@@ -133,5 +133,14 @@ Zapisovatel zaznamenává výsledek utkání na jednoduchý formulář, který p
     usePointsOption: "Použít celkový počet bodů", // Текст для чекбокса
     usePointsOptionDescription: "Pokud zaškrtnuto, při 1:1 vyhrává tým s více body ze 2 setů. Při rovnosti bodů se hraje tiebreak.", // Описание для опции "по очкам"
     useTiebreakOptionDescription: "Pokud nezaškrtnuto, při stavu 1:1 na sety se vždy hraje tiebreak.", // Описание для опции "всегда тайбрейк"
-  }
+  },
+  referee: 'Rozhodčí',
+  secretary: 'Zapisovatel',
+  refereeAssignment: 'Přidělení rozhodčích',
+  noRefereeAssigned: 'Není přidělen rozhodčí',
+  refereeInstructions: 'Rozhodčí jsou přidělováni z týmů, které právě nehrají',
+  refereeDecisionFinal: 'Rozhodnutí rozhodčího je konečné',
+  assignReferee: 'Přidělit rozhodčího',
+  assignSecretary: 'Přidělit zapisovatele',
+  assignedReferees: 'Přidělení rozhodčí',
 };

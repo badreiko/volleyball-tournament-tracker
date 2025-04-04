@@ -117,5 +117,14 @@ Secretary records the match result on a simple form, which is handed over to the
     option2: 'Always with Tiebreak',
     option2Description: 'When the score is 1:1 in sets, regardless of the number of points scored, a tiebreak to 5 points is always played to determine the winner.',
     currentRule: 'For this tournament, the following rule is used:'
-  }
+  },
+  referee: 'Referee',
+  secretary: 'Secretary',
+  refereeAssignment: 'Referee Assignment',
+  noRefereeAssigned: 'No referee assigned',
+  refereeInstructions: 'Referees are assigned from teams not currently playing',
+  refereeDecisionFinal: 'Referee decision is final',
+  assignReferee: 'Assign Referee',
+  assignSecretary: 'Assign Secretary',
+  assignedReferees: 'Assigned Referees',
 };
