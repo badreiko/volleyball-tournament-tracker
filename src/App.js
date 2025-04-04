@@ -92,6 +92,21 @@ const saveToLocalStorage = (key, value) => {
     }
 };
 
+// Добавляем валидацию счета и улучшаем логику определения победителя
+const validateScore = (score, isFinalSet, isTiebreak) => {
+  const maxRegular = 25;
+  const maxTiebreak = isFinalSet ? 15 : 5;
+  const maxPoints = isTiebreak ? maxTiebreak : maxRegular;
+  return Math.max(0, Math.min(score, maxPoints));
+};
+
+const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak) => {
+  const minWinDiff = 2;
+  const winThreshold = isTiebreak ? (isFinalSet ? 15 : 5) : 25;
+  
+  return (team1Score >= winThreshold || team2Score >= winThreshold) && 
+         Math.abs(team1Score - team2Score) >= minWinDiff;
+};
 
 function App() {
   // --- Инициализация состояния из localStorage ---
@@ -292,141 +307,100 @@ const recalculateAllTeamStats = useCallback((currentMatches) => {
 
 
   // --- Обновление счета матча (для localStorage версии) ---
-  c// Добавьте этот эффект в компонент App для автоматической проверки всех матчей
-useEffect(() => {
-  // Проверяем все матчи на авто-завершение
-  checkAllMatchesStatus();
-}, [matches]); // Запускаем при каждом изменении matches
+  const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
+    const score = parseInt(scoreStr) || 0;
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return;
 
-// Функция для проверки и обновления статуса всех матчей
-const checkAllMatchesStatus = () => {
-  console.log("Проверка статусов всех матчей...");
-  
-  let matchesUpdated = false;
-  const updatedMatches = [...matches].map(match => {
-    // Проверяем только матчи в процессе или требующие тайбрейк
-    if (match.status === 'not_started' || match.status.startsWith('completed')) {
-      return match;
-    }
+    const isFinalSet = match.round === 'final' && set === 3;
+    const isTiebreak = set === 3 || match.status === 'tie_needs_tiebreak';
     
-    // Создаем копию для изменений
-    const updatedMatch = { ...match };
-    const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
-    const isFinal = match.round === 'final';
+    const validatedScore = validateScore(score, isFinalSet, isTiebreak);
+
+    setMatches(prevMatches => 
+      prevMatches.map(m => 
+        m.id === matchId
+          ? { ...m, [`set${set}${team === 'team1' ? 'Team1' : 'Team2'}`]: validatedScore }
+          : m
+      )
+    );
+  }, [matches]);
+
+  // --- Обновление статуса всех матчей ---
+  const checkAllMatchesStatus = useCallback(() => {
+    console.log("Проверка статусов всех матчей...");
     
-    // Определяем количество выигранных сетов
-    let team1Wins = 0, team2Wins = 0;
-    
-    // Проверка первого сета (до 25 очков)
-    if (set1Team1 >= 25) team1Wins++;
-    else if (set1Team2 >= 25) team2Wins++;
-    
-    // Проверка второго сета (до 25 очков)
-    if (set2Team1 >= 25) team1Wins++;
-    else if (set2Team2 >= 25) team2Wins++;
-    
-    // Проверка третьего сета
-    if (isFinal) {
-      // В финале до 15 очков
-      if (set3Team1 >= 15) team1Wins++;
-      else if (set3Team2 >= 15) team2Wins++;
-    } else {
-      // Тайбрейк до 5 очков
-      if (set3Team1 >= 5) team1Wins++;
-      else if (set3Team2 >= 5) team2Wins++;
-    }
-    
-    // Определяем победителя матча
-    let newStatus = match.status;
-    let newWinner = null;
-    
-    if (isFinal) {
-      // Финал: нужно выиграть 2 сета
-      if (team1Wins >= 2) {
-        newStatus = 'completed';
-        newWinner = match.team1;
-      } else if (team2Wins >= 2) {
-        newStatus = 'completed';
-        newWinner = match.team2;
-      }
-    } else {
-      // Не финал
-      if (team1Wins === 2) {
-        newStatus = 'completed';
-        newWinner = match.team1;
-      } else if (team2Wins === 2) {
-        newStatus = 'completed';
-        newWinner = match.team2;
-      } else if (team1Wins === 1 && team2Wins === 1) {
-        // Счет 1-1, проверяем правило подсчета очков
-        if (tournamentSettings.useTotalPointsForTie) {
-          const team1Points = set1Team1 + set2Team1;
-          const team2Points = set1Team2 + set2Team2;
-          
-          if (team1Points > team2Points) {
-            newStatus = 'completed_by_points';
+    setMatches(prevMatches => {
+      let needsUpdate = false;
+      const updatedMatches = prevMatches.map(match => {
+        const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = match;
+        const isFinal = match.round === 'final';
+
+        // Проверка завершенности сетов
+        const set1Completed = isSetCompleted(set1Team1, set1Team2, false, false);
+        const set2Completed = isSetCompleted(set2Team1, set2Team2, false, false);
+        const set3Completed = isSetCompleted(set3Team1, set3Team2, isFinal, true);
+
+        // Определяем количество выигранных сетов
+        let team1Wins = 0, team2Wins = 0;
+        if (set1Completed) (set1Team1 > set1Team2) ? team1Wins++ : team2Wins++;
+        if (set2Completed) (set2Team1 > set2Team2) ? team1Wins++ : team2Wins++;
+        if (set3Completed) (set3Team1 > set3Team2) ? team1Wins++ : team2Wins++;
+
+        // Определяем статус матча
+        let newStatus = match.status;
+        let newWinner = match.winner;
+
+        if (isFinal) {
+          if (team1Wins >= 2) {
+            newStatus = 'completed';
             newWinner = match.team1;
-          } else if (team2Points > team1Points) {
-            newStatus = 'completed_by_points';
+          } else if (team2Wins >= 2) {
+            newStatus = 'completed';
             newWinner = match.team2;
-          } else {
-            newStatus = 'tie_needs_tiebreak';
           }
         } else {
-          newStatus = 'tie_needs_tiebreak';
+          if (team1Wins === 2) {
+            newStatus = 'completed';
+            newWinner = match.team1;
+          } else if (team2Wins === 2) {
+            newStatus = 'completed';
+            newWinner = match.team2;
+          } else if (team1Wins === 1 && team2Wins === 1) {
+            if (tournamentSettings.useTotalPointsForTie) {
+              const team1Total = set1Team1 + set2Team1;
+              const team2Total = set1Team2 + set2Team2;
+              if (team1Total > team2Total) {
+                newStatus = 'completed_by_points';
+                newWinner = match.team1;
+              } else if (team2Total > team1Total) {
+                newStatus = 'completed_by_points';
+                newWinner = match.team2;
+              } else {
+                newStatus = 'tie_needs_tiebreak';
+              }
+            } else {
+              newStatus = 'tie_needs_tiebreak';
+            }
+          }
         }
-      }
-    }
-    
-    // Изменился ли статус или победитель?
-    if (newStatus !== match.status || newWinner !== match.winner) {
-      matchesUpdated = true;
-      updatedMatch.status = newStatus;
-      updatedMatch.winner = newWinner;
-      return updatedMatch;
-    }
-    
-    return match;
-  });
-  
-  // Если были изменения, обновляем состояние
-  if (matchesUpdated) {
-    console.log("Статусы матчей обновлены");
-    setMatches(updatedMatches);
-    recalculateAllTeamStats(updatedMatches);
-    
-    // Обновляем плей-офф команды после пересчета статистики
-    setTimeout(() => {
-      setTeams(currentTeams => {
-        updatePlayoffTeams(updatedMatches, currentTeams);
-        return currentTeams;
+
+        // Если статус изменился
+        if (newStatus !== match.status || newWinner !== match.winner) {
+          needsUpdate = true;
+          return { ...match, status: newStatus, winner: newWinner };
+        }
+        return match;
       });
-    }, 0);
-  }
-};
 
-// Упрощенная функция обновления счета
-const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
-  const score = parseInt(scoreStr) >= 0 ? parseInt(scoreStr) : 0;
-  
-  setMatches(prevMatches => {
-    return prevMatches.map(match => {
-      if (match.id === matchId) {
-        const field = `set${set}${team === 'team1' ? 'Team1' : 'Team2'}`;
-        // Если счет не изменился, возвращаем старый объект
-        if (match[field] === score) return match;
-        
-        // Иначе создаем новый объект с обновленным счетом
-        return { ...match, [field]: score };
-      }
-      return match;
+      return needsUpdate ? updatedMatches : prevMatches;
     });
-  });
-  
-  // После обновления счета, checkAllMatchesStatus будет вызван автоматически 
-  // благодаря эффекту, который следит за изменениями matches
-}, []);
+  }, [tournamentSettings.useTotalPointsForTie]);
 
+  useEffect(() => {
+    // Проверяем все матчи на авто-завершение
+    checkAllMatchesStatus();
+  }, [matches]); // Запускаем при каждом изменении matches
 
   // --- Обновление Настроек ---
   const handleSettingsChange = useCallback((newSettingValue) => {
