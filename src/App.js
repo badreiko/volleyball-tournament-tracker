@@ -3,6 +3,11 @@ import './App.css';
 import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar, FaMapMarkerAlt, FaLink } from 'react-icons/fa';
 import { translations, languageNames } from './translations';
 
+// Настройки турнира
+const tournamentSettings = {
+  useTotalPointsForTie: true // true - использовать общие очки, false - всегда тайбрейк
+};
+
 // Начальные данные команд
 const initialTeams = [
   { code: 'A1', name: 'Zlatý jádro Kladno', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
@@ -79,48 +84,76 @@ function App() {
         if (match.id === matchId) {
           const updatedMatch = { ...match };
           updatedMatch[`set${set}${team === 'team1' ? 'Team1' : 'Team2'}`] = parseInt(score) || 0;
-
-          if ((set === 2 && match.round !== 'final') || (set === 3 && match.round === 'final')) {
-          const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
-          
-          if (match.round === 'final') {
-            // Для финала: нужно выиграть 2 сета (до 2 побед)
-            let team1Wins = (set1Team1 > set1Team2 ? 1 : 0) + 
-                           (set2Team1 > set2Team2 ? 1 : 0) + 
-                           (set3Team1 > set3Team2 ? 1 : 0);
-            let team2Wins = (set1Team2 > set1Team1 ? 1 : 0) + 
-                           (set2Team2 > set2Team1 ? 1 : 0) + 
-                           (set3Team2 > set3Team1 ? 1 : 0);
+          if ((set === 2 && match.round !== 'final') || (set === 3 && match.round === 'final') || (set === 3 && match.status === 'tie_needs_tiebreak')) {
+            const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
             
-            if (team1Wins >= 2) { 
-              updatedMatch.winner = match.team1; 
-              updatedMatch.status = 'completed'; 
+            if (match.round === 'final') {
+              // Для финала: нужно выиграть 2 сета (до 2 побед)
+              let team1Wins = (set1Team1 > set1Team2 ? 1 : 0) + 
+                             (set2Team1 > set2Team2 ? 1 : 0) + 
+                             (set3Team1 > set3Team2 ? 1 : 0);
+              let team2Wins = (set1Team2 > set1Team1 ? 1 : 0) + 
+                             (set2Team2 > set2Team1 ? 1 : 0) + 
+                             (set3Team2 > set3Team1 ? 1 : 0);
+              
+              if (team1Wins >= 2) { 
+                updatedMatch.winner = match.team1; 
+                updatedMatch.status = 'completed'; 
+              }
+              else if (team2Wins >= 2) { 
+                updatedMatch.winner = match.team2; 
+                updatedMatch.status = 'completed'; 
+              }
+            } else if (match.status === 'tie_needs_tiebreak' && set === 3) {
+              // Обработка тайбрейка
+              if (set3Team1 >= 5 && set3Team1 > set3Team2) {
+                updatedMatch.winner = match.team1;
+                updatedMatch.status = 'completed';
+              } else if (set3Team2 >= 5 && set3Team2 > set3Team1) {
+                updatedMatch.winner = match.team2;
+                updatedMatch.status = 'completed';
+              }
+            } else {
+              // Для обычных матчей: учитываем только 2 сета
+              let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0);
+              let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0);
+              
+              if (team1Sets === 2) { 
+                updatedMatch.winner = match.team1; 
+                updatedMatch.status = 'completed'; 
+              }
+              else if (team2Sets === 2) { 
+                updatedMatch.winner = match.team2; 
+                updatedMatch.status = 'completed'; 
+              }
+              else if (team1Sets === 1 && team2Sets === 1) {
+                // Ничья по сетам (1:1)
+                if (tournamentSettings.useTotalPointsForTie) {
+                  // Используем общие очки для определения победителя
+                  const team1TotalPoints = set1Team1 + set2Team1;
+                  const team2TotalPoints = set1Team2 + set2Team2;
+                  
+                  if (team1TotalPoints > team2TotalPoints) {
+                    updatedMatch.winner = match.team1;
+                    updatedMatch.status = 'completed_by_points';
+                  } else if (team2TotalPoints > team1TotalPoints) {
+                    updatedMatch.winner = match.team2;
+                    updatedMatch.status = 'completed_by_points';
+                  } else {
+                    // Равные очки - требуется тайбрейк
+                    updatedMatch.status = 'tie_needs_tiebreak';
+                  }
+                } else {
+                  // Всегда требуется тайбрейк при счете 1:1
+                  updatedMatch.status = 'tie_needs_tiebreak';
+                }
+              }
             }
-            else if (team2Wins >= 2) { 
-              updatedMatch.winner = match.team2; 
-              updatedMatch.status = 'completed'; 
-            }
-          } else {
-            // Для обычных матчей: учитываем только 2 сета
-            let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0);
-            let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0);
             
-            if (team1Sets === 2) { 
-              updatedMatch.winner = match.team1; 
-              updatedMatch.status = 'completed'; 
+            if (updatedMatch.status === 'completed' || updatedMatch.status === 'tie' || 
+                updatedMatch.status === 'completed_by_points') {
+              updateTeamStats(updatedMatch);
             }
-            else if (team2Sets === 2) { 
-              updatedMatch.winner = match.team2; 
-              updatedMatch.status = 'completed'; 
-            }
-            else if (team1Sets === 1 && team2Sets === 1) {
-              updatedMatch.status = 'tie';
-            }
-          }
-          
-          if (updatedMatch.status === 'completed' || updatedMatch.status === 'tie') {
-            updateTeamStats(updatedMatch);
-          }
           }
           return updatedMatch;
         }
@@ -136,16 +169,38 @@ function App() {
     setTeams(prevTeams => prevTeams.map(team => {
       if (team.code === match.team1 || team.code === match.team2) {
         const isTeam1 = team.code === match.team1;
-        const setsWon = isTeam1 ? (match.set1Team1 > match.set1Team2 ? 1 : 0) + (match.set2Team1 > match.set2Team2 ? 1 : 0) : 
-                                  (match.set1Team2 > match.set1Team1 ? 1 : 0) + (match.set2Team2 > match.set2Team1 ? 1 : 0);
-        const points = match.winner === team.code ? 3 : match.status === 'tie' ? (setsWon === 1 ? 2 : 1) : 0;
+        let setsWon = 0;
+        
+        // Подсчитываем выигранные сеты
+        if (isTeam1) {
+          setsWon += (match.set1Team1 > match.set1Team2 ? 1 : 0) + 
+                     (match.set2Team1 > match.set2Team2 ? 1 : 0) + 
+                     (match.round === 'final' && match.set3Team1 > match.set3Team2 ? 1 : 0);
+        } else {
+          setsWon += (match.set1Team2 > match.set1Team1 ? 1 : 0) + 
+                     (match.set2Team2 > match.set2Team1 ? 1 : 0) + 
+                     (match.round === 'final' && match.set3Team2 > match.set3Team1 ? 1 : 0);
+        }
+        
+        // Определяем количество очков за матч
+        let points = 0;
+        if (match.winner === team.code) {
+          points = 3; // Победа
+        } else if (match.status === 'tie' || match.status === 'completed_by_points') {
+          if (match.winner === team.code) {
+            points = 2; // Победа при 1:1
+          } else if (match.winner) {
+            points = 1; // Поражение при 1:1
+          }
+        }
+        
         return { 
           ...team, 
           points: team.points + points, 
-          wins: match.winner === team.code ? team.wins + 1 : team.wins, 
-          losses: match.winner && match.winner !== team.code ? team.losses + 1 : team.losses, 
+          wins: (match.winner === team.code) ? team.wins + 1 : team.wins, 
+          losses: (match.winner && match.winner !== team.code) ? team.losses + 1 : team.losses, 
           setsWon: team.setsWon + setsWon, 
-          setsLost: team.setsLost + (2 - setsWon) 
+          setsLost: team.setsLost + (match.round === 'final' ? 3 - setsWon : 2 - setsWon) 
         };
       }
       return team;
@@ -156,7 +211,7 @@ function App() {
   const updatePlayoffTeams = (updatedMatches) => {
     const groupRankings = {};
     ['A', 'B', 'C'].forEach(group => {
-      groupRankings[group] = teams.filter(t => t.group === group).sort((a, b) => b.points - a.points || b.setsWon - a.setsLost);
+      groupRankings[group] = teams.filter(t => t.group === group).sort((a, b) => b.points - a.points || b.setsWon - a.setsWon);
     });
     
     setMatches(prevMatches => prevMatches.map(match => {
@@ -164,22 +219,22 @@ function App() {
         const updatedMatch = { ...match };
         
         // Заполняем четвертьфиналы
-      if (match.id === 'QF-1A-1C') { 
-        updatedMatch.team1 = groupRankings['A'][0]?.code; 
-        updatedMatch.team2 = groupRankings['C'][0]?.code; 
-      }
-      else if (match.id === 'QF-1B-2C') { 
-        updatedMatch.team1 = groupRankings['B'][0]?.code; 
-        updatedMatch.team2 = groupRankings['C'][1]?.code; 
-      }
-      else if (match.id === 'QF-2A-3B') { 
-        updatedMatch.team1 = groupRankings['A'][1]?.code; 
-        updatedMatch.team2 = groupRankings['B'][2]?.code; 
-      }
-      else if (match.id === 'QF-3A-2B') { 
-        updatedMatch.team1 = groupRankings['A'][2]?.code; 
-        updatedMatch.team2 = groupRankings['B'][1]?.code; 
-      }
+        if (match.id === 'QF-1A-1C') { 
+          updatedMatch.team1 = groupRankings['A'][0]?.code; 
+          updatedMatch.team2 = groupRankings['C'][0]?.code; 
+        }
+        else if (match.id === 'QF-1B-2C') { 
+          updatedMatch.team1 = groupRankings['B'][0]?.code; 
+          updatedMatch.team2 = groupRankings['C'][1]?.code; 
+        }
+        else if (match.id === 'QF-2A-3B') { 
+          updatedMatch.team1 = groupRankings['A'][1]?.code; 
+          updatedMatch.team2 = groupRankings['B'][2]?.code; 
+        }
+        else if (match.id === 'QF-3A-2B') { 
+          updatedMatch.team1 = groupRankings['A'][2]?.code; 
+          updatedMatch.team2 = groupRankings['B'][1]?.code; 
+        }
         
         // Если обе команды определены, меняем статус на 'not_started'
         if (updatedMatch.team1 && updatedMatch.team2) {
@@ -192,7 +247,10 @@ function App() {
       // Заполняем полуфиналы на основе результатов четвертьфиналов
       if (match.round === 'semifinal') {
         const updatedMatch = { ...match };
-        const completedQuarterfinals = updatedMatches.filter(m => m.round === 'quarterfinal' && m.status === 'completed');
+        const completedQuarterfinals = updatedMatches.filter(m => 
+          m.round === 'quarterfinal' && 
+          (m.status === 'completed' || m.status === 'completed_by_points')
+        );
         
         if (match.id === 'SF-W1-W3') {
           const qf1 = completedQuarterfinals.find(m => m.id === 'QF-1A-1C');
@@ -218,7 +276,10 @@ function App() {
       // Заполняем финал и матч за 3-е место на основе результатов полуфиналов
       if (match.round === 'final' || match.round === 'third_place') {
         const updatedMatch = { ...match };
-        const completedSemifinals = updatedMatches.filter(m => m.round === 'semifinal' && m.status === 'completed');
+        const completedSemifinals = updatedMatches.filter(m => 
+          m.round === 'semifinal' && 
+          (m.status === 'completed' || m.status === 'completed_by_points')
+        );
         
         if (match.round === 'final' && match.id === 'F-W1-W2') {
           const sf1 = completedSemifinals.find(m => m.id === 'SF-W1-W3');
@@ -231,11 +292,11 @@ function App() {
           const sf2 = completedSemifinals.find(m => m.id === 'SF-W2-W4');
           
           // Проигравшие в полуфиналах
-          if (sf1?.status === 'completed') {
+          if (sf1?.status === 'completed' || sf1?.status === 'completed_by_points') {
             const loser = sf1.winner === sf1.team1 ? sf1.team2 : sf1.team1;
             updatedMatch.team1 = loser;
           }
-          if (sf2?.status === 'completed') {
+          if (sf2?.status === 'completed' || sf2?.status === 'completed_by_points') {
             const loser = sf2.winner === sf2.team1 ? sf2.team2 : sf2.team1;
             updatedMatch.team2 = loser;
           }
@@ -289,9 +350,15 @@ function App() {
               if (match.status === 'completed') {
                 statusIcon = <FaCheck className="mr-1 text-green-500" />;
                 statusClass = 'text-green-600 font-semibold';
+              } else if (match.status === 'completed_by_points') {
+                statusIcon = <FaCheck className="mr-1 text-blue-500" />;
+                statusClass = 'text-blue-600 font-semibold';
               } else if (match.status === 'tie') {
                 statusIcon = <FaExclamationTriangle className="mr-1 text-orange-500" />;
                 statusClass = 'text-orange-600 font-semibold';
+              } else if (match.status === 'tie_needs_tiebreak') {
+                statusIcon = <FaExclamationTriangle className="mr-1 text-red-500" />;
+                statusClass = 'text-red-600 font-semibold';
               } else {
                 statusIcon = <FaRegClock className="mr-1 text-gray-500" />;
                 statusClass = 'text-gray-600';
@@ -325,11 +392,14 @@ function App() {
                   </td>
                   <td className="p-3 text-sm md:text-base font-bold">{match.set1Team1} - {match.set1Team2}</td>
                   <td className="p-3 text-sm md:text-base font-bold">{match.set2Team1} - {match.set2Team2}</td>
-                  <td className="p-3 text-sm md:text-base font-bold">{match.round === 'final' ? `${match.set3Team1} - ${match.set3Team2}` : '-'}</td>
+                  <td className="p-3 text-sm md:text-base font-bold">
+                    {match.round === 'final' || match.status === 'tie_needs_tiebreak' ? 
+                      `${match.set3Team1} - ${match.set3Team2}` : '-'}
+                  </td>
                   <td className={`p-3 text-sm md:text-base ${statusClass}`}>
                     <div className="flex items-center">
                       {statusIcon}
-                      {t.statusNames[match.status]}
+                      {t.statusNames[match.status] || match.status}
                     </div>
                   </td>
                 </tr>
@@ -449,27 +519,21 @@ function App() {
     // Определяем стили для статуса
     let statusClass = 'px-3 py-1 rounded-full text-sm font-semibold inline-block ml-2';
     let statusIcon;
-    
-    switch (selectedMatch.status) {
-      case 'completed':
-        statusClass += ' bg-green-100 text-green-800';
-        statusIcon = <FaCheck className="mr-2" />;
-        break;
-      case 'tie':
-        statusClass += ' bg-orange-100 text-orange-800';
-        statusIcon = <FaExclamationTriangle className="mr-2" />;
-        break;
-      case 'completed_by_points':
-        statusClass += ' bg-green-100 text-green-800';
-        statusIcon = <FaCheck className="mr-2" />;
-        break;
-      case 'tie_needs_tiebreak':
-        statusClass += ' bg-orange-100 text-orange-800';
-        statusIcon = <FaExclamationTriangle className="mr-2" />;
-        break;
-      default:
-        statusClass += ' bg-gray-100 text-gray-800';
-        statusIcon = <FaRegClock className="mr-2" />;
+    if (selectedMatch.status === 'completed') {
+      statusClass += ' bg-green-100 text-green-800';
+      statusIcon = <FaCheck className="mr-2" />;
+    } else if (selectedMatch.status === 'completed_by_points') {
+      statusClass += ' bg-blue-100 text-blue-800';
+      statusIcon = <FaCheck className="mr-2" />;
+    } else if (selectedMatch.status === 'tie') {
+      statusClass += ' bg-orange-100 text-orange-800';
+      statusIcon = <FaExclamationTriangle className="mr-2" />;
+    } else if (selectedMatch.status === 'tie_needs_tiebreak') {
+      statusClass += ' bg-red-100 text-red-800';
+      statusIcon = <FaExclamationTriangle className="mr-2" />;
+    } else {
+      statusClass += ' bg-gray-100 text-gray-800';
+      statusIcon = <FaRegClock className="mr-2" />;
     }
     
     return (
@@ -495,13 +559,13 @@ function App() {
                 <span className={roundClass}>
                   <span className="flex items-center">
                     {roundIcon}
-                    {selectedMatch.round}
+                    {t.roundNames[selectedMatch.round]}
                   </span>
                 </span>
                 <span className={statusClass}>
                   <span className="flex items-center">
                     {statusIcon}
-                    {t.statusNames[selectedMatch.status]}
+                    {t.statusNames[selectedMatch.status] || selectedMatch.status}
                   </span>
                 </span>
               </div>
@@ -564,22 +628,24 @@ function App() {
                 </div>
               </div>
               
-              {selectedMatch.round === 'final' && (
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">{t.set3}</label>
+              {(selectedMatch.round === 'final' || selectedMatch.status === 'tie_needs_tiebreak') && (
+                <div className={`bg-white p-4 rounded-lg shadow-sm border ${selectedMatch.status === 'tie_needs_tiebreak' ? 'border-red-300' : 'border-gray-200'}`}>
+                  <label className={`block text-sm font-medium ${selectedMatch.status === 'tie_needs_tiebreak' ? 'text-red-700' : 'text-gray-700'} mb-2`}>
+                    {selectedMatch.status === 'tie_needs_tiebreak' ? t.tiebreak : t.set3}
+                  </label>
                   <div className="flex items-center justify-between">
                     <input 
                       type="number" 
                       value={selectedMatch.set3Team1} 
                       onChange={(e) => updateMatchScore(selectedMatch.id, 3, 'team1', e.target.value)} 
-                      className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                      className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${selectedMatch.status === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} 
                     />
                     <span className="text-gray-400 text-xl font-bold">:</span>
                     <input 
                       type="number" 
                       value={selectedMatch.set3Team2} 
                       onChange={(e) => updateMatchScore(selectedMatch.id, 3, 'team2', e.target.value)} 
-                      className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                      className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${selectedMatch.status === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} 
                     />
                   </div>
                 </div>
@@ -589,7 +655,7 @@ function App() {
             <div className="mt-6 flex justify-end">
               <button 
                 onClick={() => setView('matches')} 
-                className="mt-6 w-full bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white py-2 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"
+                className="mt-6 w-full bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white py-2 px-4 rounded-lg hover:from-[#0B8E8D]/90 hover:to-[#06324F]/90 transition-all duration-200 shadow-md flex items-center justify-center"
               >
                 {t.save}
               </button>
@@ -766,28 +832,39 @@ function App() {
           
           {/* Содержимое */}
           <div className="p-6 max-h-[70vh] overflow-y-auto">
-            {language === 'cs' ? (
-              <div className="prose prose-sm max-w-none">
-                <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800">{t.tournamentRules}</pre>
+            {/* Правила при счете 1:1 */}
+            <div className="mb-8 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-6 rounded-xl shadow-md border border-[#0B8E8D]/20">
+              <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.tieRules?.title}</h3>
+              
+              <div className="space-y-6">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option1}</h4>
+                  <p className="text-gray-700">{t.tieRules?.option1Description}</p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option2}</h4>
+                  <p className="text-gray-700">{t.tieRules?.option2Description}</p>
+                </div>
+                
+                <div className="bg-[#FDD80F]/10 p-4 rounded-lg shadow-sm border border-[#FDD80F]/30">
+                  <h4 className="text-lg font-semibold text-[#06324F] mb-2">{t.tieRules?.currentRule}</h4>
+                  <p className="text-[#06324F] font-bold">
+                    {tournamentSettings.useTotalPointsForTie ? t.tieRules?.option1 : t.tieRules?.option2}
+                  </p>
+                </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <FaGlobe className="text-5xl text-[#0B8E8D] mb-4" />
-                <p className="text-lg font-medium text-gray-700 mb-2">{t.rules}</p>
-                <p className="text-gray-600">Правила доступны только на чешском языке</p>
-                <button 
-                  onClick={() => setLanguage('cs')}
-                  className="mt-4 px-4 py-2 bg-[#0B8E8D] text-white rounded-lg hover:bg-[#0B8E8D]/90 transition-colors"
-                >
-                  Переключиться на чешский
-                </button>
-              </div>
-            )}
+            </div>
+            
+            {/* Основные правила турнира */}
+            <div className="prose prose-sm max-w-none">
+              <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800">{t.tournamentRules}</pre>
+            </div>
           </div>
           
           {/* Кнопка закрытия */}
           <div className="p-4 border-t border-gray-200 bg-gray-50 sticky bottom-0">
-            <button 
+          <button 
               onClick={() => setShowRules(false)}
               className="w-full py-2 bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"
             >
