@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar } from 'react-icons/fa';
+import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar, FaMapMarkerAlt, FaLink } from 'react-icons/fa';
 import { translations, languageNames } from './translations';
 
 // Начальные данные команд
@@ -59,7 +59,7 @@ function App() {
   const [matches, setMatches] = useState(() => JSON.parse(localStorage.getItem('matches')) || initialMatches);
   const [view, setView] = useState('matches'); // matches, groups, matchDetail
   const [selectedMatch, setSelectedMatch] = useState(null);
-  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'ru');
+  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'cs');
   
   // Получение текущих переводов
   const t = translations[language];
@@ -238,9 +238,9 @@ function App() {
         <FaVolleyballBall className="mr-3 text-indigo-600" /> 
         <span>{t.matches}</span>
       </h2>
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-xl shadow-lg">
+      <div className="bg-gradient-to-r from-[#C1CBA7] to-[#0B8E8D]/10 p-6 rounded-xl shadow-lg">
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+          <thead className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white">
             <tr>
               <th className="py-3 px-4 text-left text-sm md:text-base">{t.round}</th>
               <th className="py-3 px-4 text-left text-sm md:text-base">{t.match}</th>
@@ -273,17 +273,17 @@ function App() {
               // Определяем стили для раунда
               let roundClass = 'px-2 py-1 rounded text-xs font-semibold';
               if (match.round === 'group') {
-                roundClass += ' bg-blue-100 text-blue-800';
+                roundClass += ' bg-[#C1CBA7]/50 text-[#06324F]';
               } else if (match.round === 'quarterfinal') {
-                roundClass += ' bg-indigo-100 text-indigo-800';
+                roundClass += ' bg-[#0B8E8D]/20 text-[#0B8E8D]';
               } else if (match.round === 'semifinal') {
-                roundClass += ' bg-purple-100 text-purple-800';
+                roundClass += ' bg-[#06324F]/20 text-[#06324F]';
               } else if (match.round === 'final') {
-                roundClass += ' bg-red-100 text-red-800';
+                roundClass += ' bg-[#FDD80F]/20 text-[#FDD80F]/90';
               }
               
               return (
-                <tr key={match.id} className="border-b hover:bg-indigo-50 transition-colors duration-150 ease-in-out cursor-pointer" 
+                <tr key={match.id} className="border-b hover:bg-[#0B8E8D]/10 transition-colors duration-150 ease-in-out cursor-pointer" 
                     onClick={() => { setView('matchDetail'); setSelectedMatch(match); }}>
                   <td className="p-3 text-sm md:text-base">
                     <span className={roundClass}>{t.roundNames[match.round]}</span>
@@ -326,20 +326,20 @@ function App() {
           // Выбираем цвета для каждой группы
           const groupColors = {
             'A': {
-              bg: 'from-blue-500 to-blue-700',
-              lightBg: 'from-blue-50 to-indigo-50',
+              bg: 'from-[#C1CBA7] to-[#0B8E8D]',
+              lightBg: 'from-[#C1CBA7]/20 to-[#0B8E8D]/10',
               text: 'text-blue-700',
               border: 'border-blue-200'
             },
             'B': {
-              bg: 'from-purple-500 to-purple-700',
-              lightBg: 'from-purple-50 to-indigo-50',
+              bg: 'from-[#06324F] to-[#0B8E8D]',
+              lightBg: 'from-[#06324F]/10 to-[#0B8E8D]/10',
               text: 'text-purple-700',
               border: 'border-purple-200'
             },
             'C': {
-              bg: 'from-green-500 to-green-700',
-              lightBg: 'from-green-50 to-indigo-50',
+              bg: 'from-[#FDD80F] to-[#0B8E8D]',
+              lightBg: 'from-[#FDD80F]/10 to-[#0B8E8D]/10',
               text: 'text-green-700',
               border: 'border-green-200'
             }
@@ -374,7 +374,7 @@ function App() {
                             {team.name}
                           </td>
                           <td className="p-3 text-sm md:text-base text-center">
-                            <span className="inline-block w-8 h-8 rounded-full bg-indigo-100 text-indigo-800 font-bold flex items-center justify-center">
+                            <span className="inline-block w-8 h-8 rounded-full bg-[#0B8E8D]/20 text-[#06324F] font-bold flex items-center justify-center">
                               {team.points}
                             </span>
                           </td>
@@ -406,16 +406,16 @@ function App() {
     let roundClass = 'px-3 py-1 rounded-full text-sm font-semibold inline-block mb-3';
     let roundIcon;
     if (selectedMatch.round === 'group') {
-      roundClass += ' bg-blue-100 text-blue-800';
+      roundClass += ' bg-[#C1CBA7]/50 text-[#06324F]';
       roundIcon = <FaUsers className="mr-2" />;
     } else if (selectedMatch.round === 'quarterfinal') {
-      roundClass += ' bg-indigo-100 text-indigo-800';
+      roundClass += ' bg-[#0B8E8D]/20 text-[#0B8E8D]';
       roundIcon = <FaChartBar className="mr-2" />;
     } else if (selectedMatch.round === 'semifinal') {
-      roundClass += ' bg-purple-100 text-purple-800';
+      roundClass += ' bg-[#06324F]/20 text-[#06324F]';
       roundIcon = <FaChartBar className="mr-2" />;
     } else if (selectedMatch.round === 'final') {
-      roundClass += ' bg-red-100 text-red-800';
+      roundClass += ' bg-[#FDD80F]/20 text-[#FDD80F]/90';
       roundIcon = <FaTrophy className="mr-2" />;
     }
     
@@ -437,7 +437,7 @@ function App() {
       <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
         <div className="bg-white rounded-xl shadow-2xl p-0 w-full max-w-lg overflow-hidden">
           {/* Шапка */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+          <div className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] p-6 text-white">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Редактирование матча</h2>
               <button 
@@ -472,7 +472,7 @@ function App() {
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg mb-6">
+            <div className="bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-4 rounded-lg mb-6">
               <div className="flex justify-between items-center">
                 <div className="text-center w-5/12">
                   <div className="text-lg font-bold text-indigo-800">{team1.name}</div>
@@ -550,7 +550,7 @@ function App() {
             <div className="mt-6 flex justify-end">
               <button 
                 onClick={() => setView('matches')} 
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md"
+                className="mt-6 w-full bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white py-2 px-4 rounded-lg hover:from-[#0B8E8D]/90 hover:to-[#06324F]/90 transition-all duration-200 shadow-md flex items-center justify-center"
               >
                 Сохранить
               </button>
@@ -564,7 +564,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 flex flex-col">
       {/* Шапка */}
-      <header className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 flex justify-between items-center shadow-lg">
+      <header className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white p-4 flex justify-between items-center shadow-lg">
         <h1 className="text-xl md:text-2xl font-bold flex items-center">
           <FaVolleyballBall className="mr-3 animate-spin-slow" /> 
           {t.appTitle}
@@ -577,7 +577,7 @@ function App() {
             className="bg-transparent text-white border border-white rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white"
           >
             {Object.keys(languageNames).map(lang => (
-              <option key={lang} value={lang} className="bg-indigo-700 text-white">
+              <option key={lang} value={lang} className="bg-[#06324F] text-white">
                 {languageNames[lang]}
               </option>
             ))}
@@ -598,25 +598,45 @@ function App() {
           <button 
             onClick={() => setView('matches')} 
             className={`flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 ${view === 'matches' 
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' 
-              : 'hover:bg-indigo-50 text-gray-700'}`}
+              ? 'bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white shadow-md' 
+              : 'hover:bg-[#0B8E8D]/10 text-gray-700'}`}
           >
             <FaVolleyballBall className="mr-3" /> {t.matches}
           </button>
           <button 
             onClick={() => setView('groups')} 
             className={`flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 ${view === 'groups' 
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md' 
-              : 'hover:bg-indigo-50 text-gray-700'}`}
+              ? 'bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white shadow-md' 
+              : 'hover:bg-[#0B8E8D]/10 text-gray-700'}`}
           >
             <FaUsers className="mr-3" /> {t.groups}
           </button>
         </div>
         
         <div className="absolute bottom-6 left-0 right-0 px-6">
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg shadow-sm border border-indigo-100">
-            <h3 className="text-sm font-semibold text-indigo-700 mb-2">{t.aboutSection}</h3>
-            <p className="text-xs text-gray-600">{t.aboutApp}</p>
+          <div className="bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-4 rounded-lg shadow-sm border border-[#0B8E8D]/20">
+            <h3 className="text-sm font-semibold text-[#06324F] mb-2">{t.tournamentInfo}</h3>
+            <div className="text-xs text-gray-700 space-y-2">
+              <p className="flex items-center">
+                <FaCalendarAlt className="mr-2 text-[#FDD80F]" />
+                <span className="font-semibold">{t.dateLabel}</span> {t.tournamentDate}
+              </p>
+              <p className="flex items-center">
+                <FaMapMarkerAlt className="mr-2 text-[#0B8E8D]" />
+                <span className="font-semibold">{t.addressLabel}</span> {t.tournamentAddress}
+              </p>
+              <p className="flex items-center">
+                <FaLink className="mr-2 text-[#06324F]" />
+                <span className="font-semibold">{t.websiteLabel}</span> 
+                <a href={t.tournamentWebsite} target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] ml-1 hover:underline">
+                  {t.tournamentWebsite}
+                </a>
+              </p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-[#0B8E8D]/20">
+              <h3 className="text-sm font-semibold text-[#06324F] mb-1">{t.aboutSection}</h3>
+              <p className="text-xs text-gray-600">{t.aboutApp}</p>
+            </div>
           </div>
         </div>
       </aside>

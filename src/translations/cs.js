@@ -20,6 +20,13 @@ export const cs = {
   close: 'Zavřít',
   group: 'Skupina',
   aboutSection: 'O aplikaci',
+  tournamentDate: '6.4.2025',
+  tournamentAddress: 'Václava Mouchy 2045, Slaný',
+  tournamentWebsite: 'https://rvl.hala-slany.cz/',
+  tournamentInfo: 'Informace o turnaji',
+  addressLabel: 'Adresa haly:',
+  websiteLabel: 'Webové stránky:',
+  dateLabel: 'Datum:',
   roundNames: {
     group: 'Skupinová fáze',
     quarterfinal: 'Čtvrtfinále',
