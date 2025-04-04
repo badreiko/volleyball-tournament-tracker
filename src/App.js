@@ -136,70 +136,95 @@ function App() {
 // --- Пересчет всей статистики команд ---
 const recalculateAllTeamStats = useCallback((currentMatches) => {
   setTeams(prevBaseTeams => {
-      let calculatedTeams = initialTeams.map(initialTeam => {
-          const currentBaseInfo = prevBaseTeams.find(pt => pt.code === initialTeam.code) || initialTeam;
-          return { ...currentBaseInfo, points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 };
-      });
+    let calculatedTeams = initialTeams.map(initialTeam => {
+      const currentBaseInfo = prevBaseTeams.find(pt => pt.code === initialTeam.code) || initialTeam;
+      return { ...currentBaseInfo, points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 };
+    });
 
-      const completedGroupMatches = currentMatches.filter(m =>
-          m.round === 'group' &&
-          (m.status === 'completed' || m.status === 'completed_by_points' || m.winner !== null)
-      );
+    // Находим все завершенные матчи групповой стадии
+    const completedGroupMatches = currentMatches.filter(m =>
+      m.round === 'group' &&
+      (m.status === 'completed' || m.status === 'completed_by_points' || m.winner !== null)
+    );
 
-      completedGroupMatches.forEach(match => {
-          const team1Index = calculatedTeams.findIndex(t => t.code === match.team1);
-          const team2Index = calculatedTeams.findIndex(t => t.code === match.team2);
-          if (team1Index === -1 || team2Index === -1) return;
+    completedGroupMatches.forEach(match => {
+      const team1Index = calculatedTeams.findIndex(t => t.code === match.team1);
+      const team2Index = calculatedTeams.findIndex(t => t.code === match.team2);
+      if (team1Index === -1 || team2Index === -1) return;
 
-          let team1 = calculatedTeams[team1Index];
-          let team2 = calculatedTeams[team2Index];
-          
-          // Подсчитываем количество выигранных сетов для каждой команды
-          let team1SetsWon = 0, team2SetsWon = 0;
-          
-          // Учитываем первый сет (с правилом 25 очков)
-          if (match.set1Team1 >= 25 && match.set1Team1 > match.set1Team2) team1SetsWon++;
-          else if (match.set1Team2 >= 25 && match.set1Team2 > match.set1Team1) team2SetsWon++;
-          
-          // Учитываем второй сет (с правилом 25 очков)
-          if (match.set2Team1 >= 25 && match.set2Team1 > match.set2Team2) team1SetsWon++;
-          else if (match.set2Team2 >= 25 && match.set2Team2 > match.set2Team1) team2SetsWon++;
-          
-          // Проверяем третий сет (тайбрейк)
-          if (match.set3Team1 >= 5 && match.set3Team1 > match.set3Team2) team1SetsWon++;
-          else if (match.set3Team2 >= 5 && match.set3Team2 > match.set3Team1) team2SetsWon++;
-          
-          let team1Points = 0, team2Points = 0;
-
-          // Определяем победителя матча и начисляем очки
-          if (match.winner === team1.code) {
-              // 3 очка за "сухую" победу 2:0
-              // 2 очка за победу с тайбрейком или по сумме очков
-              team1Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 3 : 2;
-              team2Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 0 : 1;
-              team1.wins += 1; 
-              team2.losses += 1;
-          } else if (match.winner === team2.code) {
-              team2Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 3 : 2;
-              team1Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 0 : 1;
-              team2.wins += 1; 
-              team1.losses += 1;
-          }
-
-          // Обновляем статистику команд
-          team1.points += team1Points; 
-          team1.setsWon += team1SetsWon; 
-          team1.setsLost += team2SetsWon;
-          team2.points += team2Points; 
-          team2.setsWon += team2SetsWon; 
-          team2.setsLost += team1SetsWon;
-
-          calculatedTeams[team1Index] = team1;
-          calculatedTeams[team2Index] = team2;
-      });
+      let team1 = calculatedTeams[team1Index];
+      let team2 = calculatedTeams[team2Index];
       
-      console.log("Recalculated team stats", calculatedTeams);
-      return calculatedTeams;
+      // Определяем, сколько сетов выиграла каждая команда
+      let team1SetsWon = 0;
+      let team2SetsWon = 0;
+      const isFinal = match.round === 'final';
+
+      // Первый сет считается выигранным, если команда набрала 25 или более очков
+      if (match.set1Team1 >= 25) team1SetsWon++;
+      else if (match.set1Team2 >= 25) team2SetsWon++;
+
+      // Второй сет считается выигранным, если команда набрала 25 или более очков
+      if (match.set2Team1 >= 25) team1SetsWon++;
+      else if (match.set2Team2 >= 25) team2SetsWon++;
+
+      // Если третий сет играется, проверяем в зависимости от типа матча
+      if (isFinal) {
+        // В финале третий сет до 15 очков
+        if (match.set3Team1 >= 15) team1SetsWon++;
+        else if (match.set3Team2 >= 15) team2SetsWon++;
+      } else {
+        // В обычных матчах третий сет (тайбрейк) до 5 очков
+        if (match.set3Team1 >= 5) team1SetsWon++;
+        else if (match.set3Team2 >= 5) team2SetsWon++;
+      }
+
+      // Начисляем очки согласно правилам
+      let team1Points = 0;
+      let team2Points = 0;
+
+      if (match.winner === team1.code) {
+        // Победитель - команда 1
+        if (team1SetsWon === 2 && team2SetsWon === 0) {
+          // Победа 2:0
+          team1Points = 3;
+          team2Points = 0;
+        } else {
+          // Победа 1:1 (по очкам или тайбрейку)
+          team1Points = 2;
+          team2Points = 1;
+        }
+        team1.wins++;
+        team2.losses++;
+      } else if (match.winner === team2.code) {
+        // Победитель - команда 2
+        if (team2SetsWon === 2 && team1SetsWon === 0) {
+          // Победа 2:0
+          team2Points = 3;
+          team1Points = 0;
+        } else {
+          // Победа 1:1 (по очкам или тайбрейку)
+          team2Points = 2;
+          team1Points = 1;
+        }
+        team2.wins++;
+        team1.losses++;
+      }
+
+      // Обновляем статистику команд
+      team1.points += team1Points;
+      team1.setsWon += team1SetsWon;
+      team1.setsLost += team2SetsWon;
+      team2.points += team2Points;
+      team2.setsWon += team2SetsWon;
+      team2.setsLost += team1SetsWon;
+
+      calculatedTeams[team1Index] = team1;
+      calculatedTeams[team2Index] = team2;
+    });
+    
+    console.log("Recalculated team stats", calculatedTeams);
+    return calculatedTeams;
   });
 }, []);
 
@@ -267,174 +292,153 @@ const recalculateAllTeamStats = useCallback((currentMatches) => {
 
 
   // --- Обновление счета матча (для localStorage версии) ---
-  // --- Обновление счета матча (для localStorage версии) ---
-const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
-  const score = parseInt(scoreStr) >= 0 ? parseInt(scoreStr) : 0;
-  let needsRecalculation = false;
-  let modifiedMatches = []; // Для передачи в recalculate и updatePlayoff
-
-  setMatches(prevMatches => {
-    const updatedMatches = prevMatches.map(match => {
-      if (match.id === matchId) {
-        const updatedMatch = { ...match }; // Работаем с копией
-        const field = `set${set}${team === 'team1' ? 'Team1' : 'Team2'}`;
-
-        if (updatedMatch[field] === score) return match; // Если счет не изменился, вернуть старый объект
-
-        updatedMatch[field] = score;
-
-        const useTotalPointsRule = tournamentSettings.useTotalPointsForTie;
-        let newWinner = updatedMatch.winner;
-        let newStatus = updatedMatch.status;
-        const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
-        const hasScores = (set1Team1 > 0 || set1Team2 > 0 || set2Team1 > 0 || set2Team2 > 0 || set3Team1 > 0 || set3Team2 > 0);
-        const oldStatus = match.status;
-
-        // --- Логика определения статуса/победителя ---
-        
-        // Проверка на достижение 25 очков в первых двух сетах
-        if (set === 1 && (set1Team1 >= 25 || set1Team2 >= 25)) {
-            // Если первый сет закончен, отмечаем это, но не завершаем весь матч
-            // Рассчитываем статус и победителя ниже в общей логике
-            updatedMatch.set1Completed = true;
-        } else if (set === 2 && (set2Team1 >= 25 || set2Team2 >= 25)) {
-            // Если второй сет закончен, отмечаем это
-            updatedMatch.set2Completed = true;
-        }
-        
-        // Проверка третьего сета (тайбрейка) - приоритетная обработка
-        if (set === 3 || (set3Team1 > 0 || set3Team2 > 0)) {
-            // Правило тайбрейка: победа просто при достижении 5 очков
-            if (set3Team1 >= 5) {
-                newWinner = updatedMatch.team1;
-                newStatus = 'completed';
-            } else if (set3Team2 >= 5) {
-                newWinner = updatedMatch.team2;
-                newStatus = 'completed';
-            } else if (set3Team1 > 0 || set3Team2 > 0) {
-                // Если в третьем сете есть очки, но никто не достиг 5,
-                // значит матч в процессе тайбрейка
-                newWinner = null;
-                newStatus = 'tie_needs_tiebreak';
-            }
-        } 
-        // Финал имеет особые правила (до 2 побед из 3 сетов)
-        else if (updatedMatch.round === 'final') {
-            // В финале проверяем победы по сетам
-            let team1Wins = 0, team2Wins = 0;
-            
-            // Проверяем первый сет
-            if (set1Team1 >= 25 && set1Team1 > set1Team2) team1Wins++;
-            else if (set1Team2 >= 25 && set1Team2 > set1Team1) team2Wins++;
-            
-            // Проверяем второй сет
-            if (set2Team1 >= 25 && set2Team1 > set2Team2) team1Wins++;
-            else if (set2Team2 >= 25 && set2Team2 > set2Team1) team2Wins++;
-            
-            // Проверяем третий сет (если есть)
-            if (set3Team1 > 0 || set3Team2 > 0) {
-                if (set3Team1 >= 15 && set3Team1 > set3Team2) team1Wins++;
-                else if (set3Team2 >= 15 && set3Team2 > set3Team1) team2Wins++;
-            }
-            
-            if (team1Wins >= 2) {
-                newWinner = updatedMatch.team1;
-                newStatus = 'completed';
-            } else if (team2Wins >= 2) {
-                newWinner = updatedMatch.team2;
-                newStatus = 'completed';
+  const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
+    const score = parseInt(scoreStr) >= 0 ? parseInt(scoreStr) : 0;
+    let needsRecalculation = false;
+    let modifiedMatches = []; // Для передачи в recalculate и updatePlayoff
+  
+    setMatches(prevMatches => {
+      const updatedMatches = prevMatches.map(match => {
+        if (match.id === matchId) {
+          const updatedMatch = { ...match }; // Работаем с копией
+          const field = `set${set}${team === 'team1' ? 'Team1' : 'Team2'}`;
+  
+          if (updatedMatch[field] === score) return match; // Если счет не изменился, вернуть старый объект
+  
+          updatedMatch[field] = score;
+  
+          const useTotalPointsRule = tournamentSettings.useTotalPointsForTie;
+          let newWinner = null;
+          let newStatus = match.status;
+          const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
+          const hasScores = (set1Team1 > 0 || set1Team2 > 0 || set2Team1 > 0 || set2Team2 > 0 || set3Team1 > 0 || set3Team2 > 0);
+          const oldStatus = match.status;
+          const isFinal = updatedMatch.round === 'final';
+  
+          // --- Определяем, сколько сетов выиграла каждая команда ---
+          let team1SetsWon = 0;
+          let team2SetsWon = 0;
+  
+          // Первый сет считается выигранным, если команда набрала 25 или более очков
+          if (set1Team1 >= 25) team1SetsWon++;
+          else if (set1Team2 >= 25) team2SetsWon++;
+  
+          // Второй сет считается выигранным, если команда набрала 25 или более очков
+          if (set2Team1 >= 25) team1SetsWon++;
+          else if (set2Team2 >= 25) team2SetsWon++;
+  
+          // Если третий сет играется, проверяем в зависимости от типа матча
+          if (isFinal) {
+            // В финале третий сет до 15 очков
+            if (set3Team1 >= 15) team1SetsWon++;
+            else if (set3Team2 >= 15) team2SetsWon++;
+          } else {
+            // В обычных матчах третий сет (тайбрейк) до 5 очков
+            if (set3Team1 >= 5) team1SetsWon++;
+            else if (set3Team2 >= 5) team2SetsWon++;
+          }
+  
+          // --- Определяем статус матча ---
+          if (isFinal) {
+            // Финал: до 2 побед
+            if (team1SetsWon >= 2) {
+              newWinner = updatedMatch.team1;
+              newStatus = 'completed';
+            } else if (team2SetsWon >= 2) {
+              newWinner = updatedMatch.team2;
+              newStatus = 'completed';
             } else if (hasScores) {
-                newWinner = null;
-                newStatus = 'in_progress';
+              newStatus = 'in_progress';
             } else {
-                newWinner = null;
-                newStatus = 'not_started';
+              newStatus = 'not_started';
             }
-        } 
-        // Обычные матчи (проверяем победы по сетам с учетом правила 25 очков)
-        else {
-            // Проверяем победы в сетах с учетом правила 25 очков
-            let team1Wins = 0, team2Wins = 0;
-            
-            // Проверяем первый сет
-            if (set1Team1 >= 25 && set1Team1 > set1Team2) team1Wins++;
-            else if (set1Team2 >= 25 && set1Team2 > set1Team1) team2Wins++;
-            
-            // Проверяем второй сет
-            if (set2Team1 >= 25 && set2Team1 > set2Team2) team1Wins++;
-            else if (set2Team2 >= 25 && set2Team2 > set2Team1) team2Wins++;
-            
-            if (team1Wins === 2) {
-                newWinner = updatedMatch.team1;
-                newStatus = 'completed';
-            } else if (team2Wins === 2) {
-                newWinner = updatedMatch.team2;
-                newStatus = 'completed';
-            } else if (team1Wins === 1 && team2Wins === 1) {
-                if (useTotalPointsRule) {
-                    const team1TotalPoints = set1Team1 + set2Team1;
-                    const team2TotalPoints = set1Team2 + set2Team2;
-                    if (team1TotalPoints > team2TotalPoints) {
-                        newWinner = updatedMatch.team1;
-                        newStatus = 'completed_by_points';
-                    } else if (team2TotalPoints > team1TotalPoints) {
-                        newWinner = updatedMatch.team2;
-                        newStatus = 'completed_by_points';
-                    } else {
-                        newWinner = null;
-                        newStatus = 'tie_needs_tiebreak';
-                    }
+          } else {
+            // Обычные матчи и плей-офф
+            // Проверяем завершенность первых двух сетов
+            const set1Complete = set1Team1 >= 25 || set1Team2 >= 25;
+            const set2Complete = set2Team1 >= 25 || set2Team2 >= 25;
+  
+            if (team1SetsWon === 2 || team2SetsWon === 2) {
+              // Явная победа 2:0
+              newWinner = team1SetsWon > team2SetsWon ? updatedMatch.team1 : updatedMatch.team2;
+              newStatus = 'completed';
+            } else if (set1Complete && set2Complete) {
+              // Оба сета сыграны, счет 1:1
+              if (team1SetsWon === 1 && team2SetsWon === 1) {
+                // Проверяем необходимость тайбрейка или определяем победителя по очкам
+                const team1TotalPoints = set1Team1 + set2Team1;
+                const team2TotalPoints = set1Team2 + set2Team2;
+  
+                if (useTotalPointsRule && team1TotalPoints !== team2TotalPoints) {
+                  // Определяем победителя по сумме очков
+                  newWinner = team1TotalPoints > team2TotalPoints ? updatedMatch.team1 : updatedMatch.team2;
+                  newStatus = 'completed_by_points';
                 } else {
-                    newWinner = null;
+                  // Нужен тайбрейк
+                  if (set3Team1 >= 5) {
+                    newWinner = updatedMatch.team1;
+                    newStatus = 'completed';
+                  } else if (set3Team2 >= 5) {
+                    newWinner = updatedMatch.team2;
+                    newStatus = 'completed';
+                  } else if (set3Team1 > 0 || set3Team2 > 0) {
                     newStatus = 'tie_needs_tiebreak';
+                  } else {
+                    newStatus = 'tie_needs_tiebreak';
+                  }
                 }
+              }
             } else if (hasScores) {
-                newWinner = null;
-                newStatus = 'in_progress';
+              // Матч в процессе
+              newStatus = 'in_progress';
             } else {
-                newWinner = null;
-                newStatus = 'not_started';
+              // Матч не начат
+              newStatus = 'not_started';
             }
-        }
-
-        if (newStatus !== 'not_started' && !hasScores) { newStatus = 'not_started'; newWinner = null; }
-        if (oldStatus?.startsWith('completed') && !newStatus.startsWith('completed')) { newWinner = null; }
-        // --- Конец логики статуса ---
-
-        updatedMatch.status = newStatus;
-        updatedMatch.winner = newWinner;
-
-        if (newStatus.startsWith('completed') && oldStatus !== newStatus) {
+          }
+  
+          // Финальные проверки
+          if (newStatus !== 'not_started' && !hasScores) {
+            newStatus = 'not_started';
+            newWinner = null;
+          }
+  
+          // Проверка на изменение состояния
+          if (oldStatus?.startsWith('completed') && !newStatus.startsWith('completed')) {
+            newWinner = null;
+          }
+  
+          updatedMatch.status = newStatus;
+          updatedMatch.winner = newWinner;
+  
+          // Определяем, нужно ли пересчитывать статистику
+          if ((newStatus.startsWith('completed') && oldStatus !== newStatus) ||
+             (oldStatus?.startsWith('completed') && !newStatus.startsWith('completed'))) {
             needsRecalculation = true;
+          }
+  
+          return updatedMatch;
         }
-        if (oldStatus?.startsWith('completed') && !newStatus.startsWith('completed')) {
-            needsRecalculation = true;
-        }
-
-        return updatedMatch;
-      }
-      return match;
+        return match;
+      });
+  
+      // Сохраняем обновленные матчи для передачи в recalculate/updatePlayoff
+      modifiedMatches = updatedMatches;
+      return updatedMatches;
     });
-    // Сохраняем обновленные матчи для передачи в recalculate/updatePlayoff
-    modifiedMatches = updatedMatches;
-    return updatedMatches; // Возвращаем новый массив для обновления состояния
-  });
-
-  if (needsRecalculation) {
-      // Передаем обновленный массив матчей и текущее состояние команд
+  
+    if (needsRecalculation) {
+      // Пересчитываем статистику и обновляем плей-офф
       recalculateAllTeamStats(modifiedMatches);
-      // setTeams вызовет обновление, и updatePlayoffTeams сработает в useEffect
-      // Используем setTimeout, чтобы дать React время обновить состояние teams перед updatePlayoffTeams
+      
       setTimeout(() => {
-           // Передаем обновленные матчи и актуальные команды
-           setTeams(currentTeams => { // Получаем самое свежее состояние teams
-               updatePlayoffTeams(modifiedMatches, currentTeams);
-               return currentTeams; // Не меняем teams здесь
-           });
+        setTeams(currentTeams => {
+          updatePlayoffTeams(modifiedMatches, currentTeams);
+          return currentTeams;
+        });
       }, 0);
-  }
-
-}, [tournamentSettings, recalculateAllTeamStats, updatePlayoffTeams, teams]); // Добавили teams
+    }
+  }, [tournamentSettings, recalculateAllTeamStats, updatePlayoffTeams]);
 
 
   // --- Обновление Настроек ---
