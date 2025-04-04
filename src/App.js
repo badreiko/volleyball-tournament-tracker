@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 // Добавлена иконка FaWhistle
-import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar, FaMapMarkerAlt, FaLink, FaWhistle } from 'react-icons/fa';
+import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar, FaMapMarkerAlt, FaLink, FaBullhorn } from 'react-icons/fa';
 import { translations, languageNames } from './translations';
 
 // Начальные данные команд
@@ -408,7 +408,7 @@ function App() {
                              <td className="p-2 text-sm md:text-base text-center">{match.court}</td>
                              <td className="p-2 text-sm md:text-base text-gray-700 text-center"><div className="flex items-center justify-center"><FaCalendarAlt className="mr-1 text-indigo-500 hidden md:inline" />{match.time}</div></td>
                              {/* Отображение судьи */}
-                             <td className="p-2 text-xs text-gray-600"><div className="flex items-center"><FaWhistle className="mr-1 text-gray-400 flex-shrink-0" /><span>{refereeName}</span></div></td>
+                             <td className="p-2 text-xs text-gray-600"><div className="flex items-center"><FaBullhorn className="mr-1 text-gray-400 flex-shrink-0" /><span>{refereeName}</span></div></td>
                              <td className="p-2 text-sm md:text-base font-bold text-center">{match.set1Team1 ?? 0}-{match.set1Team2 ?? 0}</td>
                              <td className="p-2 text-sm md:text-base font-bold text-center">{match.set2Team1 ?? 0}-{match.set2Team2 ?? 0}</td>
                              <td className="p-2 text-sm md:text-base font-bold text-center">{showThirdSet ? `${match.set3Team1 ?? 0}-${match.set3Team2 ?? 0}` : '-'}</td>
@@ -502,7 +502,7 @@ function App() {
                     </div>
                     <div className="text-sm text-gray-600 flex flex-col items-end space-y-1">
                          <div className="flex items-center"><FaCalendarAlt className="mr-2 text-indigo-500" />{currentMatchData.time} ({t.court} {currentMatchData.court})</div>
-                         <div className="flex items-center"><FaWhistle className="mr-2 text-gray-400" />{t.referee || 'Судья'}: {refereeName}</div>
+                         <div className="flex items-center"><FaBullhorn className="mr-2 text-gray-400" />{t.referee || 'Судья'}: {refereeName}</div>
                     </div>
                 </div>
                 <div className="bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-4 rounded-lg mb-6"><div className="flex justify-between items-center"><div className="text-center w-5/12"><div className="text-lg font-bold text-indigo-800">{team1.name}</div></div><div className="text-center w-2/12"><div className="text-xl font-bold text-gray-600">vs</div></div><div className="text-center w-5/12"><div className="text-lg font-bold text-indigo-800">{team2.name}</div></div></div></div>
