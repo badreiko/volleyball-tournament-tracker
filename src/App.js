@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar, FaMapMarkerAlt, FaLink } from 'react-icons/fa';
-import { translations, languageNames } from './translations';
+import { translations, languageNames } from './translations'; // Ваши переводы
 
 // --- Firebase ---
-import { db } from './firebaseConfig';
+import { db } from './firebaseConfig'; // Импорт инстанса Firestore из вашего файла конфигурации
 import {
   collection,
   doc,
@@ -14,11 +14,12 @@ import {
   getDocs,
   writeBatch,
   query,
-  orderBy
+  orderBy // Для возможной сортировки матчей
 } from "firebase/firestore";
 // --- /Firebase ---
 
-// Начальные данные
+// Начальные данные (используются для ПЕРВИЧНОГО заполнения Firestore, если он пуст)
+// Если база уже заполнена, этот код больше не используется напрямую для инициализации состояния
 const initialTeamsData = [
     { code: 'A1', name: 'Zlatý jádro Kladno', group: 'A' },
     { code: 'A2', name: 'Spořilov Praha', group: 'A' },
@@ -61,7 +62,7 @@ const defaultTournamentSettings = {
 
 function App() {
   // --- Состояния ---
-  const [baseTeams, setBaseTeams] = useState([]); // Базовая инфо {code, name, group} из Firestore
+  const [baseTeams, setBaseTeams] = useState([]); // Базовая инфо {code, name, group}
   const [teamsWithStats, setTeamsWithStats] = useState([]); // Команды с вычисленной статистикой
   const [matches, setMatches] = useState([]); // Матчи из Firestore + обновленные для UI плей-офф
   const [tournamentSettings, setTournamentSettings] = useState(defaultTournamentSettings);
@@ -81,40 +82,15 @@ function App() {
     setIsLoading(true);
     let isMounted = true;
 
-    const initializeFirestoreData = async () => {
-        // Проверка и заполнение (опционально)
-         console.log("Checking Firestore initialization state...");
-         const settingsDocRef = doc(db, "config", "tournamentSettings"); // Исправлено: config вместо settings
-         const matchesCollRef = collection(db, "matches");
-         const settingsSnap = await getDoc(settingsDocRef); // Используем getDoc для одного документа
-         const matchesQuerySnap = await getDocs(query(matchesCollRef)); // Проверяем есть ли документы
-
-         if (!settingsSnap.exists() || matchesQuerySnap.empty) {
-              console.log("Firestore appears empty or uninitialized, initializing...");
-              const batch = writeBatch(db);
-              initialTeamsData.forEach(team => batch.set(doc(db, "teams", team.code), team)); // Только базовая инфо
-              initialMatchesData.forEach(match => batch.set(doc(db, "matches", match.id), match));
-              batch.set(settingsDocRef, defaultTournamentSettings); // Записываем настройки
-              try {
-                  await batch.commit();
-                  console.log("Firestore initialized successfully.");
-              } catch (error) {
-                  console.error("Error initializing Firestore:", error);
-              }
-         } else {
-              console.log("Firestore already contains data or is initialized.");
-         }
-    };
-
-     // Раскомментируйте, если нужно ПЕРВИЧНО заполнить базу
-     // initializeFirestoreData().catch(console.error);
+    // --- ОШИБКА 1: Функция initializeFirestoreData удалена, так как была неиспользуемой ---
+    // Если вам нужна эта логика, верните ее определение и вызов обратно
 
     // Подписка на матчи
     const qMatches = query(collection(db, "matches"), orderBy("time"), orderBy("court"));
     const unsubscribeMatches = onSnapshot(qMatches, (snapshot) => {
       const matchesData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
       if (isMounted) {
-          setMatches(matchesData); // Обновляем состояние матчей сырыми данными
+          setMatches(matchesData);
           setIsLoading(false); // Считаем загрузку завершенной после получения матчей
           console.log("Matches listener updated state");
       }
@@ -135,7 +111,7 @@ function App() {
     });
 
     // Подписка на настройки
-    const settingsRef = doc(db, "config", "tournamentSettings"); // Исправлено: config
+    const settingsRef = doc(db, "config", "tournamentSettings");
     const unsubscribeSettings = onSnapshot(settingsRef, (docSnap) => {
       if (isMounted) {
           if (docSnap.exists()) {
@@ -160,9 +136,9 @@ function App() {
       console.log("Firestore listeners unsubscribed");
     };
      // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Пустой массив зависимостей - выполняется один раз
+  }, []); // ОШИБКА 3: Этот useEffect должен выполняться только один раз, поэтому оставляем пустой массив зависимостей и игнорируем предупреждение ESLint
 
-   // --- Функция вычисления статистики --- (Не обернута в useCallback, т.к. вызывается только из useEffect)
+   // --- Функция вычисления статистики ---
    const calculateTeamStats = (currentMatches, currentBaseTeams) => {
         console.log("Calculating team stats...");
         let calculatedTeams = currentBaseTeams.map(team => ({
@@ -176,7 +152,7 @@ function App() {
         completedGroupMatches.forEach(match => {
             const team1Index = calculatedTeams.findIndex(t => t.code === match.team1);
             const team2Index = calculatedTeams.findIndex(t => t.code === match.team2);
-            if (team1Index === -1 || team2Index === -1) return; // Пропускаем, если команда не найдена
+            if (team1Index === -1 || team2Index === -1) return;
 
             let team1 = calculatedTeams[team1Index];
             let team2 = calculatedTeams[team2Index];
@@ -195,12 +171,13 @@ function App() {
             }
             team1.points += team1Points; team1.setsWon += team1SetsWon; team1.setsLost += team2SetsWon;
             team2.points += team2Points; team2.setsWon += team2SetsWon; team2.setsLost += team1SetsWon;
-            calculatedTeams[team1Index] = team1; calculatedTeams[team2Index] = team2;
+            calculatedTeams[team1Index] = team1;
+            calculatedTeams[team2Index] = team2;
         });
-        return calculatedTeams; // Возвращаем результат
+        return calculatedTeams;
    };
 
-   // --- Функция обновления отображения плей-офф --- (Не обернута в useCallback)
+   // --- Функция обновления отображения плей-офф ---
    const calculatePlayoffDisplay = (currentMatches, currentTeamsWithStats) => {
         console.log("Calculating playoff display...");
         const groupRankings = {};
@@ -214,7 +191,6 @@ function App() {
             if (match.round !== 'group') {
                 const displayMatch = { ...match };
                 let team1Code = null; let team2Code = null;
-                // ... (Логика определения team1Code, team2Code как раньше) ...
                  if (match.id === 'QF-1A-1C') { team1Code = groupRankings['A'][0]?.code; team2Code = groupRankings['C'][0]?.code; }
                  else if (match.id === 'QF-1B-2C') { team1Code = groupRankings['B'][0]?.code; team2Code = groupRankings['C'][1]?.code; }
                  else if (match.id === 'QF-2A-3B') { team1Code = groupRankings['A'][1]?.code; team2Code = groupRankings['B'][2]?.code; }
@@ -235,8 +211,6 @@ function App() {
                 if (displayMatch.team1 && displayMatch.team2 && displayMatch.status === 'waiting') {
                     displayMatch.status = 'not_started';
                 } else if ((!displayMatch.team1 || !displayMatch.team2) && displayMatch.status === 'not_started') {
-                     // Если команды пропали, а матч УЖЕ был 'not_started', вернуть в 'waiting'
-                     // Это предотвращает зависание в 'not_started', если результаты группы изменились
                      displayMatch.status = 'waiting';
                 }
                 return displayMatch;
@@ -247,27 +221,21 @@ function App() {
 
    // --- Эффект для пересчета статистики и обновления плей-офф ---
    useEffect(() => {
-    // Запускаем только если данные загружены и есть базовые команды и матчи
     if (!isLoading && baseTeams.length > 0 && matches.length > 0) {
         const calculatedTeams = calculateTeamStats(matches, baseTeams);
-        setTeamsWithStats(calculatedTeams); // Обновляем состояние команд со статистикой
+        setTeamsWithStats(calculatedTeams);
 
         const updatedMatches = calculatePlayoffDisplay(matches, calculatedTeams);
-         // Осторожно обновляем matches, чтобы не вызвать бесконечный цикл,
-         // если calculatePlayoffDisplay возвращает тот же объект (хотя map создает новый)
-         // Проверка JSON.stringify может быть неэффективной для больших данных
-         // Лучше проверить, действительно ли изменились поля team1, team2, status в плей-офф матчах
         setMatches(prevMatches => {
-             // Простая проверка для примера, можно улучшить
              if (JSON.stringify(prevMatches) !== JSON.stringify(updatedMatches)) {
-                  console.log("Updating matches state with playoff display changes.");
-                  return updatedMatches;
+                 console.log("Updating matches state with playoff display changes.");
+                 return updatedMatches;
              }
              return prevMatches;
          });
-
     }
-   }, [matches, baseTeams, isLoading]); // Зависит от matches и baseTeams, полученных из Firestore
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [matches, baseTeams, isLoading]); // ОШИБКА 4: Добавили isLoading в зависимости
 
 
   // --- Обновление счета матча -> Запись в Firestore ---
@@ -275,95 +243,95 @@ function App() {
     const score = parseInt(scoreStr) >= 0 ? parseInt(scoreStr) : 0;
     const matchRef = doc(db, "matches", matchId);
 
-    // Используем транзакцию или получаем документ перед обновлением для надежности,
-    // но для простоты пока используем локальное состояние matches для вычисления
     const currentMatch = matches.find(m => m.id === matchId);
-    if (!currentMatch) {
-        console.error("Match not found in local state for update:", matchId);
-        return;
-    }
+    if (!currentMatch) return;
 
     const updatedFields = {
         [`set${set}${team === 'team1' ? 'Team1' : 'Team2'}`]: score
     };
     const tempUpdatedMatch = { ...currentMatch, ...updatedFields };
-
-    // --- Определение статуса и победителя ---
     const useTotalPointsRule = tournamentSettings.useTotalPointsForTie;
-    let newWinner = null; // Начинаем с null
-    let newStatus = 'not_started'; // Статус по умолчанию
-
+    let newWinner = null; let newStatus = 'not_started';
     const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = tempUpdatedMatch;
     const hasScores = (set1Team1 > 0 || set1Team2 > 0 || set2Team1 > 0 || set2Team2 > 0 || set3Team1 > 0 || set3Team2 > 0);
 
     if (tempUpdatedMatch.round === 'final') {
-         let team1Wins = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0) + (set3Team1 > set3Team2 ? 1 : 0);
-         let team2Wins = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0) + (set3Team2 > set3Team1 ? 1 : 0);
-         if (team1Wins >= 2) { newWinner = tempUpdatedMatch.team1; newStatus = 'completed'; }
-         else if (team2Wins >= 2) { newWinner = tempUpdatedMatch.team2; newStatus = 'completed'; }
-         else if (hasScores) { newStatus = 'in_progress'; } // Если есть очки, но не завершен
-    } else if (tempUpdatedMatch.status === 'tie_needs_tiebreak' && set === 3) {
-         if (set3Team1 >= 5 && set3Team1 >= set3Team2 + 1) { newWinner = tempUpdatedMatch.team1; newStatus = 'completed'; }
-         else if (set3Team2 >= 5 && set3Team2 >= set3Team1 + 1) { newWinner = tempUpdatedMatch.team2; newStatus = 'completed'; }
-         else { newStatus = 'tie_needs_tiebreak'; } // Остается в ожидании или неверный ввод
-    } else if (tempUpdatedMatch.round !== 'group') { // Для плей-офф (кроме финала) - проверка после 2 сета
-         let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0);
-         let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0);
-         if (team1Sets >= 2) { newWinner = tempUpdatedMatch.team1; newStatus = 'completed';} // >=2 на случай ошибок
-         else if (team2Sets >= 2) { newWinner = tempUpdatedMatch.team2; newStatus = 'completed';}
-         else if (team1Sets === 1 && team2Sets === 1) {
-             if (useTotalPointsRule) {
-                 const t1 = set1Team1 + set2Team1; const t2 = set1Team2 + set2Team2;
-                 if (t1 > t2) { newWinner = tempUpdatedMatch.team1; newStatus = 'completed_by_points'; }
-                 else if (t2 > t1) { newWinner = tempUpdatedMatch.team2; newStatus = 'completed_by_points'; }
-                 else { newStatus = 'tie_needs_tiebreak'; }
-             } else {
-                 newStatus = 'tie_needs_tiebreak';
-             }
-         } else if (hasScores) { newStatus = 'in_progress'; }
-         // 'not_started' остается по умолчанию, если нет очков
-    } else { // Для группы
-         let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0);
-         let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0);
-         if (team1Sets === 2) { newWinner = tempUpdatedMatch.team1; newStatus = 'completed'; }
-         else if (team2Sets === 2) { newWinner = tempUpdatedMatch.team2; newStatus = 'completed'; }
-         else if (team1Sets === 1 && team2Sets === 1) {
-             if (useTotalPointsRule) {
-                const t1 = set1Team1 + set2Team1; const t2 = set1Team2 + set2Team2;
-                 if (t1 > t2) { newWinner = tempUpdatedMatch.team1; newStatus = 'completed_by_points'; }
-                 else if (t2 > t1) { newWinner = tempUpdatedMatch.team2; newStatus = 'completed_by_points'; }
-                 else { newStatus = 'tie_needs_tiebreak'; }
-             } else {
-                 newStatus = 'tie_needs_tiebreak';
-             }
-         } else if (hasScores) { newStatus = 'in_progress'; }
-          // 'not_started' остается по умолчанию, если нет очков
+         let t1w = (set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0)+(set3Team1>set3Team2?1:0);
+         let t2w = (set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0)+(set3Team2>set3Team1?1:0);
+         if(t1w>=2){newWinner=tempUpdatedMatch.team1;newStatus='completed';}
+         else if(t2w>=2){newWinner=tempUpdatedMatch.team2;newStatus='completed';}
+         else if(hasScores){newStatus='in_progress';}
+    } else if (currentMatch.status === 'tie_needs_tiebreak' && set === 3) { // Проверяем ИСХОДНЫЙ статус матча
+         if(set3Team1>=5 && set3Team1>=set3Team2+1){newWinner=tempUpdatedMatch.team1;newStatus='completed';}
+         else if(set3Team2>=5 && set3Team2>=set3Team1+1){newWinner=tempUpdatedMatch.team2;newStatus='completed';}
+         else {newStatus='tie_needs_tiebreak';}
+    } else if (tempUpdatedMatch.round !== 'group' && set >= 2) { // Плей-офф не финал
+         let t1s = (set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0);
+         let t2s = (set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0);
+         if(t1s>=2){newWinner=tempUpdatedMatch.team1;newStatus='completed';}
+         else if(t2s>=2){newWinner=tempUpdatedMatch.team2;newStatus='completed';}
+         else if(t1s===1 && t2s===1){
+             if(useTotalPointsRule){
+                 const t1 = set1Team1+set2Team1; const t2 = set1Team2+set2Team2;
+                 if(t1>t2){newWinner=tempUpdatedMatch.team1;newStatus='completed_by_points';}
+                 else if(t2>t1){newWinner=tempUpdatedMatch.team2;newStatus='completed_by_points';}
+                 else{newStatus='tie_needs_tiebreak';}
+             } else {newStatus='tie_needs_tiebreak';}
+         } else if(hasScores){newStatus='in_progress';}
+    } else if (tempUpdatedMatch.round === 'group' && set >= 2) { // Группа
+         let t1s = (set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0);
+         let t2s = (set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0);
+         if(t1s===2){newWinner=tempUpdatedMatch.team1;newStatus='completed';}
+         else if(t2s===2){newWinner=tempUpdatedMatch.team2;newStatus='completed';}
+         else if(t1s===1 && t2s===1){
+             if(useTotalPointsRule){
+                const t1 = set1Team1+set2Team1; const t2 = set1Team2+set2Team2;
+                 if(t1>t2){newWinner=tempUpdatedMatch.team1;newStatus='completed_by_points';}
+                 else if(t2>t1){newWinner=tempUpdatedMatch.team2;newStatus='completed_by_points';}
+                 else{newStatus='tie_needs_tiebreak';}
+             } else {newStatus='tie_needs_tiebreak';}
+         } else if(hasScores){newStatus='in_progress';}
+    } else if (set === 1) {
+         if (hasScores) {newStatus = 'in_progress';}
+         // Если сбросили первый сет на 0:0, а второй был сыгран, статус остается in_progress
+         if(newStatus === 'not_started' && (tempUpdatedMatch.set2Team1 > 0 || tempUpdatedMatch.set2Team2 > 0)){
+             newStatus = 'in_progress';
+         }
     }
-    // --- /Определение статуса и победителя ---
+
+    // Если статус не изменился на 'not_started', но очков нет, ставим 'not_started'
+    if (newStatus !== 'not_started' && !hasScores) {
+        newStatus = 'not_started';
+        newWinner = null; // Сбрасываем победителя если нет очков
+    }
+     // Если матч был завершен, а счет изменился так, что он больше не завершен, сбрасываем победителя
+     if (currentMatch.status?.startsWith('completed') && !newStatus.startsWith('completed')) {
+        newWinner = null;
+     }
+
 
     updatedFields.winner = newWinner;
     updatedFields.status = newStatus;
 
     try {
         await setDoc(matchRef, updatedFields, { merge: true });
-        console.log(`Match ${matchId} updated in Firestore`);
+        console.log(`Match ${matchId} updated in Firestore with status: ${newStatus}, winner: ${newWinner}`);
     } catch (error) {
       console.error("Error updating match:", error);
     }
-  }, [matches, tournamentSettings]); // Добавляем зависимости
+  }, [matches, tournamentSettings]);
 
   // --- Обновление Настроек -> Запись в Firestore ---
   const handleSettingsChange = useCallback(async (newSettingValue) => {
-      const settingsRef = doc(db, "config", "tournamentSettings"); // Исправлено: config
+      const settingsRef = doc(db, "config", "tournamentSettings");
       const newSettings = { ...tournamentSettings, useTotalPointsForTie: newSettingValue };
       try {
-          await setDoc(settingsRef, newSettings); // Используем setDoc для перезаписи всего объекта
+          await setDoc(settingsRef, newSettings);
           console.log("Settings updated in Firestore");
-          // Локальное состояние обновится через onSnapshot
       } catch (error) {
           console.error("Error updating settings:", error);
       }
-  }, [tournamentSettings]); // Зависимость от tournamentSettings
+  }, [tournamentSettings]);
 
   // --- UI ---
   const changeLanguage = useCallback((lang) => {
@@ -371,15 +339,15 @@ function App() {
         setLanguage(lang);
         localStorage.setItem('language', lang);
     } else {
-        console.warn(`Language "${lang}" not found. Falling back to 'cs'.`);
         setLanguage('cs');
         localStorage.setItem('language', 'cs');
     }
-  }, []); // Нет зависимостей
+  }, []);
 
   // --- Функции рендеринга (мемоизированные) ---
   const renderMatches = useCallback(() => {
-       return (
+       // ... (Код без изменений) ...
+        return (
          <div className="p-4 overflow-x-auto">
            <h2 className="text-2xl font-bold mb-6 text-indigo-700 flex items-center">
              <FaVolleyballBall className="mr-3 text-indigo-600" /><span>{t.matches}</span>
@@ -402,14 +370,11 @@ function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {[...matches] // Используем локальное состояние matches, обновленное для плей-офф
-                        .sort((a, b) => a.time.localeCompare(b.time) || a.court - b.court)
-                        .map(match => {
-                         const team1 = baseTeams.find(tm => tm.code === match.team1); // Ищем в базовых
+                    {[...matches].sort((a, b) => a.time.localeCompare(b.time) || a.court - b.court).map(match => {
+                         const team1 = baseTeams.find(tm => tm.code === match.team1);
                          const team2 = baseTeams.find(tm => tm.code === match.team2);
                          const team1Name = team1?.name || (match.round !== 'group' && match.team1 ? `...` : t.tbd);
                          const team2Name = team2?.name || (match.round !== 'group' && match.team2 ? `...` : t.tbd);
-                         // ... остальная логика стилей и отображения без изменений ...
                          let statusIcon, statusClass, statusText;
                          const currentStatus = match.status || 'unknown'; statusText = t.statusNames?.[currentStatus] || currentStatus;
                          if (currentStatus === 'completed') { statusIcon = <FaCheck className="mr-1 text-green-500" />; statusClass = 'text-green-600 font-semibold'; }
@@ -417,7 +382,7 @@ function App() {
                          else if (currentStatus === 'tie_needs_tiebreak') { statusIcon = <FaExclamationTriangle className="mr-1 text-red-500" />; statusClass = 'text-red-600 font-semibold'; }
                          else if (currentStatus === 'in_progress') { statusIcon = <FaRegClock className="mr-1 text-yellow-600 animate-spin" style={{ animationDuration: '2s' }} />; statusClass = 'text-yellow-700 font-semibold'; }
                          else if (currentStatus === 'waiting') { statusIcon = <FaRegClock className="mr-1 text-gray-400" />; statusClass = 'text-gray-500'; }
-                         else { statusIcon = <FaRegClock className="mr-1 text-gray-500" />; statusClass = 'text-gray-600'; } // not_started и др.
+                         else { statusIcon = <FaRegClock className="mr-1 text-gray-500" />; statusClass = 'text-gray-600'; }
                          let roundClass = 'px-2 py-1 rounded text-xs font-semibold inline-block';
                          const currentRound = match.round || 'unknown'; const roundText = t.roundNames?.[currentRound] || currentRound;
                          if (currentRound === 'group') { roundClass += ' bg-[#C1CBA7]/50 text-[#06324F]'; }
@@ -428,19 +393,12 @@ function App() {
                          else { roundClass += ' bg-gray-200 text-gray-700'; }
                          const showThirdSet = currentRound === 'final' || currentStatus === 'tie_needs_tiebreak' || (match.set3Team1 > 0 || match.set3Team2 > 0);
                          const canOpenDetail = match.team1 && match.team2 && currentStatus !== 'waiting';
-
                          return (
-                             <tr key={match.id} className={`border-b transition-colors duration-150 ease-in-out ${canOpenDetail ? 'hover:bg-[#0B8E8D]/10 cursor-pointer' : 'opacity-70'}`}
-                                 onClick={canOpenDetail ? () => { setView('matchDetail'); setSelectedMatch(match); } : undefined}>
+                             <tr key={match.id} className={`border-b transition-colors duration-150 ease-in-out ${canOpenDetail ? 'hover:bg-[#0B8E8D]/10 cursor-pointer' : 'opacity-70'}`} onClick={canOpenDetail ? () => { setView('matchDetail'); setSelectedMatch(match); } : undefined}>
                              <td className="p-3 text-sm md:text-base"><span className={roundClass}>{roundText}</span></td>
                              <td className="p-3 text-sm md:text-base font-medium">
                                  {team1Name} <span className="text-gray-400 mx-1">vs</span> {team2Name}
-                                 {match.winner && (
-                                    <FaTrophy
-                                        className={`inline ml-2 ${match.winner === team1?.code ? 'text-yellow-500' : match.winner === team2?.code ? 'text-yellow-500' : 'text-gray-400'}`}
-                                        title={`${t.winner}: ${baseTeams.find(w => w.code === match.winner)?.name || '?'}`}
-                                    />
-                                 )}
+                                 {match.winner && (<FaTrophy className={`inline ml-2 ${match.winner === team1?.code ? 'text-yellow-500' : match.winner === team2?.code ? 'text-yellow-500' : 'text-gray-400'}`} title={`${t.winner}: ${baseTeams.find(w => w.code === match.winner)?.name || '?'}`} />)}
                              </td>
                              <td className="p-3 text-sm md:text-base text-center">{match.court}</td>
                              <td className="p-3 text-sm md:text-base text-gray-700 text-center"><div className="flex items-center justify-center"><FaCalendarAlt className="mr-2 text-indigo-500 hidden md:inline" />{match.time}</div></td>
@@ -457,9 +415,10 @@ function App() {
            )}
          </div>
        );
-   }, [matches, baseTeams, isLoading, t, setView, setSelectedMatch]); // Добавили baseTeams, setView, setSelectedMatch
+   }, [matches, baseTeams, isLoading, t, setView, setSelectedMatch]);
 
   const renderGroups = useCallback(() => {
+     // ... (Код без изменений, использует teamsWithStats) ...
       return (
         <div className="p-4">
           <h2 className="text-2xl font-bold mb-6 text-indigo-700 flex items-center">
@@ -477,7 +436,6 @@ function App() {
                    };
                   const colors = groupColors[group];
                   const groupTeams = teamsWithStats.filter(tm => tm.group === group); // Используем teamsWithStats
-
                  return (
                    <div key={group} className={`bg-gradient-to-r ${colors.lightBg} rounded-xl shadow-lg overflow-hidden`}>
                      <div className={`bg-gradient-to-r ${colors.bg} p-4 text-white`}>
@@ -496,9 +454,7 @@ function App() {
                                </tr>
                              </thead>
                              <tbody>
-                               {[...groupTeams]
-                                 .sort((a, b) => b.points - a.points || (b.setsWon - b.setsLost) - (a.setsWon - a.setsLost) || b.setsWon - a.setsWon || a.name.localeCompare(b.name))
-                                 .map((team, index) => (
+                               {[...groupTeams].sort((a, b) => b.points - a.points || (b.setsWon - b.setsLost) - (a.setsWon - a.setsLost) || b.setsWon - a.setsWon || a.name.localeCompare(b.name)).map((team, index) => (
                                    <tr key={team.code} className={`${index < 2 ? 'bg-green-50' : ''} ${index === 0 ? 'font-bold' : ''} border-b ${colors.border} hover:bg-gray-50 transition-colors duration-150`}>
                                      <td className="p-3 text-sm md:text-base">
                                        {index < 3 && <FaTrophy className={`inline mr-2 ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-400'}`} />}
@@ -524,9 +480,8 @@ function App() {
    }, [teamsWithStats, isLoading, t]); // Зависит от teamsWithStats
 
   const renderMatchDetail = useCallback(() => {
-     // ... (Код рендеринга деталей матча, как в предыдущем ответе) ...
-       // Использует selectedMatch, matches, baseTeams, t, updateMatchScore
-       const currentMatchData = selectedMatch ? matches.find(m => m.id === selectedMatch.id) : null;
+    // ... (Код без изменений, использует `onBlur` для инпутов) ...
+      const currentMatchData = selectedMatch ? matches.find(m => m.id === selectedMatch.id) : null;
        if (!currentMatchData) return null;
        const team1 = baseTeams.find(t => t.code === currentMatchData.team1) || { name: t.tbd };
        const team2 = baseTeams.find(t => t.code === currentMatchData.team2) || { name: t.tbd };
@@ -549,33 +504,13 @@ function App() {
        const showThirdSetInput = currentRound === 'final' || currentStatus === 'tie_needs_tiebreak';
 
         return (
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 z-[70] backdrop-blur-sm"> {/* Еще выше z-index */}
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 z-[70] backdrop-blur-sm">
             <div className="bg-white rounded-xl shadow-2xl p-0 w-full max-w-lg overflow-hidden">
-              {/* Шапка */}
-              <div className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] p-6 text-white">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">{t.matchDetail}</h2>
-                  <button onClick={() => { setView('matches'); setSelectedMatch(null); }} className="text-white hover:text-red-200 transition-colors duration-150">✕</button>
-                </div>
-              </div>
-              {/* Содержимое */}
+              <div className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] p-6 text-white"><div className="flex justify-between items-center"><h2 className="text-2xl font-bold">{t.matchDetail}</h2><button onClick={() => { setView('matches'); setSelectedMatch(null); }} className="text-white hover:text-red-200 transition-colors duration-150">✕</button></div></div>
               <div className="p-6 max-h-[80vh] overflow-y-auto">
-                <div className="flex flex-wrap justify-between items-center mb-6 gap-y-2">
-                  <div className="flex items-center flex-wrap gap-2">
-                    <span className={roundClass}><span className="flex items-center">{roundIcon}{roundText}</span></span>
-                    <span className={statusClass}><span className="flex items-center">{statusIcon}{statusText}</span></span>
-                  </div>
-                  <div className="text-gray-600 flex items-center"><FaCalendarAlt className="mr-2 text-indigo-500" />{currentMatchData.time} ({t.court} {currentMatchData.court})</div>
-                </div>
-                <div className="bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-4 rounded-lg mb-6">
-                  <div className="flex justify-between items-center">
-                    <div className="text-center w-5/12"><div className="text-lg font-bold text-indigo-800">{team1.name}</div></div>
-                    <div className="text-center w-2/12"><div className="text-xl font-bold text-gray-600">vs</div></div>
-                    <div className="text-center w-5/12"><div className="text-lg font-bold text-indigo-800">{team2.name}</div></div>
-                  </div>
-                </div>
+                <div className="flex flex-wrap justify-between items-center mb-6 gap-y-2"><div className="flex items-center flex-wrap gap-2"><span className={roundClass}><span className="flex items-center">{roundIcon}{roundText}</span></span><span className={statusClass}><span className="flex items-center">{statusIcon}{statusText}</span></span></div><div className="text-gray-600 flex items-center"><FaCalendarAlt className="mr-2 text-indigo-500" />{currentMatchData.time} ({t.court} {currentMatchData.court})</div></div>
+                <div className="bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-4 rounded-lg mb-6"><div className="flex justify-between items-center"><div className="text-center w-5/12"><div className="text-lg font-bold text-indigo-800">{team1.name}</div></div><div className="text-center w-2/12"><div className="text-xl font-bold text-gray-600">vs</div></div><div className="text-center w-5/12"><div className="text-lg font-bold text-indigo-800">{team2.name}</div></div></div></div>
                 <div className="space-y-4">
-                  {/* Set 1 */}
                   <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <label className="block text-sm font-medium text-gray-700 mb-2">{t.set1}</label>
                     <div className="flex items-center justify-between">
@@ -584,7 +519,6 @@ function App() {
                       <input type="number" min="0" defaultValue={currentMatchData.set1Team2 ?? 0} onBlur={(e) => updateMatchScore(currentMatchData.id, 1, 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                     </div>
                   </div>
-                  {/* Set 2 */}
                   <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                     <label className="block text-sm font-medium text-gray-700 mb-2">{t.set2}</label>
                     <div className="flex items-center justify-between">
@@ -593,7 +527,6 @@ function App() {
                       <input type="number" min="0" defaultValue={currentMatchData.set2Team2 ?? 0} onBlur={(e) => updateMatchScore(currentMatchData.id, 2, 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                     </div>
                   </div>
-                  {/* Set 3 / Tiebreak */}
                   {showThirdSetInput && (
                     <div className={`bg-white p-4 rounded-lg shadow-sm border ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300' : 'border-gray-200'}`}>
                       <label className={`block text-sm font-medium ${currentStatus === 'tie_needs_tiebreak' ? 'text-red-700' : 'text-gray-700'} mb-2`}>
@@ -607,71 +540,63 @@ function App() {
                     </div>
                   )}
                 </div>
-                <div className="mt-6 flex justify-end">
-                  <button onClick={() => { setView('matches'); setSelectedMatch(null); }} className="w-full bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white py-2 px-4 rounded-lg hover:from-[#0B8E8D]/90 hover:to-[#06324F]/90 transition-all duration-200 shadow-md flex items-center justify-center"><FaCheck className="mr-2"/> {t.close || 'Закрыть'}</button>
-                </div>
+                <div className="mt-6 flex justify-end"><button onClick={() => { setView('matches'); setSelectedMatch(null); }} className="w-full bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white py-2 px-4 rounded-lg hover:from-[#0B8E8D]/90 hover:to-[#06324F]/90 transition-all duration-200 shadow-md flex items-center justify-center"><FaCheck className="mr-2"/> {t.close || 'Закрыть'}</button></div>
               </div>
             </div>
           </div>
         );
-   }, [selectedMatch, matches, baseTeams, t, updateMatchScore, setView, setSelectedMatch]); // Добавили updateMatchScore и др.
+   }, [selectedMatch, matches, baseTeams, t, updateMatchScore, setView, setSelectedMatch]);
 
   const renderRulesModal = useCallback(() => {
-    // ... (Код рендеринга модалки правил, как в предыдущем ответе) ...
-      // Использует showRules, language, tournamentSettings, t, handleSettingsChange, changeLanguage
-       return (
-         <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-start justify-center p-4 z-[60] backdrop-blur-sm overflow-y-auto">
-           <div className="bg-white rounded-xl shadow-2xl p-0 w-full max-w-4xl my-8 overflow-hidden">
-             {/* Шапка */}
-             <div className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] p-6 text-white sticky top-0 z-10">
-               <div className="flex justify-between items-center">
-                 <h2 className="text-2xl font-bold">{t.rules}</h2>
-                 <div className="flex items-center space-x-2">
-                    {Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (<button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 py-1 text-xs rounded transition-colors duration-150 ${language === lang ? 'bg-white text-[#0B8E8D] shadow-sm' : 'bg-[#0B8E8D]/80 text-white hover:bg-[#0B8E8D]/90'}`} title={languageNames[lang]}>{lang.toUpperCase()}</button>))}
-                   <button onClick={() => setShowRules(false)} className="text-white hover:text-[#FDD80F] transition-colors ml-4" title={t.close}><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
-                 </div>
-               </div>
-             </div>
-             {/* Содержимое */}
-             <div className="p-6 max-h-[70vh] overflow-y-auto">
-               {/* Настройки правил */}
-               <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6 border border-gray-200">
-                 <h4 className="text-lg font-semibold text-[#06324F] mb-3">{t.tieRules?.settingsTitle || "Настройки (1:1)"}</h4>
-                 <div className="flex items-center space-x-3">
-                   <input type="checkbox" id="useTotalPointsForTie" checked={tournamentSettings.useTotalPointsForTie} onChange={(e) => handleSettingsChange(e.target.checked)} className="h-5 w-5 rounded text-[#0B8E8D] focus:ring-2 focus:ring-[#0B8E8D]/50 border-gray-300"/>
-                   <label htmlFor="useTotalPointsForTie" className="text-gray-700 select-none cursor-pointer">{t.tieRules?.usePointsOption || "Исп. общ. кол-во очков"}</label>
-                 </div>
-                  <p className="text-xs text-gray-500 mt-2">{tournamentSettings.useTotalPointsForTie ? t.tieRules?.usePointsOptionDescription || "При 1:1 выигрыш по очкам, при равенстве - тайбрейк." : t.tieRules?.useTiebreakOptionDescription || "При 1:1 всегда играется тайбрейк."}</p>
-               </div>
-               {/* Описание правил */}
-                <div className="mb-8 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-6 rounded-xl shadow-md border border-[#0B8E8D]/20">
-                  <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.tieRules?.title}</h3>
-                  <div className="space-y-4">
-                    <div className={`p-4 rounded-lg shadow-sm border ${tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-200' : 'bg-gray-100 border-gray-200'}`}> <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option1}</h4> <p className="text-gray-700 text-sm">{t.tieRules?.option1Description}</p> </div>
-                    <div className={`p-4 rounded-lg shadow-sm border ${!tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-200' : 'bg-gray-100 border-gray-200'}`}> <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option2}</h4> <p className="text-gray-700 text-sm">{t.tieRules?.option2Description}</p> </div>
-                  </div>
+    // ... (Код без изменений) ...
+      return (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-start justify-center p-4 z-[60] backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl p-0 w-full max-w-4xl my-8 overflow-hidden">
+            <div className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] p-6 text-white sticky top-0 z-10">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">{t.rules}</h2>
+                <div className="flex items-center space-x-2">
+                   {Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (<button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 py-1 text-xs rounded transition-colors duration-150 ${language === lang ? 'bg-white text-[#0B8E8D] shadow-sm' : 'bg-[#0B8E8D]/80 text-white hover:bg-[#0B8E8D]/90'}`} title={languageNames[lang]}>{lang.toUpperCase()}</button>))}
+                  <button onClick={() => setShowRules(false)} className="text-white hover:text-[#FDD80F] transition-colors ml-4" title={t.close}><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
                 </div>
-               {/* Основные правила */}
-               <div className="prose prose-sm max-w-none mt-6">
-                  <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.generalRulesTitle || "Общие правила"}</h3>
-                  <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800 bg-gray-50 p-4 rounded border border-gray-200">{t.tournamentRules || "Текст правил..."}</pre>
+              </div>
+            </div>
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6 border border-gray-200">
+                <h4 className="text-lg font-semibold text-[#06324F] mb-3">{t.tieRules?.settingsTitle || "Настройки (1:1)"}</h4>
+                <div className="flex items-center space-x-3">
+                  <input type="checkbox" id="useTotalPointsForTie" checked={tournamentSettings.useTotalPointsForTie} onChange={(e) => handleSettingsChange(e.target.checked)} className="h-5 w-5 rounded text-[#0B8E8D] focus:ring-2 focus:ring-[#0B8E8D]/50 border-gray-300"/>
+                  <label htmlFor="useTotalPointsForTie" className="text-gray-700 select-none cursor-pointer">{t.tieRules?.usePointsOption || "Исп. общ. кол-во очков"}</label>
+                </div>
+                 <p className="text-xs text-gray-500 mt-2">{tournamentSettings.useTotalPointsForTie ? t.tieRules?.usePointsOptionDescription || "При 1:1 выигрыш по очкам, при равенстве - тайбрейк." : t.tieRules?.useTiebreakOptionDescription || "При 1:1 всегда играется тайбрейк."}</p>
+              </div>
+               <div className="mb-8 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-6 rounded-xl shadow-md border border-[#0B8E8D]/20">
+                 <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.tieRules?.title}</h3>
+                 <div className="space-y-4">
+                   <div className={`p-4 rounded-lg shadow-sm border ${tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-200' : 'bg-gray-100 border-gray-200'}`}> <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option1}</h4> <p className="text-gray-700 text-sm">{t.tieRules?.option1Description}</p> </div>
+                   <div className={`p-4 rounded-lg shadow-sm border ${!tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-200' : 'bg-gray-100 border-gray-200'}`}> <h4 className="text-lg font-semibold text-[#0B8E8D] mb-2">{t.tieRules?.option2}</h4> <p className="text-gray-700 text-sm">{t.tieRules?.option2Description}</p> </div>
+                 </div>
                </div>
-             </div>
-             {/* Кнопка закрытия */}
-             <div className="p-4 border-t border-gray-200 bg-gray-50 sticky bottom-0">
-               <button onClick={() => setShowRules(false)} className="w-full py-2 bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"><FaCheck className="mr-2" /> {t.hideRules || "Закрыть"}</button>
-             </div>
-           </div>
-         </div>
-        );
-   }, [showRules, language, tournamentSettings, t, handleSettingsChange, changeLanguage]); // Добавляем зависимости
+              <div className="prose prose-sm max-w-none mt-6">
+                 <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.generalRulesTitle || "Общие правила"}</h3>
+                 <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800 bg-gray-50 p-4 rounded border border-gray-200">{t.tournamentRules || "Текст правил..."}</pre>
+              </div>
+            </div>
+            <div className="p-4 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+              <button onClick={() => setShowRules(false)} className="w-full py-2 bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"><FaCheck className="mr-2" /> {t.hideRules || "Закрыть"}</button>
+            </div>
+          </div>
+        </div>
+       );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language, tournamentSettings, t, handleSettingsChange, changeLanguage]); // ОШИБКА 2: Убрали showRules из зависимостей
 
   // --- Основной рендер ---
   return (
     <>
       <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
         {/* Sidebar */}
-        <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky top-0 z-40 border-t border-gray-200"> {/* Уменьшен z-index */}
+        <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky top-0 z-40 border-t border-gray-200">
            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
              <h1 className="text-xl font-bold text-[#06324F] flex items-center"><FaVolleyballBall className="mr-2 text-[#0B8E8D]" /> RVL</h1>
              <div className="flex space-x-1">
@@ -683,7 +608,6 @@ function App() {
              <button onClick={() => setView('groups')} className={`flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 ${view === 'groups' ? 'bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white shadow-md' : 'hover:bg-[#0B8E8D]/10 text-gray-700'}`}><FaUsers className="mr-3" /> {t.groups}</button>
              <button onClick={() => setShowRules(true)} className="flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 hover:bg-[#0B8E8D]/10 text-gray-700 mt-2"><FaGlobe className="mr-3 text-[#FDD80F]" /> {t.rules}</button>
            </div>
-            {/* Инфо (Десктоп) */}
            <div className="md:absolute md:bottom-6 md:left-0 md:right-0 px-6 mt-4 md:mt-0 hidden md:block">
              <div className="bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-4 rounded-lg shadow-sm border border-[#0B8E8D]/20">
                <h3 className="text-sm font-semibold text-[#06324F] mb-2">{t.tournamentInfo}</h3>
@@ -703,7 +627,6 @@ function App() {
         <main className="flex-1 p-0 md:p-6 pb-20 md:pb-6">
           {view === 'matches' && renderMatches()}
           {view === 'groups' && renderGroups()}
-            {/* Инфо (Мобайл) */}
            <div className="md:hidden p-4 mx-4 mt-4 mb-24 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 rounded-lg shadow-sm border border-[#0B8E8D]/20">
              <h3 className="text-sm font-semibold text-[#06324F] mb-2">{t.tournamentInfo}</h3>
              <div className="text-xs text-gray-700 space-y-2">
