@@ -181,6 +181,9 @@ function App() {
             .filter(m => m.round === 'group')
             .every(m => m.status === 'completed' || m.status === 'completed_by_points');
     
+        console.log("Все групповые матчи завершены:", allGroupMatchesCompleted);
+        console.log("Рейтинги групп:", groupRankings);
+    
         setMatches(prevMatches => {
             let changed = false;
             const updatedMatchesArray = prevMatches.map(match => {
@@ -189,8 +192,6 @@ function App() {
                 const updatedMatch = { ...match };
                 let team1Code = null;
                 let team2Code = null;
-    
-                if (!allGroupMatchesCompleted && match.round === 'quarterfinal') return updatedMatch;
     
                 switch (match.id) {
                     case 'QF-1A-1C':
@@ -241,29 +242,39 @@ function App() {
                         return match;
                 }
     
-                if (team1Code !== updatedMatch.team1 || team2Code !== updatedMatch.team2) {
-                    updatedMatch.team1 = team1Code;
-                    updatedMatch.team2 = team2Code;
-                    changed = true;
-    
-                    if (team1Code && team2Code && updatedMatch.status === 'waiting') {
-                        updatedMatch.status = 'not_started';
-                    } else if ((!team1Code || !team2Code) && updatedMatch.status !== 'waiting') {
-                        updatedMatch.status = 'waiting';
-                        updatedMatch.set1Team1 = 0;
-                        updatedMatch.set1Team2 = 0;
-                        updatedMatch.set2Team1 = 0;
-                        updatedMatch.set2Team2 = 0;
-                        updatedMatch.set3Team1 = 0;
-                        updatedMatch.set3Team2 = 0;
-                        updatedMatch.winner = null;
+                if (team1Code && team2Code) {
+                    if (updatedMatch.team1 !== team1Code || updatedMatch.team2 !== team2Code || updatedMatch.status === 'waiting') {
+                        updatedMatch.team1 = team1Code;
+                        updatedMatch.team2 = team2Code;
+                        if (updatedMatch.status === 'waiting') {
+                            updatedMatch.status = 'not_started';
+                            console.log(`Матч ${match.id} переведен из waiting в not_started с командами ${team1Code} vs ${team2Code}`);
+                        }
+                        changed = true;
                     }
+                } else if ((!team1Code || !team2Code) && updatedMatch.status !== 'waiting') {
+                    updatedMatch.team1 = null;
+                    updatedMatch.team2 = null;
+                    updatedMatch.status = 'waiting';
+                    updatedMatch.set1Team1 = 0;
+                    updatedMatch.set1Team2 = 0;
+                    updatedMatch.set2Team1 = 0;
+                    updatedMatch.set2Team2 = 0;
+                    updatedMatch.set3Team1 = 0;
+                    updatedMatch.set3Team2 = 0;
+                    updatedMatch.winner = null;
+                    changed = true;
+                    console.log(`Матч ${match.id} переведен в waiting из-за отсутствия команд`);
                 }
     
                 return updatedMatch;
             });
     
-            return changed ? updatedMatchesArray : prevMatches;
+            if (changed) {
+                console.log("Обновленные матчи:", updatedMatchesArray.filter(m => m.round !== 'group'));
+                return updatedMatchesArray;
+            }
+            return prevMatches;
         });
     }, []);
 
