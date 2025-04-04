@@ -303,6 +303,7 @@ function App() {
             return changed ? updatedMatchesArray : prevMatches;
         });
     }, []);
+    
 
     const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
         const score = parseInt(scoreStr) || 0;
