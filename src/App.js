@@ -165,8 +165,6 @@ function App() {
     }, []);
 
     const updatePlayoffTeams = useCallback((currentMatches, currentTeams) => {
-        console.log("Запуск updatePlayoffTeams...");
-        
         // Формируем рейтинги команд в группах
         const groupRankings = {};
         ['A', 'B', 'C'].forEach(group => {
@@ -208,58 +206,59 @@ function App() {
                 let team1Code = null;
                 let team2Code = null;
                 
-                // Исправленная логика определения команд для плей-офф
-                // Независимо от завершения групповых матчей, заполняем команды по рейтингу групп
-                switch (match.id) {
-                    case 'QF-1A-1C':
-                        team1Code = groupRankings['A']?.[0]?.code || null;
-                        team2Code = groupRankings['C']?.[0]?.code || null;
-                        break;
-                    case 'QF-1B-2C':
-                        team1Code = groupRankings['B']?.[0]?.code || null;
-                        team2Code = groupRankings['C']?.[1]?.code || null;
-                        break;
-                    case 'QF-2A-3B':
-                        team1Code = groupRankings['A']?.[1]?.code || null;
-                        team2Code = groupRankings['B']?.[2]?.code || null;
-                        break;
-                    case 'QF-3A-2B':
-                        team1Code = groupRankings['A']?.[2]?.code || null;
-                        team2Code = groupRankings['B']?.[1]?.code || null;
-                        break;
-                    case 'SF-W1-W3':
-                        const qf1 = prevMatches.find(m => m.id === 'QF-1A-1C');
-                        const qf3 = prevMatches.find(m => m.id === 'QF-2A-3B');
-                        team1Code = qf1?.winner || null;
-                        team2Code = qf3?.winner || null;
-                        break;
-                    case 'SF-W2-W4':
-                        const qf2 = prevMatches.find(m => m.id === 'QF-1B-2C');
-                        const qf4 = prevMatches.find(m => m.id === 'QF-3A-2B');
-                        team1Code = qf2?.winner || null;
-                        team2Code = qf4?.winner || null;
-                        break;
-                    case 'F-W1-W2':
-                        const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3');
-                        const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4');
-                        team1Code = sf1?.winner || null;
-                        team2Code = sf2?.winner || null;
-                        break;
-                    case 'F3-L1-L2':
-                        const sf1m = prevMatches.find(m => m.id === 'SF-W1-W3');
-                        const sf2m = prevMatches.find(m => m.id === 'SF-W2-W4');
-                        
-                        // Находим проигравших в полуфиналах
-                        if (sf1m?.winner && sf1m.team1 && sf1m.team2) {
-                            team1Code = sf1m.winner === sf1m.team1 ? sf1m.team2 : sf1m.team1;
-                        }
-                        
-                        if (sf2m?.winner && sf2m.team1 && sf2m.team2) {
-                            team2Code = sf2m.winner === sf2m.team1 ? sf2m.team2 : sf2m.team1;
-                        }
-                        break;
-                    default:
-                        break;
+                // Заполняем команды только если все групповые матчи завершены
+                if (allGroupMatchesCompleted) {
+                    switch (match.id) {
+                        case 'QF-1A-1C':
+                            team1Code = groupRankings['A']?.[0]?.code || null;
+                            team2Code = groupRankings['C']?.[0]?.code || null;
+                            break;
+                        case 'QF-1B-2C':
+                            team1Code = groupRankings['B']?.[0]?.code || null;
+                            team2Code = groupRankings['C']?.[1]?.code || null;
+                            break;
+                        case 'QF-2A-3B':
+                            team1Code = groupRankings['A']?.[1]?.code || null;
+                            team2Code = groupRankings['B']?.[2]?.code || null;
+                            break;
+                        case 'QF-3A-2B':
+                            team1Code = groupRankings['A']?.[2]?.code || null;
+                            team2Code = groupRankings['B']?.[1]?.code || null;
+                            break;
+                        case 'SF-W1-W3':
+                            const qf1 = prevMatches.find(m => m.id === 'QF-1A-1C');
+                            const qf3 = prevMatches.find(m => m.id === 'QF-2A-3B');
+                            team1Code = qf1?.winner || null;
+                            team2Code = qf3?.winner || null;
+                            break;
+                        case 'SF-W2-W4':
+                            const qf2 = prevMatches.find(m => m.id === 'QF-1B-2C');
+                            const qf4 = prevMatches.find(m => m.id === 'QF-3A-2B');
+                            team1Code = qf2?.winner || null;
+                            team2Code = qf4?.winner || null;
+                            break;
+                        case 'F-W1-W2':
+                            const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3');
+                            const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4');
+                            team1Code = sf1?.winner || null;
+                            team2Code = sf2?.winner || null;
+                            break;
+                        case 'F3-L1-L2':
+                            const sf1m = prevMatches.find(m => m.id === 'SF-W1-W3');
+                            const sf2m = prevMatches.find(m => m.id === 'SF-W2-W4');
+                            
+                            // Находим проигравших в полуфиналах
+                            if (sf1m?.winner && sf1m.team1 && sf1m.team2) {
+                                team1Code = sf1m.winner === sf1m.team1 ? sf1m.team2 : sf1m.team1;
+                            }
+                            
+                            if (sf2m?.winner && sf2m.team1 && sf2m.team2) {
+                                team2Code = sf2m.winner === sf2m.team1 ? sf2m.team2 : sf2m.team1;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
     
                 // Корректируем код судьи, если он в неправильном формате
@@ -278,7 +277,8 @@ function App() {
                         }
                         changed = true;
                     }
-                } else if ((!team1Code || !team2Code) && updatedMatch.status !== 'waiting') {
+                } else if ((!team1Code || !team2Code) && updatedMatch.status !== 'waiting' && !allGroupMatchesCompleted) {
+                    // Только сбрасываем матчи, если групповой этап не завершен
                     updatedMatch.team1 = null;
                     updatedMatch.team2 = null;
                     updatedMatch.status = 'waiting';
