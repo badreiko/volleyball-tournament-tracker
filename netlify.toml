@@ -9,3 +9,7 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[site]
+  # ID сайта на Netlify
+  id = "rvl-volleyball-tournament-mg4gy"

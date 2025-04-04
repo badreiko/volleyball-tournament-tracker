@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { FaVolleyballBall, FaUsers, FaTrophy, FaMedal, FaRegClock, FaCheck, FaHourglassHalf, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar } from 'react-icons/fa';
+import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar } from 'react-icons/fa';
 import { translations, languageNames } from './translations';
 
 // Начальные данные команд
