@@ -88,119 +88,85 @@ function App() {
 
   // --- Загрузка данных и подписка на обновления из Firestore ---
   useEffect(() => {
-    setIsLoading(true);
-    let isMounted = true;
-
-    // Функция для первичного заполнения Firestore
     const initializeFirestoreData = async () => {
-        // Проверка и заполнение (см. предыдущий ответ, опционально)
-         console.log("Checking Firestore data...");
-         const settingsDoc = await doc(db, "config", "tournamentSettings");
-         const matchesColl = await collection(db, "matches");
-         const settingsSnap = await getDocs(settingsDoc); // Ошибка: getDocs для документа, надо getDoc
-         const matchesSnap = await getDocs(matchesColl);
+      try {
+        // Проверяем, есть ли данные в коллекции teams
+        const teamsSnapshot = await getDocs(collection(db, 'teams'));
+        if (teamsSnapshot.empty) {
+          // Если коллекция пустая, инициализируем данные
+          const batch = writeBatch(db);
+          
+          // Добавляем команды
+          initialTeamsWithStats.forEach(team => {
+            batch.set(doc(db, 'teams', team.code), team);
+          });
 
-         if (!settingsSnap.exists() || matchesSnap.empty) { // Проверяем существование настроек и пустоту матчей
-              console.log("Firestore appears empty or uninitialized, initializing...");
-              const batch = writeBatch(db);
-              initialTeamsData.forEach(team => batch.set(doc(db, "teams", team.code), team));
-              initialMatchesData.forEach(match => batch.set(doc(db, "matches", match.id), match));
-              batch.set(doc(db, "config", "tournamentSettings"), defaultTournamentSettings);
-              try {
-                  await batch.commit();
-                  console.log("Firestore initialized successfully.");
-              } catch (error) {
-                  console.error("Error initializing Firestore:", error);
-              }
-         } else {
-              console.log("Firestore already contains data or is initialized.");
-         }
-    };
+          // Добавляем матчи
+          initialMatchesData.forEach(match => {
+            batch.set(doc(db, 'matches', match.id), match);
+          });
 
-    // Раскомментируйте строку ниже ТОЛЬКО ЕСЛИ вы хотите ЗАПОЛНИТЬ ПУСТУЮ базу данных
-    // initializeFirestoreData().catch(console.error);
+          // Добавляем настройки турнира
+          batch.set(doc(db, 'settings', 'tournament'), tournamentSettings);
 
-    // Подписка на матчи (сортировка по времени для предсказуемости)
-    const qMatches = query(collection(db, "matches"), orderBy("time"), orderBy("court"));
-    const unsubscribeMatches = onSnapshot(qMatches, (snapshot) => {
-      const matchesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      if (isMounted) {
-          setMatches(matchesData); // Обновляем состояние матчей
-          // Статистика и плей-офф пересчитаются в другом useEffect
-          setIsLoading(false); // Загрузка завершена после получения матчей
-          console.log("Matches updated from Firestore");
-      }
-    }, (error) => {
-        console.error("Error fetching matches:", error);
-        if (isMounted) setIsLoading(false);
-    });
+          await batch.commit();
+        }
 
-    // Подписка на базовую информацию о командах
-    const unsubscribeTeams = onSnapshot(collection(db, "teams"), (snapshot) => {
-        const teamsBaseData = snapshot.docs.map(doc => ({ code: doc.id, ...doc.data() }));
-         if (isMounted && teamsBaseData.length > 0) { // Обновляем только если есть данные
-             // Обновляем базовую информацию, сохраняя статы из локального состояния
-              setTeams(prevTeamsWithStats => {
-                  const statsMap = new Map(prevTeamsWithStats.map(t => [t.code, { points: t.points, wins: t.wins, losses: t.losses, setsWon: t.setsWon, setsLost: t.setsLost }]));
-                  return teamsBaseData.map(baseTeam => ({
-                      ...baseTeam,
-                      ...(statsMap.get(baseTeam.code) || { points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 })
-                  }));
-              });
-             console.log("Base teams data updated from Firestore");
-         } else if (isMounted && teamsBaseData.length === 0) {
-             console.warn("Teams collection is empty in Firestore.");
-             // Возможно, стоит здесь инициализировать команды, если их нет
-         }
-    }, (error) => {
-        console.error("Error fetching teams:", error);
-    });
+        // Подписываемся на изменения в коллекциях
+        const unsubscribeTeams = onSnapshot(collection(db, 'teams'), (snapshot) => {
+          const teamsData = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+          }));
+          setTeams(teamsData);
+        });
 
-    // Подписка на настройки
-    const settingsRef = doc(db, "config", "tournamentSettings");
-    const unsubscribeSettings = onSnapshot(settingsRef, (docSnap) => {
-      if (isMounted) {
-          if (docSnap.exists()) {
-              setTournamentSettings(docSnap.data());
-              console.log("Settings updated from Firestore");
-          } else {
-              console.log("Settings document not found, using default and saving.");
-              setTournamentSettings(defaultTournamentSettings);
-              // Записываем дефолтные настройки, если документ не существует
-              setDoc(settingsRef, defaultTournamentSettings).catch(err => console.error("Error saving default settings:", err));
+        const unsubscribeMatches = onSnapshot(collection(db, 'matches'), (snapshot) => {
+          const matchesData = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id
+          }));
+          setMatches(matchesData);
+        });
+
+        const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'tournament'), (doc) => {
+          if (doc.exists()) {
+            setTournamentSettings(doc.data());
           }
-      }
-    }, (error) => {
-        console.error("Error fetching settings:", error);
-    });
+        });
 
-    // Очистка подписок
-    return () => {
-      isMounted = false;
-      unsubscribeMatches();
-      unsubscribeTeams();
-      unsubscribeSettings();
-      console.log("Firestore listeners unsubscribed");
+        return () => {
+          unsubscribeTeams();
+          unsubscribeMatches();
+          unsubscribeSettings();
+        };
+      } catch (error) {
+        console.error('Ошибка при инициализации Firestore:', error);
+      }
     };
+
+    const init = async () => {
+      await initializeFirestoreData();
+      setIsLoading(false);
+    };
+    init();
   }, []); // Пустой массив зависимостей - выполняется один раз
 
   // --- Эффект для пересчета статистики и обновления плей-офф ---
   // Выполняется при изменении матчей (полученных из Firestore) или базовой информации команд
   useEffect(() => {
-    if (matches.length > 0 && teams.length > 0 && !isLoading) { // Только если данные загружены
-        console.log("Recalculating stats and playoffs based on data update...");
-        recalculateAllTeamStats(matches, teams);
+    if (!isLoading) {
+      recalculateAllTeamStats();
     }
-  }, [matches, teams, isLoading]); // Зависимость от матчей и базовых данных команд
-
+  }, [matches, recalculateAllTeamStats]); // Добавляем recalculateAllTeamStats в зависимости
 
   // --- Логика вычисления статистики (клиентская) ---
-  const recalculateAllTeamStats = useCallback((currentMatches, currentTeamsBase) => {
-    let calculatedTeams = currentTeamsBase.map(team => ({
+  const recalculateAllTeamStats = useCallback(() => {
+    let calculatedTeams = teams.map(team => ({
         ...team, points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0
     }));
 
-    const completedGroupMatches = currentMatches.filter(m =>
+    const completedGroupMatches = matches.filter(m =>
         m.round === 'group' &&
         (m.status === 'completed' || m.status === 'completed_by_points')
     );
@@ -237,21 +203,20 @@ function App() {
     setTeams(calculatedTeams); // Обновляем состояние команд с вычисленной статистикой
     console.log("Team stats recalculated");
 
-    updatePlayoffDisplay(currentMatches, calculatedTeams); // Обновляем отображение плей-офф
+    updatePlayoffDisplay(); // Обновляем отображение плей-офф
 
-  }, []); // useCallback без зависимостей, т.к. получает все нужные данные аргументами
-
+  }, [matches, teams]); // Добавляем teams в зависимости
 
   // --- Логика обновления отображения плей-офф (UI) ---
-  const updatePlayoffDisplay = useCallback((currentMatches, currentTeamsWithStats) => {
+  const updatePlayoffDisplay = useCallback(() => {
     const groupRankings = {};
     ['A', 'B', 'C'].forEach(group => {
-        groupRankings[group] = [...currentTeamsWithStats] // Сортируем копию
+        groupRankings[group] = [...teams] // Сортируем копию
             .filter(t => t.group === group)
             .sort((a, b) => b.points - a.points || (b.setsWon - b.setsLost) - (a.setsWon - a.setsLost) || b.setsWon - a.setsWon || a.name.localeCompare(b.name));
     });
 
-     let updatedMatchesForDisplay = currentMatches.map(match => {
+     let updatedMatchesForDisplay = matches.map(match => {
          if (match.round !== 'group') {
              const displayMatch = { ...match };
              let team1Code = null; let team2Code = null;
@@ -260,11 +225,11 @@ function App() {
              else if (match.id === 'QF-1B-2C') { team1Code = groupRankings['B'][0]?.code; team2Code = groupRankings['C'][1]?.code; }
              else if (match.id === 'QF-2A-3B') { team1Code = groupRankings['A'][1]?.code; team2Code = groupRankings['B'][2]?.code; }
              else if (match.id === 'QF-3A-2B') { team1Code = groupRankings['A'][2]?.code; team2Code = groupRankings['B'][1]?.code; }
-             else if (match.id === 'SF-W1-W3') { const qf1 = currentMatches.find(m => m.id === 'QF-1A-1C'); const qf3 = currentMatches.find(m => m.id === 'QF-2A-3B'); team1Code = qf1?.winner; team2Code = qf3?.winner; }
-             else if (match.id === 'SF-W2-W4') { const qf2 = currentMatches.find(m => m.id === 'QF-1B-2C'); const qf4 = currentMatches.find(m => m.id === 'QF-3A-2B'); team1Code = qf2?.winner; team2Code = qf4?.winner; }
-             else if (match.id === 'F-W1-W2') { const sf1 = currentMatches.find(m => m.id === 'SF-W1-W3'); const sf2 = currentMatches.find(m => m.id === 'SF-W2-W4'); team1Code = sf1?.winner; team2Code = sf2?.winner; }
+             else if (match.id === 'SF-W1-W3') { const qf1 = matches.find(m => m.id === 'QF-1A-1C'); const qf3 = matches.find(m => m.id === 'QF-2A-3B'); team1Code = qf1?.winner; team2Code = qf3?.winner; }
+             else if (match.id === 'SF-W2-W4') { const qf2 = matches.find(m => m.id === 'QF-1B-2C'); const qf4 = matches.find(m => m.id === 'QF-3A-2B'); team1Code = qf2?.winner; team2Code = qf4?.winner; }
+             else if (match.id === 'F-W1-W2') { const sf1 = matches.find(m => m.id === 'SF-W1-W3'); const sf2 = matches.find(m => m.id === 'SF-W2-W4'); team1Code = sf1?.winner; team2Code = sf2?.winner; }
              else if (match.id === 'F3-L1-L2') {
-                 const sf1 = currentMatches.find(m => m.id === 'SF-W1-W3'); const sf2 = currentMatches.find(m => m.id === 'SF-W2-W4');
+                 const sf1 = matches.find(m => m.id === 'SF-W1-W3'); const sf2 = matches.find(m => m.id === 'SF-W2-W4');
                  const loser1 = (sf1?.winner && sf1.team1 && sf1.team2) ? (sf1.winner === sf1.team1 ? sf1.team2 : sf1.team1) : null;
                  const loser2 = (sf2?.winner && sf2.team1 && sf2.team2) ? (sf2.winner === sf2.team1 ? sf2.team2 : sf2.team1) : null;
                  team1Code = loser1; team2Code = loser2;
@@ -294,11 +259,10 @@ function App() {
     }
 
 
-  }, [matches]); // Зависит только от matches, т.к. teams (статы) уже пересчитаны
-
+  }, [matches, teams]); // Добавляем teams в зависимости
 
   // --- Обновление счета матча -> Запись в Firestore ---
-  const updateMatchScore = async (matchId, set, team, scoreStr) => {
+  const updateMatchScore = useCallback(async (matchId, set, team, scoreStr) => {
     const score = parseInt(scoreStr) >= 0 ? parseInt(scoreStr) : 0; // Убедимся, что счет не отрицательный
     const matchRef = doc(db, "matches", matchId);
 
@@ -371,19 +335,19 @@ function App() {
     } catch (error) {
       console.error("Error updating match:", error);
     }
-  };
+  }, [matches, tournamentSettings]); // Добавляем tournamentSettings в зависимости
 
   // --- Обновление Настроек -> Запись в Firestore ---
-  const handleSettingsChange = async (newSettingValue) => {
-      const settingsRef = doc(db, "config", "tournamentSettings");
+  const handleSettingsChange = useCallback((newSettingValue) => {
       const newSettings = { ...tournamentSettings, useTotalPointsForTie: newSettingValue };
-      try {
-          await setDoc(settingsRef, newSettings); // Перезаписываем весь объект настроек
-          console.log("Settings updated in Firestore");
-      } catch (error) {
-          console.error("Error updating settings:", error);
-      }
-  };
+      setTournamentSettings(newSettings);
+      
+      // Обновляем настройки в Firestore
+      updateDoc(doc(db, 'settings', 'tournament'), newSettings);
+      
+      // Пересчитываем статистику команд
+      recalculateAllTeamStats();
+  }, [tournamentSettings, recalculateAllTeamStats]); // Добавляем tournamentSettings и recalculateAllTeamStats в зависимости
 
   // --- UI ---
   const changeLanguage = (lang) => {
@@ -486,7 +450,7 @@ function App() {
           )}
         </div>
       );
-  }, [matches, teams, isLoading, t]); // Добавляем зависимости
+  }, [matches, teams, isLoading, t]); // Добавляем teams в зависимости
 
   const renderGroups = useCallback(() => {
      // ... (Код рендеринга групп, как в предыдущем ответе)
@@ -538,7 +502,7 @@ function App() {
                                      <td className="p-3 text-sm md:text-base text-center"><span className="inline-block w-8 h-8 rounded-full bg-[#0B8E8D]/20 text-[#06324F] font-bold flex items-center justify-center">{team.points || 0}</span></td>
                                      <td className="p-3 text-sm md:text-base text-center">{team.wins || 0}/{team.losses || 0}</td>
                                      <td className="p-3 text-sm md:text-base text-center"><span className="font-semibold text-green-600">{team.setsWon || 0}</span><span className="mx-1 text-gray-400">:</span><span className="font-semibold text-red-600">{team.setsLost || 0}</span></td>
-                                     <td className={`p-3 text-sm md:text-base text-center font-semibold ${(team.setsWon - team.setsLost) > 0 ? 'text-green-700' : (team.setsWon - team.setsLost) < 0 ? 'text-red-700' : 'text-gray-600'}`}>{(team.setsWon - team.setsLost) > 0 ? '+' : ''}{team.setsWon - team.setsLost || 0}</td>
+                                     <td className={`p-3 text-sm md:text-base font-semibold ${(team.setsWon - team.setsLost) > 0 ? 'text-green-700' : (team.setsWon - team.setsLost) < 0 ? 'text-red-700' : 'text-gray-600'}`}>{(team.setsWon - team.setsLost) > 0 ? '+' : ''}{team.setsWon - team.setsLost || 0}</td>
                                    </tr>
                                  ))}
                              </tbody>
@@ -552,7 +516,7 @@ function App() {
            )}
         </div>
        );
-  }, [teams, isLoading, t]); // Добавляем зависимости
+  }, [teams, isLoading, t]); // Добавляем teams в зависимости
 
   const renderMatchDetail = useCallback(() => {
     // ... (Код рендеринга деталей матча, как в предыдущем ответе)
@@ -644,7 +608,7 @@ function App() {
            </div>
          </div>
        );
-  }, [selectedMatch, matches, teams, t]); // Добавляем зависимости
+  }, [selectedMatch, matches, teams, t]); // Добавляем teams в зависимости
 
   const renderRulesModal = useCallback(() => {
     // ... (Код рендеринга модалки правил, как в предыдущем ответе)
@@ -706,14 +670,14 @@ function App() {
           </div>
         </div>
        );
-  }, [showRules, language, tournamentSettings, t]); // Добавляем зависимости
+  }, [showRules, language, tournamentSettings, t]); // Добавляем tournamentSettings в зависимости
 
   // --- Основной рендер компонента ---
   return (
     <>
       <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
         {/* Боковая панель */}
-        <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky top-0 z-20">
+        <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky top-0 z-20 border-t border-gray-200"> {/* Уменьшен z-index */}
            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
              <h1 className="text-xl font-bold text-[#06324F] flex items-center"><FaVolleyballBall className="mr-2 text-[#0B8E8D]" /> RVL</h1>
              <div className="flex space-x-1">
