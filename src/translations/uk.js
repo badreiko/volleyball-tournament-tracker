@@ -27,6 +27,9 @@ export const uk = {
   addressLabel: 'Адреса залу:',
   websiteLabel: 'Веб-сайт:',
   dateLabel: 'Дата:',
+  rules: 'Правила турніру',
+  showRules: 'Показати правила',
+  hideRules: 'Сховати правила',
   roundNames: {
     group: 'Груповий етап',
     quarterfinal: 'Чвертьфінал',

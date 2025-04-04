@@ -27,6 +27,9 @@ export const ru = {
   addressLabel: 'Адрес зала:',
   websiteLabel: 'Веб-сайт:',
   dateLabel: 'Дата:',
+  rules: 'Правила турнира',
+  showRules: 'Показать правила',
+  hideRules: 'Скрыть правила',
   roundNames: {
     group: 'Групповой этап',
     quarterfinal: 'Четвертьфинал',

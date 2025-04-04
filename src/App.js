@@ -60,6 +60,7 @@ function App() {
   const [view, setView] = useState('matches'); // matches, groups, matchDetail
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'cs');
+  const [showRules, setShowRules] = useState(false);
   
   // Получение текущих переводов
   const t = translations[language];
@@ -611,6 +612,12 @@ function App() {
           >
             <FaUsers className="mr-3" /> {t.groups}
           </button>
+          <button 
+            onClick={() => setShowRules(true)} 
+            className="flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 hover:bg-[#0B8E8D]/10 text-gray-700 mt-2"
+          >
+            <FaGlobe className="mr-3 text-[#FDD80F]" /> {t.rules}
+          </button>
         </div>
         
         <div className="absolute bottom-6 left-0 right-0 px-6">
@@ -659,6 +666,59 @@ function App() {
         </button>
       </nav>
     </div>
+    
+    {/* Модальное окно с правилами турнира */}
+    {showRules && (
+      <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-start justify-center p-4 z-50 backdrop-blur-sm overflow-y-auto">
+        <div className="bg-white rounded-xl shadow-2xl p-0 w-full max-w-4xl my-8 overflow-hidden">
+          {/* Шапка */}
+          <div className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] p-6 text-white sticky top-0 z-10">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">{t.rules}</h2>
+              <button 
+                onClick={() => setShowRules(false)}
+                className="text-white hover:text-[#FDD80F] transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          {/* Содержимое */}
+          <div className="p-6 max-h-[70vh] overflow-y-auto">
+            {language === 'cs' ? (
+              <div className="prose prose-sm max-w-none">
+                <pre className="whitespace-pre-wrap font-sans text-sm text-gray-800">{t.tournamentRules}</pre>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-8 text-center">
+                <FaGlobe className="text-5xl text-[#0B8E8D] mb-4" />
+                <p className="text-lg font-medium text-gray-700 mb-2">{t.rules}</p>
+                <p className="text-gray-600">Правила доступны только на чешском языке</p>
+                <button 
+                  onClick={() => setLanguage('cs')}
+                  className="mt-4 px-4 py-2 bg-[#0B8E8D] text-white rounded-lg hover:bg-[#0B8E8D]/90 transition-colors"
+                >
+                  Переключиться на чешский
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Кнопка закрытия */}
+          <div className="p-4 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+            <button 
+              onClick={() => setShowRules(false)}
+              className="w-full py-2 bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center"
+            >
+              <FaCheck className="mr-2" /> {t.hideRules}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 }
 
