@@ -133,8 +133,7 @@ function App() {
   }, [teams, matches, language, tournamentSettings]);
 
 
-  // --- Пересчет всей статистики команд ---
-  // --- Пересчет всей статистики команд ---
+// --- Пересчет всей статистики команд ---
 const recalculateAllTeamStats = useCallback((currentMatches) => {
   setTeams(prevBaseTeams => {
       let calculatedTeams = initialTeams.map(initialTeam => {
@@ -158,22 +157,17 @@ const recalculateAllTeamStats = useCallback((currentMatches) => {
           // Подсчитываем количество выигранных сетов для каждой команды
           let team1SetsWon = 0, team2SetsWon = 0;
           
-          // Учитываем первый сет
-          if (match.set1Team1 > match.set1Team2) team1SetsWon++;
-          else if (match.set1Team2 > match.set1Team1) team2SetsWon++;
+          // Учитываем первый сет (с правилом 25 очков)
+          if (match.set1Team1 >= 25 && match.set1Team1 > match.set1Team2) team1SetsWon++;
+          else if (match.set1Team2 >= 25 && match.set1Team2 > match.set1Team1) team2SetsWon++;
           
-          // Учитываем второй сет
-          if (match.set2Team1 > match.set2Team2) team1SetsWon++;
-          else if (match.set2Team2 > match.set2Team1) team2SetsWon++;
+          // Учитываем второй сет (с правилом 25 очков)
+          if (match.set2Team1 >= 25 && match.set2Team1 > match.set2Team2) team1SetsWon++;
+          else if (match.set2Team2 >= 25 && match.set2Team2 > match.set2Team1) team2SetsWon++;
           
           // Проверяем третий сет (тайбрейк)
-          let tiebreakWinner = null;
-          if (match.set3Team1 >= 5) tiebreakWinner = team1.code;
-          else if (match.set3Team2 >= 5) tiebreakWinner = team2.code;
-          
-          // Если есть победитель тайбрейка, считаем это как выигранный сет
-          if (tiebreakWinner === team1.code) team1SetsWon++;
-          else if (tiebreakWinner === team2.code) team2SetsWon++;
+          if (match.set3Team1 >= 5 && match.set3Team1 > match.set3Team2) team1SetsWon++;
+          else if (match.set3Team2 >= 5 && match.set3Team2 > match.set3Team1) team2SetsWon++;
           
           let team1Points = 0, team2Points = 0;
 
@@ -297,7 +291,18 @@ const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
         const oldStatus = match.status;
 
         // --- Логика определения статуса/победителя ---
-        // Проверка третьего сета (тайбрейка) - переместили в начало для приоритетной обработки
+        
+        // Проверка на достижение 25 очков в первых двух сетах
+        if (set === 1 && (set1Team1 >= 25 || set1Team2 >= 25)) {
+            // Если первый сет закончен, отмечаем это, но не завершаем весь матч
+            // Рассчитываем статус и победителя ниже в общей логике
+            updatedMatch.set1Completed = true;
+        } else if (set === 2 && (set2Team1 >= 25 || set2Team2 >= 25)) {
+            // Если второй сет закончен, отмечаем это
+            updatedMatch.set2Completed = true;
+        }
+        
+        // Проверка третьего сета (тайбрейка) - приоритетная обработка
         if (set === 3 || (set3Team1 > 0 || set3Team2 > 0)) {
             // Правило тайбрейка: победа просто при достижении 5 очков
             if (set3Team1 >= 5) {
@@ -315,31 +320,81 @@ const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
         } 
         // Финал имеет особые правила (до 2 побед из 3 сетов)
         else if (updatedMatch.round === 'final') {
-            let t1w=(set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0)+(set3Team1>set3Team2?1:0);
-            let t2w=(set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0)+(set3Team2>set3Team1?1:0);
-            if(t1w>=2){newWinner=updatedMatch.team1;newStatus='completed';}
-            else if(t2w>=2){newWinner=updatedMatch.team2;newStatus='completed';}
-            else if(hasScores){newWinner=null;newStatus='in_progress';}
-            else {newWinner=null;newStatus='not_started';}
+            // В финале проверяем победы по сетам
+            let team1Wins = 0, team2Wins = 0;
+            
+            // Проверяем первый сет
+            if (set1Team1 >= 25 && set1Team1 > set1Team2) team1Wins++;
+            else if (set1Team2 >= 25 && set1Team2 > set1Team1) team2Wins++;
+            
+            // Проверяем второй сет
+            if (set2Team1 >= 25 && set2Team1 > set2Team2) team1Wins++;
+            else if (set2Team2 >= 25 && set2Team2 > set2Team1) team2Wins++;
+            
+            // Проверяем третий сет (если есть)
+            if (set3Team1 > 0 || set3Team2 > 0) {
+                if (set3Team1 >= 15 && set3Team1 > set3Team2) team1Wins++;
+                else if (set3Team2 >= 15 && set3Team2 > set3Team1) team2Wins++;
+            }
+            
+            if (team1Wins >= 2) {
+                newWinner = updatedMatch.team1;
+                newStatus = 'completed';
+            } else if (team2Wins >= 2) {
+                newWinner = updatedMatch.team2;
+                newStatus = 'completed';
+            } else if (hasScores) {
+                newWinner = null;
+                newStatus = 'in_progress';
+            } else {
+                newWinner = null;
+                newStatus = 'not_started';
+            }
         } 
-        // Обычные матчи (до 2 сетов или до 1:1 + подсчет очков)
-        else if (set >= 2 || (set2Team1 > 0 || set2Team2 > 0)) {
-            let t1s=(set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0);
-            let t2s=(set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0);
-            if(t1s===2){newWinner=updatedMatch.team1;newStatus='completed';}
-            else if(t2s===2){newWinner=updatedMatch.team2;newStatus='completed';}
-            else if(t1s===1 && t2s===1){
-                if(useTotalPointsRule){
-                    const t1=set1Team1+set2Team1; const t2=set1Team2+set2Team2;
-                    if(t1>t2){newWinner=updatedMatch.team1;newStatus='completed_by_points';}
-                    else if(t2>t1){newWinner=updatedMatch.team2;newStatus='completed_by_points';}
-                    else{newWinner=null;newStatus='tie_needs_tiebreak';}
-                } else {newWinner=null;newStatus='tie_needs_tiebreak';}
-            } else if(hasScores){newWinner=null;newStatus='in_progress';}
-            else {newWinner=null;newStatus='not_started';}
-        } else if (set === 1 || (set1Team1 > 0 || set1Team2 > 0)) {
-            newWinner = null;
-            newStatus = hasScores ? 'in_progress' : 'not_started';
+        // Обычные матчи (проверяем победы по сетам с учетом правила 25 очков)
+        else {
+            // Проверяем победы в сетах с учетом правила 25 очков
+            let team1Wins = 0, team2Wins = 0;
+            
+            // Проверяем первый сет
+            if (set1Team1 >= 25 && set1Team1 > set1Team2) team1Wins++;
+            else if (set1Team2 >= 25 && set1Team2 > set1Team1) team2Wins++;
+            
+            // Проверяем второй сет
+            if (set2Team1 >= 25 && set2Team1 > set2Team2) team1Wins++;
+            else if (set2Team2 >= 25 && set2Team2 > set2Team1) team2Wins++;
+            
+            if (team1Wins === 2) {
+                newWinner = updatedMatch.team1;
+                newStatus = 'completed';
+            } else if (team2Wins === 2) {
+                newWinner = updatedMatch.team2;
+                newStatus = 'completed';
+            } else if (team1Wins === 1 && team2Wins === 1) {
+                if (useTotalPointsRule) {
+                    const team1TotalPoints = set1Team1 + set2Team1;
+                    const team2TotalPoints = set1Team2 + set2Team2;
+                    if (team1TotalPoints > team2TotalPoints) {
+                        newWinner = updatedMatch.team1;
+                        newStatus = 'completed_by_points';
+                    } else if (team2TotalPoints > team1TotalPoints) {
+                        newWinner = updatedMatch.team2;
+                        newStatus = 'completed_by_points';
+                    } else {
+                        newWinner = null;
+                        newStatus = 'tie_needs_tiebreak';
+                    }
+                } else {
+                    newWinner = null;
+                    newStatus = 'tie_needs_tiebreak';
+                }
+            } else if (hasScores) {
+                newWinner = null;
+                newStatus = 'in_progress';
+            } else {
+                newWinner = null;
+                newStatus = 'not_started';
+            }
         }
 
         if (newStatus !== 'not_started' && !hasScores) { newStatus = 'not_started'; newWinner = null; }
