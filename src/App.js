@@ -134,49 +134,80 @@ function App() {
 
 
   // --- Пересчет всей статистики команд ---
-  const recalculateAllTeamStats = useCallback((currentMatches) => {
-    setTeams(prevBaseTeams => {
-        let calculatedTeams = initialTeams.map(initialTeam => {
-            const currentBaseInfo = prevBaseTeams.find(pt => pt.code === initialTeam.code) || initialTeam;
-            return { ...currentBaseInfo, points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 };
-        });
+  // --- Пересчет всей статистики команд ---
+const recalculateAllTeamStats = useCallback((currentMatches) => {
+  setTeams(prevBaseTeams => {
+      let calculatedTeams = initialTeams.map(initialTeam => {
+          const currentBaseInfo = prevBaseTeams.find(pt => pt.code === initialTeam.code) || initialTeam;
+          return { ...currentBaseInfo, points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 };
+      });
 
-        const completedGroupMatches = currentMatches.filter(m =>
-            m.round === 'group' &&
-            (m.status === 'completed' || m.status === 'completed_by_points')
-        );
+      const completedGroupMatches = currentMatches.filter(m =>
+          m.round === 'group' &&
+          (m.status === 'completed' || m.status === 'completed_by_points' || m.winner !== null)
+      );
 
-        completedGroupMatches.forEach(match => {
-            const team1Index = calculatedTeams.findIndex(t => t.code === match.team1);
-            const team2Index = calculatedTeams.findIndex(t => t.code === match.team2);
-            if (team1Index === -1 || team2Index === -1) return;
+      completedGroupMatches.forEach(match => {
+          const team1Index = calculatedTeams.findIndex(t => t.code === match.team1);
+          const team2Index = calculatedTeams.findIndex(t => t.code === match.team2);
+          if (team1Index === -1 || team2Index === -1) return;
 
-            let team1 = calculatedTeams[team1Index];
-            let team2 = calculatedTeams[team2Index];
-            let team1SetsWon = (match.set1Team1 > match.set1Team2 ? 1 : 0) + (match.set2Team1 > match.set2Team2 ? 1 : 0);
-            let team2SetsWon = (match.set1Team2 > match.set1Team1 ? 1 : 0) + (match.set2Team2 > match.set2Team1 ? 1 : 0);
-            let team1Points = 0; let team2Points = 0;
+          let team1 = calculatedTeams[team1Index];
+          let team2 = calculatedTeams[team2Index];
+          
+          // Подсчитываем количество выигранных сетов для каждой команды
+          let team1SetsWon = 0, team2SetsWon = 0;
+          
+          // Учитываем первый сет
+          if (match.set1Team1 > match.set1Team2) team1SetsWon++;
+          else if (match.set1Team2 > match.set1Team1) team2SetsWon++;
+          
+          // Учитываем второй сет
+          if (match.set2Team1 > match.set2Team2) team1SetsWon++;
+          else if (match.set2Team2 > match.set2Team1) team2SetsWon++;
+          
+          // Проверяем третий сет (тайбрейк)
+          let tiebreakWinner = null;
+          if (match.set3Team1 >= 5) tiebreakWinner = team1.code;
+          else if (match.set3Team2 >= 5) tiebreakWinner = team2.code;
+          
+          // Если есть победитель тайбрейка, считаем это как выигранный сет
+          if (tiebreakWinner === team1.code) team1SetsWon++;
+          else if (tiebreakWinner === team2.code) team2SetsWon++;
+          
+          let team1Points = 0, team2Points = 0;
 
-            if (match.winner === team1.code) {
-                team1Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 3 : 2;
-                team2Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 0 : 1;
-                team1.wins += 1; team2.losses += 1;
-            } else if (match.winner === team2.code) {
-                team2Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 3 : 2;
-                team1Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 0 : 1;
-                team2.wins += 1; team1.losses += 1;
-            }
+          // Определяем победителя матча и начисляем очки
+          if (match.winner === team1.code) {
+              // 3 очка за "сухую" победу 2:0
+              // 2 очка за победу с тайбрейком или по сумме очков
+              team1Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 3 : 2;
+              team2Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 0 : 1;
+              team1.wins += 1; 
+              team2.losses += 1;
+          } else if (match.winner === team2.code) {
+              team2Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 3 : 2;
+              team1Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 0 : 1;
+              team2.wins += 1; 
+              team1.losses += 1;
+          }
 
-            team1.points += team1Points; team1.setsWon += team1SetsWon; team1.setsLost += team2SetsWon;
-            team2.points += team2Points; team2.setsWon += team2SetsWon; team2.setsLost += team1SetsWon;
+          // Обновляем статистику команд
+          team1.points += team1Points; 
+          team1.setsWon += team1SetsWon; 
+          team1.setsLost += team2SetsWon;
+          team2.points += team2Points; 
+          team2.setsWon += team2SetsWon; 
+          team2.setsLost += team1SetsWon;
 
-            calculatedTeams[team1Index] = team1;
-            calculatedTeams[team2Index] = team2;
-        });
-        console.log("Recalculated team stats", calculatedTeams);
-        return calculatedTeams;
-    });
-  }, []);
+          calculatedTeams[team1Index] = team1;
+          calculatedTeams[team2Index] = team2;
+      });
+      
+      console.log("Recalculated team stats", calculatedTeams);
+      return calculatedTeams;
+  });
+}, []);
 
 
   // --- Обновление плей-офф команд ---
