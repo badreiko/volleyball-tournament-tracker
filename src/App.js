@@ -38,10 +38,10 @@ const initialMatches = [
   { id: 'C2-C3', court: 3, time: '12:20', team1: 'C2', team2: 'C3', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
   
   // Четвертьфиналы
-  { id: 'QF-1A-2B', court: 1, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
-  { id: 'QF-1B-2A', court: 2, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
-  { id: 'QF-1C-WC', court: 1, time: '13:40', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
-  { id: 'QF-2C-3B', court: 2, time: '13:40', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  { id: 'QF-1A-1C', court: 1, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  { id: 'QF-1B-2C', court: 2, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  { id: 'QF-2A-3B', court: 1, time: '13:40', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
+  { id: 'QF-3A-2B', court: 2, time: '13:40', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal' },
   
   // Полуфиналы
   { id: 'SF-W1-W3', court: 1, time: '14:20', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'semifinal' },
@@ -80,13 +80,46 @@ function App() {
           const updatedMatch = { ...match };
           updatedMatch[`set${set}${team === 'team1' ? 'Team1' : 'Team2'}`] = parseInt(score) || 0;
           if ((set === 2 && match.round !== 'final') || (set === 3 && match.round === 'final')) {
-            const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
-            let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0) + (set3Team1 > set3Team2 ? 1 : 0);
-            let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0) + (set3Team2 > set3Team1 ? 1 : 0);
-            if (team1Sets === 2) { updatedMatch.winner = match.team1; updatedMatch.status = 'completed'; }
-            else if (team2Sets === 2) { updatedMatch.winner = match.team2; updatedMatch.status = 'completed'; }
-            else if (team1Sets === 1 && team2Sets === 1 && match.round !== 'final') updatedMatch.status = 'tie';
-            if (updatedMatch.status === 'completed' || updatedMatch.status === 'tie') updateTeamStats(updatedMatch);
+          const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
+          
+          if (match.round === 'final') {
+            // Для финала: нужно выиграть 2 сета (до 2 побед)
+            let team1Wins = (set1Team1 > set1Team2 ? 1 : 0) + 
+                           (set2Team1 > set2Team2 ? 1 : 0) + 
+                           (set3Team1 > set3Team2 ? 1 : 0);
+            let team2Wins = (set1Team2 > set1Team1 ? 1 : 0) + 
+                           (set2Team2 > set2Team1 ? 1 : 0) + 
+                           (set3Team2 > set3Team1 ? 1 : 0);
+            
+            if (team1Wins >= 2) { 
+              updatedMatch.winner = match.team1; 
+              updatedMatch.status = 'completed'; 
+            }
+            else if (team2Wins >= 2) { 
+              updatedMatch.winner = match.team2; 
+              updatedMatch.status = 'completed'; 
+            }
+          } else {
+            // Для обычных матчей: учитываем только 2 сета
+            let team1Sets = (set1Team1 > set1Team2 ? 1 : 0) + (set2Team1 > set2Team2 ? 1 : 0);
+            let team2Sets = (set1Team2 > set1Team1 ? 1 : 0) + (set2Team2 > set2Team1 ? 1 : 0);
+            
+            if (team1Sets === 2) { 
+              updatedMatch.winner = match.team1; 
+              updatedMatch.status = 'completed'; 
+            }
+            else if (team2Sets === 2) { 
+              updatedMatch.winner = match.team2; 
+              updatedMatch.status = 'completed'; 
+            }
+            else if (team1Sets === 1 && team2Sets === 1) {
+              updatedMatch.status = 'tie';
+            }
+          }
+          
+          if (updatedMatch.status === 'completed' || updatedMatch.status === 'tie') {
+            updateTeamStats(updatedMatch);
+          }
           }
           return updatedMatch;
         }
@@ -138,22 +171,22 @@ function App() {
         const updatedMatch = { ...match };
         
         // Заполняем четвертьфиналы
-        if (match.id === 'QF-1A-2B') { 
-          updatedMatch.team1 = groupRankings['A'][0]?.code; 
-          updatedMatch.team2 = groupRankings['B'][1]?.code; 
-        }
-        else if (match.id === 'QF-1B-2A') { 
-          updatedMatch.team1 = groupRankings['B'][0]?.code; 
-          updatedMatch.team2 = groupRankings['A'][1]?.code; 
-        }
-        else if (match.id === 'QF-1C-WC') { 
-          updatedMatch.team1 = groupRankings['C'][0]?.code; 
-          updatedMatch.team2 = wildcard; 
-        }
-        else if (match.id === 'QF-2C-3B') { 
-          updatedMatch.team1 = groupRankings['C'][1]?.code; 
-          updatedMatch.team2 = groupRankings['B'][2]?.code; 
-        }
+      if (match.id === 'QF-1A-1C') { 
+        updatedMatch.team1 = groupRankings['A'][0]?.code; 
+        updatedMatch.team2 = groupRankings['C'][0]?.code; 
+      }
+      else if (match.id === 'QF-1B-2C') { 
+        updatedMatch.team1 = groupRankings['B'][0]?.code; 
+        updatedMatch.team2 = groupRankings['C'][1]?.code; 
+      }
+      else if (match.id === 'QF-2A-3B') { 
+        updatedMatch.team1 = groupRankings['A'][1]?.code; 
+        updatedMatch.team2 = groupRankings['B'][2]?.code; 
+      }
+      else if (match.id === 'QF-3A-2B') { 
+        updatedMatch.team1 = groupRankings['A'][2]?.code; 
+        updatedMatch.team2 = groupRankings['B'][1]?.code; 
+      }
         
         // Если обе команды определены, меняем статус на 'not_started'
         if (updatedMatch.team1 && updatedMatch.team2) {
@@ -169,14 +202,14 @@ function App() {
         const completedQuarterfinals = updatedMatches.filter(m => m.round === 'quarterfinal' && m.status === 'completed');
         
         if (match.id === 'SF-W1-W3') {
-          const qf1 = completedQuarterfinals.find(m => m.id === 'QF-1A-2B');
-          const qf3 = completedQuarterfinals.find(m => m.id === 'QF-1C-WC');
+          const qf1 = completedQuarterfinals.find(m => m.id === 'QF-1A-1C');
+          const qf3 = completedQuarterfinals.find(m => m.id === 'QF-2A-3B');
           if (qf1?.winner) updatedMatch.team1 = qf1.winner;
           if (qf3?.winner) updatedMatch.team2 = qf3.winner;
         }
         else if (match.id === 'SF-W2-W4') {
-          const qf2 = completedQuarterfinals.find(m => m.id === 'QF-1B-2A');
-          const qf4 = completedQuarterfinals.find(m => m.id === 'QF-2C-3B');
+          const qf2 = completedQuarterfinals.find(m => m.id === 'QF-1B-2C');
+          const qf4 = completedQuarterfinals.find(m => m.id === 'QF-3A-2B');
           if (qf2?.winner) updatedMatch.team1 = qf2.winner;
           if (qf4?.winner) updatedMatch.team2 = qf4.winner;
         }
@@ -563,39 +596,30 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 flex flex-col">
-      {/* Шапка */}
-      <header className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white p-4 flex justify-between items-center shadow-lg">
-        <h1 className="text-xl md:text-2xl font-bold flex items-center">
-          <FaVolleyballBall className="mr-3 animate-spin-slow" /> 
-          {t.appTitle}
-        </h1>
-        <div className="flex items-center space-x-2">
-          <FaGlobe className="text-white" />
-          <select 
-            value={language} 
-            onChange={(e) => changeLanguage(e.target.value)}
-            className="bg-transparent text-white border border-white rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white"
-          >
-            {Object.keys(languageNames).map(lang => (
-              <option key={lang} value={lang} className="bg-[#06324F] text-white">
+  <>
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+      {/* Боковая панель */}
+      <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky top-0 z-20">
+        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h1 className="text-xl font-bold text-[#06324F] flex items-center">
+            <FaVolleyballBall className="mr-2 text-[#0B8E8D]" /> RVL
+          </h1>
+          <div className="flex space-x-2">
+            {Object.keys(translations).map(lang => (
+              <button
+                key={lang}
+                onClick={() => changeLanguage(lang)}
+                className={`px-2 py-1 text-xs rounded ${language === lang 
+                  ? 'bg-[#0B8E8D] text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              >
                 {languageNames[lang]}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
-      </header>
-
-      {/* Основной контент */}
-      <main className="flex-1 md:ml-64 p-2">
-        {view === 'matches' && renderMatches()}
-        {view === 'groups' && renderGroups()}
-        {view === 'matchDetail' && renderMatchDetail()}
-      </main>
-
-      {/* Боковое меню для десктопов */}
-      <aside className="hidden md:block w-64 bg-white shadow-xl p-6 fixed top-16 bottom-0 left-0 z-10">
-        <div className="space-y-2">
+        
+        <div className="p-4 space-y-2">
           <button 
             onClick={() => setView('matches')} 
             className={`flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 ${view === 'matches' 
@@ -620,7 +644,7 @@ function App() {
           </button>
         </div>
         
-        <div className="absolute bottom-6 left-0 right-0 px-6">
+        <div className="md:absolute md:bottom-6 md:left-0 md:right-0 px-6 mt-4 md:mt-0 hidden md:block">
           <div className="bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-4 rounded-lg shadow-sm border border-[#0B8E8D]/20">
             <h3 className="text-sm font-semibold text-[#06324F] mb-2">{t.tournamentInfo}</h3>
             <div className="text-xs text-gray-700 space-y-2">
@@ -647,22 +671,58 @@ function App() {
           </div>
         </div>
       </aside>
+      
+      {/* Основной контент */}
+      <main className="flex-1 p-0 md:p-6 pb-20 md:pb-6">
+        {view === 'matches' && renderMatches()}
+        {view === 'groups' && renderGroups()}
+        {view === 'matchDetail' && renderMatchDetail()}
+        
+        {/* Информация о турнире для мобильных устройств */}
+        <div className="md:hidden p-4 mx-4 mt-4 mb-24 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 rounded-lg shadow-sm border border-[#0B8E8D]/20">
+          <h3 className="text-sm font-semibold text-[#06324F] mb-2">{t.tournamentInfo}</h3>
+          <div className="text-xs text-gray-700 space-y-2">
+            <p className="flex items-center">
+              <FaCalendarAlt className="mr-2 text-[#FDD80F]" />
+              <span className="font-semibold">{t.dateLabel}</span> {t.tournamentDate}
+            </p>
+            <p className="flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-[#0B8E8D]" />
+              <span className="font-semibold">{t.addressLabel}</span> {t.tournamentAddress}
+            </p>
+            <p className="flex items-center">
+              <FaLink className="mr-2 text-[#06324F]" />
+              <span className="font-semibold">{t.websiteLabel}</span> 
+              <a href={t.tournamentWebsite} target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] ml-1 hover:underline">
+                {t.tournamentWebsite}
+              </a>
+            </p>
+          </div>
+        </div>
+      </main>
 
       {/* Нижняя навигация для мобильных */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 flex justify-around md:hidden z-10">
         <button 
           onClick={() => setView('matches')} 
-          className={`p-2 flex flex-col items-center ${view === 'matches' ? 'text-indigo-600 font-semibold' : 'text-gray-600'}`}
+          className={`p-2 flex flex-col items-center ${view === 'matches' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600'}`}
         >
           <FaVolleyballBall className="text-xl mb-1" />
           <span className="text-xs">{t.matches}</span>
         </button>
         <button 
           onClick={() => setView('groups')} 
-          className={`p-2 flex flex-col items-center ${view === 'groups' ? 'text-indigo-600 font-semibold' : 'text-gray-600'}`}
+          className={`p-2 flex flex-col items-center ${view === 'groups' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600'}`}
         >
           <FaUsers className="text-xl mb-1" />
           <span className="text-xs">{t.groups}</span>
+        </button>
+        <button 
+          onClick={() => setShowRules(true)} 
+          className={`p-2 flex flex-col items-center text-gray-600`}
+        >
+          <FaGlobe className="text-xl mb-1 text-[#FDD80F]" />
+          <span className="text-xs">{t.rules}</span>
         </button>
       </nav>
     </div>
@@ -719,7 +779,8 @@ function App() {
         </div>
       </div>
     )}
-  );
+  </>
+);
 }
 
 export default App;
