@@ -273,28 +273,29 @@ function App() {
                  else if(hasScores){newWinner=null;newStatus='in_progress';}
                  else {newWinner=null;newStatus='not_started';}
             } else if (oldStatus === 'tie_needs_tiebreak' && set === 3) {
-                 console.log('Тайбрейк:', 'Счёт', set3Team1, '-', set3Team2); // Логируем текущий счёт
-                 // Улучшенная логика: Победа при достижении 5 очков с отрывом
-                 if ((set3Team1 >= 5 && set3Team1 >= set3Team2 + 1) || 
-                     (set3Team1 === 5 && set3Team2 < 5)) {
-                     console.log('Команда 1 победила в тайбрейке');
-                     newWinner = match.team1; 
-                     newStatus = 'completed';
-                 } else if ((set3Team2 >= 5 && set3Team2 >= set3Team1 + 1) || 
-                            (set3Team2 === 5 && set3Team1 < 5)) {
-                     console.log('Команда 2 победила в тайбрейке');
-                     newWinner = match.team2; 
-                     newStatus = 'completed';
-                 } else if (set3Team1 > 5 || set3Team2 > 5) {
-                     // Если кто-то набрал > 5, но не выиграл
-                     newWinner = null; 
-                     newStatus = 'tie_needs_tiebreak';
-                     console.warn("Tiebreak score exceeds 5 points");
-                 } else {
-                     // Счет меньше 5 или некорректный ввод
-                     newWinner = null; 
-                     newStatus = 'tie_needs_tiebreak';
-                 }
+                // Исправление логики тайбрейка: победа только при счете 5-x
+                const score1 = updatedMatch.set3Team1;
+                const score2 = updatedMatch.set3Team2;
+
+                // Победа засчитывается СТРОГО при счете 5-x, где x < 5
+                if (score1 === 5 && score1 > score2) {
+                    newWinner = updatedMatch.team1;
+                    newStatus = 'completed';
+                } else if (score2 === 5 && score2 > score1) {
+                    newWinner = updatedMatch.team2;
+                    newStatus = 'completed';
+                } else {
+                    // Если счет не 5-x (например, 4-4, 5-5, или был введен счет > 5),
+                    // то матч не завершен по правилу "до 5"
+                    newWinner = null;
+                    newStatus = 'tie_needs_tiebreak';
+                    if (score1 > 5 || score2 > 5) {
+                         console.warn("Введен счет тайбрейка > 5. Победа только при счете 5-x (x < 5).");
+                         // Можно опционально сбросить введенный счет > 5 обратно к 5,
+                         // но лучше оставить как есть и не завершать матч,
+                         // пока не будет введен корректный финальный счет (5-0..5-4)
+                    }
+                }
             } else if (set >= 2 && updatedMatch.round !== 'final') {
                  let t1s=(set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0);
                  let t2s=(set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0);
