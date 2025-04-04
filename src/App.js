@@ -273,9 +273,23 @@ function App() {
                  else if(hasScores){newWinner=null;newStatus='in_progress';}
                  else {newWinner=null;newStatus='not_started';}
             } else if (oldStatus === 'tie_needs_tiebreak' && set === 3) {
-                 if(set3Team1>=5 && set3Team1>=set3Team2+1){newWinner=updatedMatch.team1;newStatus='completed';}
-                 else if(set3Team2>=5 && set3Team2>=set3Team1+1){newWinner=updatedMatch.team2;newStatus='completed';}
-                 else {newWinner=null;newStatus='tie_needs_tiebreak';}
+                 // Новая логика: Первый до 5 побеждает
+                 if (set3Team1 === 5 && set3Team1 > set3Team2) {
+                     newWinner = match.team1; 
+                     newStatus = 'completed';
+                 } else if (set3Team2 === 5 && set3Team2 > set3Team1) {
+                     newWinner = match.team2; 
+                     newStatus = 'completed';
+                 } else if (set3Team1 > 5 || set3Team2 > 5) {
+                     // Если кто-то набрал > 5, но не выиграл
+                     newWinner = null; 
+                     newStatus = 'tie_needs_tiebreak';
+                     console.warn("Tiebreak score exceeds 5 points");
+                 } else {
+                     // Счет меньше 5 или некорректный ввод
+                     newWinner = null; 
+                     newStatus = 'tie_needs_tiebreak';
+                 }
             } else if (set >= 2 && updatedMatch.round !== 'final') {
                  let t1s=(set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0);
                  let t2s=(set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0);
@@ -529,9 +543,23 @@ function App() {
                         {currentStatus === 'tie_needs_tiebreak' ? t.tiebreak : t.set3} {currentStatus === 'tie_needs_tiebreak' && ` (${t.tiebreak_condition || 'до 5'})`}
                       </label>
                       <div className="flex items-center justify-between">
-                        <input type="number" min="0" defaultValue={currentMatchData.set3Team1 ?? 0} onBlur={(e) => updateMatchScore(currentMatchData.id, 3, 'team1', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
+                        <input
+                          type="number"
+                          min="0"
+                          max="5"
+                          defaultValue={currentMatchData.set3Team1 ?? 0}
+                          onBlur={(e) => updateMatchScore(currentMatchData.id, 3, 'team1', e.target.value)}
+                          className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`}
+                        />
                         <span className="text-gray-400 text-xl font-bold">:</span>
-                        <input type="number" min="0" defaultValue={currentMatchData.set3Team2 ?? 0} onBlur={(e) => updateMatchScore(currentMatchData.id, 3, 'team2', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
+                        <input
+                          type="number"
+                          min="0"
+                          max="5"
+                          defaultValue={currentMatchData.set3Team2 ?? 0}
+                          onBlur={(e) => updateMatchScore(currentMatchData.id, 3, 'team2', e.target.value)}
+                          className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`}
+                        />
                       </div>
                     </div>
                   )}
