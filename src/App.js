@@ -177,79 +177,102 @@ function App() {
                 );
         });
     
-        const allGroupMatchesCompleted = currentMatches
-            .filter(m => m.round === 'group')
-            .every(m => m.status === 'completed' || m.status === 'completed_by_points');
-    
-        if (!allGroupMatchesCompleted) return;
-    
-        setMatches(prevMatches => {
-            const updatedMatchesArray = prevMatches.map(match => {
-                if (match.round === 'group') return match;
-    
-                const updatedMatch = { ...match };
-                let team1Code = null;
-                let team2Code = null;
-    
-                switch (match.id) {
-                    case 'QF-1A-1C':
-                        team1Code = groupRankings['A'][0]?.code;
-                        team2Code = groupRankings['C'][0]?.code;
-                        break;
-                    case 'QF-1B-2C':
-                        team1Code = groupRankings['B'][0]?.code;
-                        team2Code = groupRankings['C'][1]?.code;
-                        break;
-                    case 'QF-2A-3B':
-                        team1Code = groupRankings['A'][1]?.code;
-                        team2Code = groupRankings['B'][2]?.code;
-                        break;
-                    case 'QF-3A-2B':
-                        team1Code = groupRankings['A'][2]?.code;
-                        team2Code = groupRankings['B'][1]?.code;
-                        break;
-                    case 'SF-W1-W3':
-                        const qf1 = currentMatches.find(m => m.id === 'QF-1A-1C');
-                        const qf3 = currentMatches.find(m => m.id === 'QF-2A-3B');
-                        team1Code = qf1?.winner;
-                        team2Code = qf3?.winner;
-                        break;
-                    case 'SF-W2-W4':
-                        const qf2 = currentMatches.find(m => m.id === 'QF-1B-2C');
-                        const qf4 = currentMatches.find(m => m.id === 'QF-3A-2B');
-                        team1Code = qf2?.winner;
-                        team2Code = qf4?.winner;
-                        break;
-                    case 'F-W1-W2':
-                        const sf1 = currentMatches.find(m => m.id === 'SF-W1-W3');
-                        const sf2 = currentMatches.find(m => m.id === 'SF-W2-W4');
-                        team1Code = sf1?.winner;
-                        team2Code = sf2?.winner;
-                        break;
-                    case 'F3-L1-L2':
-                        const sf1Loser = currentMatches.find(m => m.id === 'SF-W1-W3');
-                        const sf2Loser = currentMatches.find(m => m.id === 'SF-W2-W4');
-                        team1Code = sf1Loser?.winner === sf1Loser?.team1 ? sf1Loser?.team2 : sf1Loser?.team1;
-                        team2Code = sf2Loser?.winner === sf2Loser?.team1 ? sf2Loser?.team2 : sf2Loser?.team1;
-                        break;
-                    default:
-                        return match;
-                }
-    
-                if (team1Code && team2Code && (updatedMatch.team1 !== team1Code || updatedMatch.team2 !== team2Code)) {
-                    updatedMatch.team1 = team1Code;
-                    updatedMatch.team2 = team2Code;
-                    if (updatedMatch.status === 'waiting') {
-                        updatedMatch.status = 'not_started';
-                    }
-                }
-    
-                return updatedMatch;
+        const updatePlayoffTeams = useCallback((currentMatches, currentTeams) => {
+            const groupRankings = {};
+            ['A', 'B', 'C'].forEach(group => {
+                groupRankings[group] = [...currentTeams]
+                    .filter(t => t.group === group)
+                    .sort((a, b) => 
+                        b.points - a.points || 
+                        (b.setsWon - b.setsLost) - (a.setsWon - a.setsLost) || 
+                        b.setsWon - a.setsWon || 
+                        a.name.localeCompare(b.name)
+                    );
             });
-    
-            return updatedMatchesArray;
-        });
-    }, []);
+        
+            setMatches(prevMatches => {
+                let changed = false;
+                const updatedMatchesArray = prevMatches.map(match => {
+                    if (match.round === 'group') return match;
+        
+                    const updatedMatch = { ...match };
+                    let team1Code = null;
+                    let team2Code = null;
+        
+                    switch (match.id) {
+                        case 'QF-1A-1C':
+                            team1Code = groupRankings['A'][0]?.code;
+                            team2Code = groupRankings['C'][0]?.code;
+                            break;
+                        case 'QF-1B-2C':
+                            team1Code = groupRankings['B'][0]?.code;
+                            team2Code = groupRankings['C'][1]?.code;
+                            break;
+                        case 'QF-2A-3B':
+                            team1Code = groupRankings['A'][1]?.code;
+                            team2Code = groupRankings['B'][2]?.code;
+                            break;
+                        case 'QF-3A-2B':
+                            team1Code = groupRankings['A'][2]?.code;
+                            team2Code = groupRankings['B'][1]?.code;
+                            break;
+                        case 'SF-W1-W3':
+                            const qf1 = prevMatches.find(m => m.id === 'QF-1A-1C');
+                            const qf3 = prevMatches.find(m => m.id === 'QF-2A-3B');
+                            team1Code = qf1?.winner || null;
+                            team2Code = qf3?.winner || null;
+                            break;
+                        case 'SF-W2-W4':
+                            const qf2 = prevMatches.find(m => m.id === 'QF-1B-2C');
+                            const qf4 = prevMatches.find(m => m.id === 'QF-3A-2B');
+                            team1Code = qf2?.winner || null;
+                            team2Code = qf4?.winner || null;
+                            break;
+                        case 'F-W1-W2':
+                            const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3');
+                            const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4');
+                            team1Code = sf1?.winner || null;
+                            team2Code = sf2?.winner || null;
+                            break;
+                        case 'F3-L1-L2':
+                            const sf1Loser = prevMatches.find(m => m.id === 'SF-W1-W3');
+                            const sf2Loser = prevMatches.find(m => m.id === 'SF-W2-W4');
+                            team1Code = sf1Loser?.winner && sf1Loser.team1 && sf1Loser.team2 
+                                ? (sf1Loser.winner === sf1Loser.team1 ? sf1Loser.team2 : sf1Loser.team1) 
+                                : null;
+                            team2Code = sf2Loser?.winner && sf2Loser.team1 && sf2Loser.team2 
+                                ? (sf2Loser.winner === sf2Loser.team1 ? sf2Loser.team2 : sf2Loser.team1) 
+                                : null;
+                            break;
+                        default:
+                            return match;
+                    }
+        
+                    if (team1Code !== updatedMatch.team1 || team2Code !== updatedMatch.team2) {
+                        updatedMatch.team1 = team1Code;
+                        updatedMatch.team2 = team2Code;
+                        changed = true;
+        
+                        if (team1Code && team2Code && updatedMatch.status === 'waiting') {
+                            updatedMatch.status = 'not_started';
+                        } else if ((!team1Code || !team2Code) && updatedMatch.status !== 'waiting') {
+                            updatedMatch.status = 'waiting';
+                            updatedMatch.set1Team1 = 0;
+                            updatedMatch.set1Team2 = 0;
+                            updatedMatch.set2Team1 = 0;
+                            updatedMatch.set2Team2 = 0;
+                            updatedMatch.set3Team1 = 0;
+                            updatedMatch.set3Team2 = 0;
+                            updatedMatch.winner = null;
+                        }
+                    }
+        
+                    return updatedMatch;
+                });
+        
+                return changed ? updatedMatchesArray : prevMatches;
+            });
+        }, []);
 
     const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
         const score = parseInt(scoreStr) || 0;
