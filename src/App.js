@@ -158,13 +158,6 @@ function App() {
       groupRankings[group] = teams.filter(t => t.group === group).sort((a, b) => b.points - a.points || b.setsWon - a.setsWon);
     });
     
-    // Находим лучшие команды для плей-офф
-    const thirdPlaceTeams = [
-      groupRankings['A'][2],
-      groupRankings['B'][2],
-      groupRankings['C'][2]
-    ].filter(Boolean).sort((a, b) => b.points - a.points || b.setsWon - a.setsWon);
-    
     setMatches(prevMatches => prevMatches.map(match => {
       if (match.round === 'quarterfinal') {
         const updatedMatch = { ...match };
