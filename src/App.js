@@ -165,6 +165,9 @@ function App() {
     }, []);
 
     const updatePlayoffTeams = useCallback((currentMatches, currentTeams) => {
+        console.log("Запуск updatePlayoffTeams...");
+        console.log("Текущие команды:", currentTeams);
+    
         // Формируем рейтинги команд в группах
         const groupRankings = {};
         ['A', 'B', 'C'].forEach(group => {
@@ -176,6 +179,7 @@ function App() {
                     b.setsWon - a.setsWon || 
                     a.name.localeCompare(b.name)
                 );
+            console.log(`Ранжирование группы ${group}:`, groupRankings[group].map(t => `${t.code}: ${t.name} (${t.points} очков)`));
         });
     
         // Проверяем завершение всех групповых матчей
@@ -183,6 +187,8 @@ function App() {
         const allGroupMatchesCompleted = groupMatches.every(m => 
             m.status === 'completed' || m.status === 'completed_by_points'
         );
+        console.log("Групповые матчи:", groupMatches.length, "Завершены:", allGroupMatchesCompleted);
+        console.log("Статусы групповых матчей:", groupMatches.map(m => ({ id: m.id, status: m.status })));
     
         setMatches(prevMatches => {
             let changed = false;
@@ -193,42 +199,49 @@ function App() {
                 let team1Code = null;
                 let team2Code = null;
     
-                // Определяем команды только если групповой этап завершен
+                // Определяем команды для матча
                 if (allGroupMatchesCompleted || match.round !== 'quarterfinal') {
                     switch (match.id) {
                         case 'QF-1A-1C':
-                            team1Code = groupRankings['A']?.[0]?.code;
-                            team2Code = groupRankings['C']?.[0]?.code;
+                            team1Code = groupRankings['A']?.[0]?.code || null;
+                            team2Code = groupRankings['C']?.[0]?.code || null;
+                            console.log(`QF-1A-1C: ${team1Code} vs ${team2Code}`);
                             break;
                         case 'QF-1B-2C':
-                            team1Code = groupRankings['B']?.[0]?.code;
-                            team2Code = groupRankings['C']?.[1]?.code;
+                            team1Code = groupRankings['B']?.[0]?.code || null;
+                            team2Code = groupRankings['C']?.[1]?.code || null;
+                            console.log(`QF-1B-2C: ${team1Code} vs ${team2Code}`);
                             break;
                         case 'QF-2A-3B':
-                            team1Code = groupRankings['A']?.[1]?.code;
-                            team2Code = groupRankings['B']?.[2]?.code;
+                            team1Code = groupRankings['A']?.[1]?.code || null;
+                            team2Code = groupRankings['B']?.[2]?.code || null;
+                            console.log(`QF-2A-3B: ${team1Code} vs ${team2Code}`);
                             break;
                         case 'QF-3A-2B':
-                            team1Code = groupRankings['A']?.[2]?.code;
-                            team2Code = groupRankings['B']?.[1]?.code;
+                            team1Code = groupRankings['A']?.[2]?.code || null;
+                            team2Code = groupRankings['B']?.[1]?.code || null;
+                            console.log(`QF-3A-2B: ${team1Code} vs ${team2Code}`);
                             break;
                         case 'SF-W1-W3':
                             const qf1 = prevMatches.find(m => m.id === 'QF-1A-1C');
                             const qf3 = prevMatches.find(m => m.id === 'QF-2A-3B');
                             team1Code = qf1?.winner || null;
                             team2Code = qf3?.winner || null;
+                            console.log(`SF-W1-W3: ${team1Code} vs ${team2Code}`);
                             break;
                         case 'SF-W2-W4':
                             const qf2 = prevMatches.find(m => m.id === 'QF-1B-2C');
                             const qf4 = prevMatches.find(m => m.id === 'QF-3A-2B');
                             team1Code = qf2?.winner || null;
                             team2Code = qf4?.winner || null;
+                            console.log(`SF-W2-W4: ${team1Code} vs ${team2Code}`);
                             break;
                         case 'F-W1-W2':
                             const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3');
                             const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4');
                             team1Code = sf1?.winner || null;
                             team2Code = sf2?.winner || null;
+                            console.log(`F-W1-W2: ${team1Code} vs ${team2Code}`);
                             break;
                         case 'F3-L1-L2':
                             const sf1m = prevMatches.find(m => m.id === 'SF-W1-W3');
@@ -239,6 +252,7 @@ function App() {
                             team2Code = sf2m?.winner && sf2m.team1 && sf2m.team2 
                                 ? (sf2m.winner === sf2m.team1 ? sf2m.team2 : sf2m.team1) 
                                 : null;
+                            console.log(`F3-L1-L2: ${team1Code} vs ${team2Code}`);
                             break;
                         default:
                             return match;
@@ -252,6 +266,7 @@ function App() {
                         updatedMatch.team2 = team2Code;
                         if (updatedMatch.status === 'waiting') {
                             updatedMatch.status = 'not_started';
+                            console.log(`Матч ${match.id} переведен в not_started: ${team1Code} vs ${team2Code}`);
                         }
                         changed = true;
                     }
@@ -267,11 +282,17 @@ function App() {
                     updatedMatch.set3Team2 = 0;
                     updatedMatch.winner = null;
                     changed = true;
+                    console.log(`Матч ${match.id} переведен в waiting`);
                 }
     
                 return updatedMatch;
             });
     
+            if (changed) {
+                console.log("Матчи обновлены:", updatedMatchesArray.filter(m => m.round !== 'group'));
+            } else {
+                console.log("Обновление матчей не требуется");
+            }
             return changed ? updatedMatchesArray : prevMatches;
         });
     }, []);
