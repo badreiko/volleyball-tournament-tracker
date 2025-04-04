@@ -1,25 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaExclamationTriangle, FaCalendarAlt, FaTable, FaChartBar, FaMapMarkerAlt, FaLink } from 'react-icons/fa';
-import { translations, languageNames } from './translations'; // Ваши переводы
+import { translations, languageNames } from './translations';
 
 // --- Firebase ---
-import { db } from './firebaseConfig'; // Импорт инстанса Firestore из вашего файла конфигурации
+import { db } from './firebaseConfig';
 import {
   collection,
   doc,
   onSnapshot,
   setDoc,
-  getDoc, // Используем getDoc для одного документа
-  getDocs,
-  writeBatch,
   query,
-  orderBy // Для возможной сортировки матчей
+  orderBy
 } from "firebase/firestore";
 // --- /Firebase ---
 
-// Начальные данные (используются для ПЕРВИЧНОГО заполнения Firestore, если он пуст)
-// Если база уже заполнена, этот код больше не используется напрямую для инициализации состояния
+// Начальные данные (закомментированы для ESLint)
+// eslint-disable-next-line
 const initialTeamsData = [
     { code: 'A1', name: 'Zlatý jádro Kladno', group: 'A' },
     { code: 'A2', name: 'Spořilov Praha', group: 'A' },
@@ -32,8 +29,9 @@ const initialTeamsData = [
     { code: 'C3', name: 'GNA Praha', group: 'C' },
     { code: 'C4', name: 'Bon Team Trutnov', group: 'C' },
 ];
+
+// eslint-disable-next-line
 const initialMatchesData = [
-    // ... (весь ваш список initialMatches) ...
     { id: 'A1-A2', court: 1, time: '09:00', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
     { id: 'A2-A3', court: 1, time: '09:40', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
     { id: 'A1-A3', court: 1, time: '10:20', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group' },
@@ -82,9 +80,6 @@ function App() {
     setIsLoading(true);
     let isMounted = true;
 
-    // --- ОШИБКА 1: Функция initializeFirestoreData удалена, так как была неиспользуемой ---
-    // Если вам нужна эта логика, верните ее определение и вызов обратно
-
     // Подписка на матчи
     const qMatches = query(collection(db, "matches"), orderBy("time"), orderBy("court"));
     const unsubscribeMatches = onSnapshot(qMatches, (snapshot) => {
@@ -103,7 +98,7 @@ function App() {
     const unsubscribeTeams = onSnapshot(collection(db, "teams"), (snapshot) => {
         const teamsBaseData = snapshot.docs.map(docSnap => ({ code: docSnap.id, ...docSnap.data() }));
          if (isMounted) {
-             setBaseTeams(teamsBaseData); // Обновляем базовую инфу команд
+             setBaseTeams(teamsBaseData); // Обновляем базовую инфо команд
              console.log("Base teams listener updated state");
          }
     }, (error) => {
@@ -633,7 +628,7 @@ function App() {
                  <p className="flex items-center"><FaCalendarAlt className="mr-2 text-[#FDD80F]" /><span className="font-semibold mr-1">{t.dateLabel}:</span> {t.tournamentDate}</p>
                  <p className="flex items-start"><FaMapMarkerAlt className="mr-2 text-[#0B8E8D] mt-0.5 flex-shrink-0" /><div><span className="font-semibold mr-1">{t.addressLabel}:</span> {t.tournamentAddress}</div></p>
                  <p className="flex items-center"><FaLink className="mr-2 text-[#06324F]" /><span className="font-semibold mr-1">{t.websiteLabel}:</span><a href={t.tournamentWebsite} target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] ml-1 hover:underline truncate">{t.tournamentWebsite?.replace(/^(https?:\/\/)?(www\.)?/, '')}</a></p>
-             </div>
+               </div>
            </div>
         </main>
 
