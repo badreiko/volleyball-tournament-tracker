@@ -13,7 +13,15 @@ const firebaseConfig = {
 
 const initialTeamsData = [
   { code: 'A1', name: 'Zlatý jádro Kladno', group: 'A' },
-  // ... все команды
+  { code: 'A2', name: 'Spořilov Praha', group: 'A' },
+  { code: 'A3', name: 'Lážo Plážo Děčín', group: 'A' },
+  { code: 'B1', name: 'Všude zdejší Slaný', group: 'B' },
+  { code: 'B2', name: 'Sokol Benešov', group: 'B' },
+  { code: 'B3', name: 'Kaliči Teplice', group: 'B' },
+  { code: 'C1', name: 'DREAM TEAM Pardubice', group: 'C' },
+  { code: 'C2', name: 'UB Mongolsko', group: 'C' },
+  { code: 'C3', name: 'GNA Praha', group: 'C' },
+  { code: 'C4', name: 'Bon Team Trutnov', group: 'C' },
 ];
 
 const initialMatchesData = [
