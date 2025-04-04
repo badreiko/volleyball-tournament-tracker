@@ -13,7 +13,8 @@ import {
   getDocs,
   writeBatch,
   query,
-  orderBy // Для возможной сортировки матчей
+  orderBy, // Для возможной сортировки матчей
+  updateDoc
 } from "firebase/firestore";
 // --- /Firebase ---
 
@@ -436,7 +437,7 @@ function App() {
                                 )}
                             </td>
                             <td className="p-3 text-sm md:text-base text-center">{match.court}</td>
-                            <td className="p-3 text-sm md:text-base text-gray-700 text-center"><div className="flex items-center justify-center"><FaCalendarAlt className="mr-2 text-indigo-500 hidden md:inline" />{match.time}</div></td>
+                            <td className="p-3 text-sm md:text-base text-gray-700 text-center"><div className="flex items-center justify-center"><FaCalendarAlt className="mr-2 text-indigo-500" />{match.time}</div></td>
                             <td className="p-3 text-sm md:text-base font-bold text-center">{match.set1Team1 ?? 0} - {match.set1Team2 ?? 0}</td>
                             <td className="p-3 text-sm md:text-base font-bold text-center">{match.set2Team1 ?? 0} - {match.set2Team2 ?? 0}</td>
                             <td className="p-3 text-sm md:text-base font-bold text-center">{showThirdSet ? `${match.set3Team1 ?? 0} - ${match.set3Team2 ?? 0}` : '-'}</td>
