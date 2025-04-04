@@ -18,6 +18,9 @@ export const cs = {
   losses: 'Prohry',
   sets: 'Sety',
   close: 'Zavřít',
+  save: 'Uložit',
+  matchDetail: 'Detail zápasu',
+  tiebreak: 'Tiebreak',
   group: 'Skupina',
   aboutSection: 'O aplikaci',
   tournamentDate: '6.4.2025',
@@ -79,7 +82,7 @@ Prohra 0 : 2 … 0 bodů
 
 Získané body v zápasu  určí pořadí v tabulce (A / B / C). V případě rovnosti bodů rozhoduje počet vítězných setů. V případě stejného počtu setů pak více vítězných míčů.
 Play-off fáze
-Do playoff fáze postupují 2 nejlepší týmy ze skupiny II. (C) a všechny týmy ze skupiny I. (A a B).   
+Do playoff fáze postupují 2 nejlepší týmy ze skupiny II. (C) a všechna týmy ze skupiny I. (A a B).   
 Ve čtvrtfinále se utkají týmy takto: 1A – 1C, 1B – 2C, 2A – 3B, 3A – 2B
 Vítězové QF zápasů postupují do SF. Vítězové SF postupují do Finále
 Každý zápas v playoff fázi se hraje na 2 sety do 25 bodů.  Při dosažení 25. bodu je konec setu (výhra o 2 body tedy není nutná). V případě nerozhodného stavu 1:1 se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
@@ -100,10 +103,18 @@ Zapisovatel zaznamenává výsledek utkání na jednoduchý formulář, který p
     final: 'Finále'
   },
   statusNames: {
-    not_started: 'Nezačal',
+    not_started: 'Nespustený',
     in_progress: 'Probíhá',
-    completed: 'Dokončen',
-    tie: 'Remíza',
-    waiting: 'Čekání'
+    completed: 'Dokončený',
+    waiting: 'Čeká se',
+    completed_by_points: 'Výhra podle bodů'
+  },
+  tieRules: {
+    title: 'Pravidla při stavu 1:1 setů',
+    option1: 'Podle celkového počtu bodů',
+    option1Description: 'Tým, který získal více celkových bodů v obou setech, je považován za vítěze (s stavem "výhra 1:1"). Tým s menším počtem bodů získává stav "prohra 1:1". Pokud je celkový počet bodů stejný, hraje se tiebreak do 5 bodů.',
+    option2: 'Vždy s tiebreakem',
+    option2Description: 'Při stavu 1:1 setů se nezávisle na počtu získaných bodů vždy hraje tiebreak do 5 bodů pro určení vítěze.',
+    currentRule: 'Pro tento turnaj se používá pravidlo:'
   }
 };
