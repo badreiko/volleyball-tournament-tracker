@@ -4,13 +4,6 @@
 
 [build.environment]
   NODE_VERSION = "16"
-  REACT_APP_FIREBASE_API_KEY = "AIzaSyCnyjWYnwDZziXcW4jM1m78DIO_eEF6bTg"
-  REACT_APP_FIREBASE_AUTH_DOMAIN = "volleyball-tournament-tracker.firebaseapp.com"
-  REACT_APP_FIREBASE_PROJECT_ID = "volleyball-tournament-tracker"
-  REACT_APP_FIREBASE_STORAGE_BUCKET = "volleyball-tournament-tracker.appspot.com"
-  REACT_APP_FIREBASE_MESSAGING_SENDER_ID = "295203651273"
-  REACT_APP_FIREBASE_APP_ID = "1:295203651273:web:09a3e377d43fff83111718"
-  REACT_APP_FIREBASE_MEASUREMENT_ID = "G-PEYW1JMQK2"
 
 [[redirects]]
   from = "/*"

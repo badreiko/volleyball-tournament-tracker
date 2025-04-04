@@ -154,7 +154,6 @@ function App() {
         let changed = false;
         const updatedMatchesForDisplay = prevMatches.map(match => {
             if (match.round !== 'group') {
-                const originalMatch = {...match}; // Сохраняем оригинал для сравнения
                 let team1Code = null; let team2Code = null;
 
                 // Логика определения кодов команд
@@ -177,7 +176,7 @@ function App() {
                 if (match.team2 !== team2Code) { match.team2 = team2Code || null; changed = true; }
 
                 // Обновляем статус
-                const oldStatus = match.status;
+                const oldStatus = match.status; // Сохраняем старый статус для сравнения
                 if (match.team1 && match.team2 && match.status === 'waiting') {
                     match.status = 'not_started';
                 } else if ((!match.team1 || !match.team2) && match.status === 'not_started') {
@@ -212,52 +211,49 @@ function App() {
   const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
     const score = parseInt(scoreStr) >= 0 ? parseInt(scoreStr) : 0;
 
-    let changedMatch = null;
     let needsRecalculation = false;
 
     // Обновляем матчи
     setMatches(prevMatches => {
       const updatedMatches = prevMatches.map(match => {
         if (match.id === matchId) {
-          const updatedMatch = { ...match };
           const field = `set${set}${team === 'team1' ? 'Team1' : 'Team2'}`;
           // Обновляем только если значение изменилось
-          if (updatedMatch[field] !== score) {
-              updatedMatch[field] = score;
-              changedMatch = updatedMatch; // Запоминаем измененный матч
+          if (match[field] !== score) {
+              match[field] = score;
           } else {
               return match; // Возвращаем старый объект, если поле не изменилось
           }
 
           // Логика определения статуса и победителя (та же, что и раньше)
           const useTotalPointsRule = tournamentSettings.useTotalPointsForTie;
-          let newWinner = updatedMatch.winner;
-          let newStatus = updatedMatch.status;
-          const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = updatedMatch;
+          let newWinner = match.winner;
+          let newStatus = match.status;
+          const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = match;
           const hasScores = (set1Team1 > 0 || set1Team2 > 0 || set2Team1 > 0 || set2Team2 > 0 || set3Team1 > 0 || set3Team2 > 0);
           const oldStatus = match.status; // Сохраняем старый статус для сравнения
 
-          if (updatedMatch.round === 'final') {
+          if (match.round === 'final') {
                let t1w=(set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0)+(set3Team1>set3Team2?1:0);
                let t2w=(set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0)+(set3Team2>set3Team1?1:0);
-               if(t1w>=2){newWinner=updatedMatch.team1;newStatus='completed';}
-               else if(t2w>=2){newWinner=updatedMatch.team2;newStatus='completed';}
+               if(t1w>=2){newWinner=match.team1;newStatus='completed';}
+               else if(t2w>=2){newWinner=match.team2;newStatus='completed';}
                else if(hasScores){newWinner=null;newStatus='in_progress';}
                else {newWinner=null;newStatus='not_started';}
           } else if (oldStatus === 'tie_needs_tiebreak' && set === 3) {
-               if(set3Team1>=5 && set3Team1>=set3Team2+1){newWinner=updatedMatch.team1;newStatus='completed';}
-               else if(set3Team2>=5 && set3Team2>=set3Team1+1){newWinner=updatedMatch.team2;newStatus='completed';}
+               if(set3Team1>=5 && set3Team1>=set3Team2+1){newWinner=match.team1;newStatus='completed';}
+               else if(set3Team2>=5 && set3Team2>=set3Team1+1){newWinner=match.team2;newStatus='completed';}
                else {newWinner=null;newStatus='tie_needs_tiebreak';}
-          } else if (set >= 2 && updatedMatch.round !== 'final') {
+          } else if (set >= 2 && match.round !== 'final') {
                let t1s=(set1Team1>set1Team2?1:0)+(set2Team1>set2Team2?1:0);
                let t2s=(set1Team2>set1Team1?1:0)+(set2Team2>set2Team1?1:0);
-               if(t1s===2){newWinner=updatedMatch.team1;newStatus='completed';}
-               else if(t2s===2){newWinner=updatedMatch.team2;newStatus='completed';}
+               if(t1s===2){newWinner=match.team1;newStatus='completed';}
+               else if(t2s===2){newWinner=match.team2;newStatus='completed';}
                else if(t1s===1 && t2s===1){
                    if(useTotalPointsRule){
                        const t1=set1Team1+set2Team1; const t2=set1Team2+set2Team2;
-                       if(t1>t2){newWinner=updatedMatch.team1;newStatus='completed_by_points';}
-                       else if(t2>t1){newWinner=updatedMatch.team2;newStatus='completed_by_points';}
+                       if(t1>t2){newWinner=match.team1;newStatus='completed_by_points';}
+                       else if(t2>t1){newWinner=match.team2;newStatus='completed_by_points';}
                        else{newWinner=null;newStatus='tie_needs_tiebreak';}
                    } else {newWinner=null;newStatus='tie_needs_tiebreak';}
                } else if(hasScores){newWinner=null;newStatus='in_progress';}
@@ -265,7 +261,7 @@ function App() {
           } else if (set === 1) {
                newWinner = null;
                newStatus = hasScores ? 'in_progress' : 'not_started';
-               if(newStatus==='not_started' && (updatedMatch.set2Team1 > 0 || updatedMatch.set2Team2 > 0)){ newStatus = 'in_progress';}
+               if(newStatus==='not_started' && (match.set2Team1 > 0 || match.set2Team2 > 0)){ newStatus = 'in_progress';}
           }
 
            if (newStatus !== 'not_started' && !hasScores) { newStatus = 'not_started'; newWinner = null; }
@@ -273,8 +269,8 @@ function App() {
 
 
            // Обновляем только если статус или победитель изменились
-           if (updatedMatch.status !== newStatus) { updatedMatch.status = newStatus; changedMatch = updatedMatch; }
-           if (updatedMatch.winner !== newWinner) { updatedMatch.winner = newWinner; changedMatch = updatedMatch; }
+           if (match.status !== newStatus) { match.status = newStatus; }
+           if (match.winner !== newWinner) { match.winner = newWinner; }
 
            // Помечаем необходимость пересчета, если статус стал завершенным
            if (newStatus.startsWith('completed') && oldStatus !== newStatus) {
@@ -285,7 +281,7 @@ function App() {
                needsRecalculation = true;
            }
 
-          return updatedMatch; // Возвращаем обновленный или старый объект
+          return match; // Возвращаем обновленный или старый объект
         }
         return match;
       });
@@ -572,7 +568,7 @@ function App() {
                  <p className="flex items-center"><FaCalendarAlt className="mr-2 text-[#FDD80F]" /><span className="font-semibold mr-1">{t.dateLabel}:</span> {t.tournamentDate}</p>
                  <p className="flex items-start"><FaMapMarkerAlt className="mr-2 text-[#0B8E8D] mt-0.5 flex-shrink-0" /><div><span className="font-semibold mr-1">{t.addressLabel}:</span> {t.tournamentAddress}</div></p>
                  <p className="flex items-center"><FaLink className="mr-2 text-[#06324F]" /><span className="font-semibold mr-1">{t.websiteLabel}:</span><a href={t.tournamentWebsite} target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] ml-1 hover:underline truncate">{t.tournamentWebsite?.replace(/^(https?:\/\/)?(www\.)?/, '')}</a></p>
-             </div>
+               </div>
            </div>
         </main>
 
