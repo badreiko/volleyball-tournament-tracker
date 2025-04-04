@@ -11,7 +11,8 @@ import {
   onSnapshot,
   setDoc,
   query,
-  orderBy
+  orderBy,
+  getDocs
 } from "firebase/firestore";
 // --- /Firebase ---
 
@@ -132,6 +133,30 @@ function App() {
     };
      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // ОШИБКА 3: Этот useEffect должен выполняться только один раз, поэтому оставляем пустой массив зависимостей и игнорируем предупреждение ESLint
+
+   // --- Проверка подключения к Firestore ---
+   useEffect(() => {
+    console.log('Проверка подключения к Firestore...');
+    
+    const testConnection = async () => {
+      try {
+        const testDocRef = doc(db, 'test_connection', 'check');
+        await setDoc(testDocRef, { timestamp: new Date() });
+        console.log('Firestore: подключение успешно');
+        
+        // Проверка наличия коллекций
+        const matchesSnap = await getDocs(collection(db, 'matches'));
+        console.log(`Найдено матчей: ${matchesSnap.size}`);
+        
+        const teamsSnap = await getDocs(collection(db, 'teams'));
+        console.log(`Найдено команд: ${teamsSnap.size}`);
+      } catch (error) {
+        console.error('Ошибка подключения к Firestore:', error);
+      }
+    };
+    
+    testConnection();
+  }, []);
 
    // --- Функция вычисления статистики ---
    const calculateTeamStats = (currentMatches, currentBaseTeams) => {
