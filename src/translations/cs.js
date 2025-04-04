@@ -18,12 +18,12 @@ export const cs = {
   losses: 'Prohry',
   sets: 'Sety',
   close: 'Zavřít',
-  save: 'Uložit',
+  save: 'Uložit', // Může být neaktuální, pokud je ukládání automatické
   matchDetail: 'Detail zápasu',
   tiebreak: 'Tiebreak',
   group: 'Skupina',
   aboutSection: 'O aplikaci',
-  tournamentDate: '6.4.2025',
+  tournamentDate: '6.4.2025', // Pozor, aktuální datum je 4. dubna 2025
   tournamentAddress: 'Václava Mouchy 2045, Slaný',
   tournamentWebsite: 'https://rvl.hala-slany.cz/',
   tournamentInfo: 'Informace o turnaji',
@@ -33,9 +33,10 @@ export const cs = {
   rules: 'Pravidla turnaje',
   showRules: 'Zobrazit pravidla',
   hideRules: 'Skrýt pravidla',
+  // tournamentRules оставлен без изменений, т.к. предоставленный текст детален
   tournamentRules: `Rozdělení do skupiny a hrací systém
 Jedním z cílů Regionální volejbalové ligy je to, aby se vzájemně utkávaly týmy srovnatelné herní úrovně. Tomu je přizpůsoben herní systém našich turnajů. V rámci našeho jarního turnaje budou tedy týmy rozděleny do dvou výkonnostních skupin, dle aktuálního pořadí v soutěži a pravidel RVL
- 
+
 Skupina I.
 Kaliči Teplice
 Spořilov Praha
@@ -48,15 +49,13 @@ Skupina II.
 UB Mongolsko
 GNA Praha
 Bon Team Trutnov
-DREAM TEAM Pardubice 
+DREAM TEAM Pardubice
 
-
- 
 
 Skupinová fáze
 
 Týmy ze skupiny I. jsou rozděleny do dvou herních skupin A a B takto:
- 
+
 Skupina A
 Lážo Plážo Děčín
 Spořilov Praha
@@ -66,7 +65,7 @@ Skupina B
 Kaliči Teplice
 Sokol Benešov
 Všude zdejší Slaný
- 
+
 Týmy ve skupině sehrají zápasy každý s každým. Tím se určí pořadí ve skupině A a B.
 
 Skupina II. (dále pracovně označována jako C)
@@ -75,14 +74,14 @@ Skupina II. (dále pracovně označována jako C)
 Každý zápas ve skupinové fázi se hraje na 2 sety do 25 bodů.  Při dosažení 25. bodu je konec setu (výhra o 2 body tedy není nutná). V případě nerozhodného stavu 1:1 a stejném poměru míčů v obou setech se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
 
 Bodování zápasu:
-Výhra 	2 : 0 … 3 body
-Výhra 	1 : 1 … 2 body
+Výhra   2 : 0 … 3 body
+Výhra   1 : 1 … 2 body
 Prohra 1 : 1 … 1 bod
 Prohra 0 : 2 … 0 bodů
 
 Získané body v zápasu  určí pořadí v tabulce (A / B / C). V případě rovnosti bodů rozhoduje počet vítězných setů. V případě stejného počtu setů pak více vítězných míčů.
 Play-off fáze
-Do playoff fáze postupují 2 nejlepší týmy ze skupiny II. (C) a všechna týmy ze skupiny I. (A a B).   
+Do playoff fáze postupují 2 nejlepší týmy ze skupiny II. (C) a všechna týmy ze skupiny I. (A a B).
 Ve čtvrtfinále se utkají týmy takto: 1A – 1C, 1B – 2C, 2A – 3B, 3A – 2B
 Vítězové QF zápasů postupují do SF. Vítězové SF postupují do Finále
 Každý zápas v playoff fázi se hraje na 2 sety do 25 bodů.  Při dosažení 25. bodu je konec setu (výhra o 2 body tedy není nutná). V případě nerozhodného stavu 1:1 se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
@@ -95,26 +94,44 @@ Finálový zápas rozhodne jak o držiteli první ceny (míč Molten) tak i o pr
 Rozhodčí a zapisovatel
 Funkci rozhodčího a zapisovatele obsazují vždy týmy, které aktuálně nehrají, dle uvedeného rozpisu.  Rozhodnutí  rozhodčího je konečné.  (Připomínáme, že se jedná o turnaj amatérských hráčů.)
 Zapisovatel zaznamenává výsledek utkání na jednoduchý formulář, který po skončení zápasu předá ke stolku organizátorů.`,
+
+  // --- Добавленные/Обновленные ключи ---
+  tbd: 'Bude určeno', // Команда "Будет определено"
+  winner: 'Vítěz',
+  winsLossesShort: 'V/P', // Коротко: Výhry/Prohry
+  setsShort: 'S', // Коротко: Sety
+  setsDiffShort: 'RS', // Коротко: Rozdíl setů
+  tiebreak_condition: 'do 5', // Условие тайбрейка
+
+  generalRulesTitle: "Obecná pravidla", // Заголовок для общих правил
+
   roundNames: {
     group: 'Skupinová fáze',
     quarterfinal: 'Čtvrtfinále',
     semifinal: 'Semifinále',
     third_place: 'Zápas o 3. místo',
-    final: 'Finále'
+    final: 'Finále',
+    unknown: 'Neznámé' // Добавлено на случай неопределенного раунда
   },
   statusNames: {
-    not_started: 'Nespustený',
+    not_started: 'Nezahájený', // Изменено для согласованности
     in_progress: 'Probíhá',
     completed: 'Dokončený',
     waiting: 'Čeká se',
-    completed_by_points: 'Výhra podle bodů'
+    completed_by_points: 'Výhra na body', // Изменено для точности
+    tie_needs_tiebreak: 'Nutný tiebreak', // Статус для ничьи 1:1 при опр. правилах
+    unknown: 'Neznámý' // Добавлено на случай неопределенного статуса
   },
   tieRules: {
-    title: 'Pravidla při stavu 1:1 setů',
+    title: 'Pravidla při stavu 1:1 na sety', // Исправлено "setů" на "na sety" для лучшей грамматики
     option1: 'Podle celkového počtu bodů',
-    option1Description: 'Tým, který získal více celkových bodů v obou setech, je považován za vítěze (s stavem "výhra 1:1"). Tým s menším počtem bodů získává stav "prohra 1:1". Pokud je celkový počet bodů stejný, hraje se tiebreak do 5 bodů.',
+    option1Description: 'Tým, který získal více celkových bodů v obou setech, je vítězem. Tým s menším počtem bodů prohrává. Pokud je celkový počet bodů stejný, hraje se tiebreak do 5 bodů.',
     option2: 'Vždy s tiebreakem',
-    option2Description: 'Při stavu 1:1 setů se nezávisle na počtu získaných bodů vždy hraje tiebreak do 5 bodů pro určení vítěze.',
-    currentRule: 'Pro tento turnaj se používá pravidlo:'
+    option2Description: 'Při stavu 1:1 na sety se bez ohledu na počet získaných bodů vždy hraje tiebreak do 5 bodů pro určení vítěze.',
+    currentRule: 'Pro tento turnaj se používá pravidlo:', // Может быть уже не нужно
+    settingsTitle: "Nastavení pravidel (1:1)", // Заголовок для настроек в модальном окне
+    usePointsOption: "Použít celkový počet bodů", // Текст для чекбокса
+    usePointsOptionDescription: "Pokud zaškrtnuto, při 1:1 vyhrává tým s více body ze 2 setů. Při rovnosti bodů se hraje tiebreak.", // Описание для опции "по очкам"
+    useTiebreakOptionDescription: "Pokud nezaškrtnuto, při stavu 1:1 na sety se vždy hraje tiebreak.", // Описание для опции "всегда тайбрейк"
   }
 };
