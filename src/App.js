@@ -87,6 +87,53 @@ function App() {
 
   const t = translations[language] || translations['cs'];
 
+  // --- Логика вычисления статистики (клиентская) ---
+  const recalculateAllTeamStats = useCallback(() => {
+    let calculatedTeams = teams.map(team => ({
+        ...team, points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0
+    }));
+
+    const completedGroupMatches = matches.filter(m =>
+        m.round === 'group' &&
+        (m.status === 'completed' || m.status === 'completed_by_points')
+    );
+
+    completedGroupMatches.forEach(match => {
+        const team1Index = calculatedTeams.findIndex(t => t.code === match.team1);
+        const team2Index = calculatedTeams.findIndex(t => t.code === match.team2);
+
+        if (team1Index !== -1 && team2Index !== -1) {
+            let team1 = calculatedTeams[team1Index];
+            let team2 = calculatedTeams[team2Index];
+            let team1SetsWon = (match.set1Team1 > match.set1Team2 ? 1 : 0) + (match.set2Team1 > match.set2Team2 ? 1 : 0);
+            let team2SetsWon = (match.set1Team2 > match.set1Team1 ? 1 : 0) + (match.set2Team2 > match.set2Team1 ? 1 : 0);
+            let team1Points = 0; let team2Points = 0;
+
+            if (match.winner === team1.code) {
+                team1Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 3 : 2;
+                team2Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 0 : 1;
+                team1.wins += 1; team2.losses += 1;
+            } else if (match.winner === team2.code) {
+                team2Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 3 : 2;
+                team1Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 0 : 1;
+                team2.wins += 1; team1.losses += 1;
+            }
+
+            team1.points += team1Points; team1.setsWon += team1SetsWon; team1.setsLost += team2SetsWon;
+            team2.points += team2Points; team2.setsWon += team2SetsWon; team2.setsLost += team1SetsWon;
+
+            calculatedTeams[team1Index] = team1;
+            calculatedTeams[team2Index] = team2;
+        }
+    });
+
+    setTeams(calculatedTeams); // Обновляем состояние команд с вычисленной статистикой
+    console.log("Team stats recalculated");
+
+    updatePlayoffDisplay(); // Обновляем отображение плей-офф
+
+  }, [matches, teams]); // Добавляем teams в зависимости
+
   // --- Загрузка данных и подписка на обновления из Firestore ---
   useEffect(() => {
     const initializeFirestoreData = async () => {
@@ -160,53 +207,6 @@ function App() {
       recalculateAllTeamStats();
     }
   }, [matches, recalculateAllTeamStats]); // Добавляем recalculateAllTeamStats в зависимости
-
-  // --- Логика вычисления статистики (клиентская) ---
-  const recalculateAllTeamStats = useCallback(() => {
-    let calculatedTeams = teams.map(team => ({
-        ...team, points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0
-    }));
-
-    const completedGroupMatches = matches.filter(m =>
-        m.round === 'group' &&
-        (m.status === 'completed' || m.status === 'completed_by_points')
-    );
-
-    completedGroupMatches.forEach(match => {
-        const team1Index = calculatedTeams.findIndex(t => t.code === match.team1);
-        const team2Index = calculatedTeams.findIndex(t => t.code === match.team2);
-
-        if (team1Index !== -1 && team2Index !== -1) {
-            let team1 = calculatedTeams[team1Index];
-            let team2 = calculatedTeams[team2Index];
-            let team1SetsWon = (match.set1Team1 > match.set1Team2 ? 1 : 0) + (match.set2Team1 > match.set2Team2 ? 1 : 0);
-            let team2SetsWon = (match.set1Team2 > match.set1Team1 ? 1 : 0) + (match.set2Team2 > match.set2Team1 ? 1 : 0);
-            let team1Points = 0; let team2Points = 0;
-
-            if (match.winner === team1.code) {
-                team1Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 3 : 2;
-                team2Points = (team1SetsWon === 2 && team2SetsWon === 0) ? 0 : 1;
-                team1.wins += 1; team2.losses += 1;
-            } else if (match.winner === team2.code) {
-                team2Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 3 : 2;
-                team1Points = (team2SetsWon === 2 && team1SetsWon === 0) ? 0 : 1;
-                team2.wins += 1; team1.losses += 1;
-            }
-
-            team1.points += team1Points; team1.setsWon += team1SetsWon; team1.setsLost += team2SetsWon;
-            team2.points += team2Points; team2.setsWon += team2SetsWon; team2.setsLost += team1SetsWon;
-
-            calculatedTeams[team1Index] = team1;
-            calculatedTeams[team2Index] = team2;
-        }
-    });
-
-    setTeams(calculatedTeams); // Обновляем состояние команд с вычисленной статистикой
-    console.log("Team stats recalculated");
-
-    updatePlayoffDisplay(); // Обновляем отображение плей-офф
-
-  }, [matches, teams]); // Добавляем teams в зависимости
 
   // --- Логика обновления отображения плей-офф (UI) ---
   const updatePlayoffDisplay = useCallback(() => {
