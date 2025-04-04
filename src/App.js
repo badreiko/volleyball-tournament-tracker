@@ -273,11 +273,13 @@ function App() {
                  else if(hasScores){newWinner=null;newStatus='in_progress';}
                  else {newWinner=null;newStatus='not_started';}
             } else if (oldStatus === 'tie_needs_tiebreak' && set === 3) {
-                 // Новая логика: Первый до 5 побеждает
-                 if (set3Team1 === 5 && set3Team1 > set3Team2) {
+                 // Улучшенная логика: Победа при достижении 5 очков с отрывом
+                 if ((set3Team1 >= 5 && set3Team1 >= set3Team2 + 1) || 
+                     (set3Team1 === 5 && set3Team2 < 5)) {
                      newWinner = match.team1; 
                      newStatus = 'completed';
-                 } else if (set3Team2 === 5 && set3Team2 > set3Team1) {
+                 } else if ((set3Team2 >= 5 && set3Team2 >= set3Team1 + 1) || 
+                            (set3Team2 === 5 && set3Team1 < 5)) {
                      newWinner = match.team2; 
                      newStatus = 'completed';
                  } else if (set3Team1 > 5 || set3Team2 > 5) {
