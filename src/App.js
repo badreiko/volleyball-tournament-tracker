@@ -214,9 +214,46 @@ function App() {
     }, [/* initialTeams - константа */]); // Зависимостей нет
 
     // --- Автоматическое обновление плей-офф (только команды и статус) ---
-     const updatePlayoffTeams = useCallback(() => {
-        // console.log("--- updatePlayoffTeams START (Automatic Check - Teams Only) ---");
+    const updatePlayoffTeams = useCallback(() => {
         setMatches(prevMatches => {
+            // *** НОВОЕ: Подсчет завершенных групповых матчей ***
+            const completedGroupMatches = prevMatches.filter(m =>
+                m.round === 'group' &&
+                (m.status === 'completed' || m.status === 'completed_by_points')
+            );
+            const completedGroupMatchesCount = completedGroupMatches.length;
+            const requiredMatchesBeforePlayoff = 6; // Половина от 12 групповых матчей
+
+            let changed = false; // Флаг, указывающий были ли изменения
+
+            // *** НОВОЕ: Проверка условия для заполнения плей-офф ***
+            if (completedGroupMatchesCount < requiredMatchesBeforePlayoff) {
+                // Если сыграно недостаточно матчей, сбрасываем плей-офф в ожидание
+                // console.log(`Playoff update skipped: Only ${completedGroupMatchesCount}/${requiredMatchesBeforePlayoff} group matches completed.`);
+                const resetMatches = prevMatches.map(match => {
+                    // Сбрасываем только матчи плей-офф, если они не пустые
+                    if (match.round !== 'group' && (match.team1 !== null || match.team2 !== null || match.status !== 'waiting')) {
+                        changed = true; // Отмечаем, что было изменение
+                        return {
+                            ...match,
+                            team1: null,
+                            team2: null,
+                            refereeTeamCode: null,
+                            status: 'waiting',
+                            // Также сбрасываем счет и победителя
+                            set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null
+                        };
+                    }
+                    return match; // Оставляем как есть (групповые или уже пустые плей-офф)
+                });
+                // Возвращаем новый массив только если были сбросы
+                return changed ? resetMatches : prevMatches;
+            }
+
+            // *** СТАРАЯ ЛОГИКА (выполняется, если сыграно достаточно матчей) ***
+            // console.log(`Updating playoffs: ${completedGroupMatchesCount}/${requiredMatchesBeforePlayoff} group matches completed.`);
+
+            // 1. Ранжирование (на основе текущих 'teams')
             const groupLetters = ['A', 'B', 'C'];
             const groupRankings = {};
             groupLetters.forEach(group => {
@@ -225,34 +262,34 @@ function App() {
             });
             const getRankedTeamCode = (group, rank) => groupRankings[group]?.[rank - 1]?.code || null;
 
-            let changed = false;
+            // 2. Обновление матчей плей-офф
             const updatedMatchesArray = prevMatches.map(match => {
                 if (match.round === 'group') return match;
 
                 const currentTeam1 = match.team1;
                 const currentTeam2 = match.team2;
                 const currentStatus = match.status;
-                const currentReferee = match.refereeTeamCode; // Важно для сброса
+                const currentReferee = match.refereeTeamCode;
 
                 let newTeam1Code = null;
                 let newTeam2Code = null;
 
-                // Определение команд
+                // Определение команд (логика switch без изменений)
                 switch (match.id) {
-                    case 'QF-1A-1C': newTeam1Code = getRankedTeamCode('A', 1); newTeam2Code = getRankedTeamCode('C', 1); break;
-                    case 'QF-1B-2C': newTeam1Code = getRankedTeamCode('B', 1); newTeam2Code = getRankedTeamCode('C', 2); break;
-                    case 'QF-2A-3B': newTeam1Code = getRankedTeamCode('A', 2); newTeam2Code = getRankedTeamCode('B', 3); break;
-                    case 'QF-3A-2B': newTeam1Code = getRankedTeamCode('A', 3); newTeam2Code = getRankedTeamCode('B', 2); break;
-                    case 'SF-W1-W3': { const qf1 = prevMatches.find(m => m.id === 'QF-1A-1C'); const qf3 = prevMatches.find(m => m.id === 'QF-2A-3B'); newTeam1Code = qf1?.winner || null; newTeam2Code = qf3?.winner || null; break; }
-                    case 'SF-W2-W4': { const qf2 = prevMatches.find(m => m.id === 'QF-1B-2C'); const qf4 = prevMatches.find(m => m.id === 'QF-3A-2B'); newTeam1Code = qf2?.winner || null; newTeam2Code = qf4?.winner || null; break; }
-                    case 'F-W1-W2': { const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3'); const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4'); newTeam1Code = sf1?.winner || null; newTeam2Code = sf2?.winner || null; break; }
-                    case 'F3-L1-L2': {
-                        const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3');
-                        const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4');
-                        const getLoser = (sfMatch) => (!sfMatch || !sfMatch.winner || !sfMatch.team1 || !sfMatch.team2) ? null : (sfMatch.winner === sfMatch.team1 ? sfMatch.team2 : sfMatch.team1);
-                        newTeam1Code = getLoser(sf1); newTeam2Code = getLoser(sf2);
-                        break;
-                    }
+                     case 'QF-1A-1C': newTeam1Code = getRankedTeamCode('A', 1); newTeam2Code = getRankedTeamCode('C', 1); break;
+                     case 'QF-1B-2C': newTeam1Code = getRankedTeamCode('B', 1); newTeam2Code = getRankedTeamCode('C', 2); break;
+                     case 'QF-2A-3B': newTeam1Code = getRankedTeamCode('A', 2); newTeam2Code = getRankedTeamCode('B', 3); break;
+                     case 'QF-3A-2B': newTeam1Code = getRankedTeamCode('A', 3); newTeam2Code = getRankedTeamCode('B', 2); break;
+                     case 'SF-W1-W3': { const qf1 = prevMatches.find(m => m.id === 'QF-1A-1C'); const qf3 = prevMatches.find(m => m.id === 'QF-2A-3B'); newTeam1Code = qf1?.winner || null; newTeam2Code = qf3?.winner || null; break; }
+                     case 'SF-W2-W4': { const qf2 = prevMatches.find(m => m.id === 'QF-1B-2C'); const qf4 = prevMatches.find(m => m.id === 'QF-3A-2B'); newTeam1Code = qf2?.winner || null; newTeam2Code = qf4?.winner || null; break; }
+                     case 'F-W1-W2': { const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3'); const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4'); newTeam1Code = sf1?.winner || null; newTeam2Code = sf2?.winner || null; break; }
+                     case 'F3-L1-L2': {
+                         const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3');
+                         const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4');
+                         const getLoser = (sfMatch) => (!sfMatch || !sfMatch.winner || !sfMatch.team1 || !sfMatch.team2) ? null : (sfMatch.winner === sfMatch.team1 ? sfMatch.team2 : sfMatch.team1);
+                         newTeam1Code = getLoser(sf1); newTeam2Code = getLoser(sf2);
+                         break;
+                     }
                     default: return match;
                 }
 
@@ -260,28 +297,29 @@ function App() {
                 const newStatus = teamsDetermined ? 'not_started' : 'waiting';
                 const teamsChanged = currentTeam1 !== newTeam1Code || currentTeam2 !== newTeam2Code;
                 const statusChanged = currentStatus !== newStatus;
-                // Сбрасываем судью плей-офф, если команды изменились
+                // Сбрасываем судью плей-офф, если команды изменились (т.к. выбор ручной)
                 const newRefereeCode = teamsChanged ? null : currentReferee;
-                const refereeMaybeChanged = currentReferee !== newRefereeCode; // Проверяем, изменился ли судья (из-за сброса)
+                const refereeMaybeChanged = currentReferee !== newRefereeCode;
 
                 if (teamsChanged || statusChanged || refereeMaybeChanged) {
-                    changed = true;
+                    if (!changed) changed = true; // Отмечаем, что были изменения
                     return {
                         ...match,
                         team1: newTeam1Code,
                         team2: newTeam2Code,
                         status: newStatus,
-                        refereeTeamCode: newRefereeCode, // Сброс или сохранение
-                        ...(teamsChanged && { // Сброс счета только при смене команд
+                        refereeTeamCode: newRefereeCode,
+                        ...(teamsChanged && {
                             set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null
                         })
                     };
                 }
-                return match;
+                return match; // Нет изменений для этого матча
             });
-            // console.log("--- updatePlayoffTeams END --- Changed:", changed);
-            return changed ? updatedMatchesArray : prevMatches; // Обновляем только если были изменения
-        });
+
+            // Возвращаем новый массив только если были изменения
+            return changed ? updatedMatchesArray : prevMatches;
+        }); // Конец setMatches
     }, [teams, setMatches]); // Зависит от teams и setMatches
 
     // --- Обновление счета матча ---
