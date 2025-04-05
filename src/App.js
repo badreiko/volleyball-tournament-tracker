@@ -76,11 +76,22 @@ const validateScore = (score, isFinalSet, isTiebreak) => {
 };
 
 const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak) => {
-    const minWinDiff = 2;
-    const winThreshold = isTiebreak ? (isFinalSet ? 15 : 5) : 25;
-    // Убедимся что счет не null/undefined перед сравнением
-    const score1 = team1Score ?? 0;
-    const score2 = team2Score ?? 0;
+    const score1 = team1Score ?? 0; // Обработка null/undefined
+    const score2 = team2Score ?? 0; // Обработка null/undefined
+
+    // --- ИСПРАВЛЕНИЕ: Особая логика для обычного тай-брейка (до 5) ---
+    if (isTiebreak && !isFinalSet) {
+        // Победа наступает сразу при достижении 5 очков любой командой.
+        return score1 === 5 || score2 === 5;
+    }
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+
+    // --- Стандартная логика для обычных сетов (до 25) и тай-брейка финала (до 15) ---
+    const minWinDiff = 2; // Требуется разница в 2 очка
+    // Порог победы: 15 для финального тай-брейка, 25 для обычного сета
+    const winThreshold = isTiebreak /* && isFinalSet */ ? 15 : 25; // Если это isTiebreak, то это может быть только финальный (isFinalSet=true)
+
+    // Должен быть достигнут порог И должна быть разница в 2 очка
     return (score1 >= winThreshold || score2 >= winThreshold) &&
            Math.abs(score1 - score2) >= minWinDiff;
 };
