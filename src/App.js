@@ -231,7 +231,7 @@ function App() {
     }, []);
 
     const updatePlayoffTeams = useCallback((currentMatches, currentTeams) => {
-        console.log("Автоматическое обновление команд и предопределенных судей плей-офф...");
+        console.log("--- updatePlayoffTeams START ---");
         const groupLetters = ['A', 'B', 'C'];
         const groupRankings = {};
         groupLetters.forEach(group => {
@@ -245,23 +245,28 @@ function App() {
              '3C': getRankedTeamCode('C', 3),
              '4C': getRankedTeamCode('C', 4),
          };
+         console.log("Calculated Rankings (Top 1):", "A:", getRankedTeamCode('A',1), "B:", getRankedTeamCode('B',1), "C:", getRankedTeamCode('C',1));
 
         setMatches(prevMatches => {
             let changed = false;
             const updatedMatchesArray = prevMatches.map(match => {
                 if (match.round === 'group') return match;
 
-                 const initialMatchData = initialMatches.find(im => im.id === match.id);
-                 const refereeRule = initialMatchData?.refereeRule;
+                // Логируем исходное состояние матча плей-офф
+                // console.log(`Checking match: ${match.id}, Status: ${match.status}, Teams: ${match.team1}-${match.team2}, Ref: ${match.refereeTeamCode}`);
 
-                 let currentTeam1 = match.team1;
-                 let currentTeam2 = match.team2;
-                 let currentReferee = match.refereeTeamCode;
+                const initialMatchData = initialMatches.find(im => im.id === match.id);
+                const refereeRule = initialMatchData?.refereeRule;
 
-                 let newTeam1Code = null;
-                 let newTeam2Code = null;
+                let currentTeam1 = match.team1;
+                let currentTeam2 = match.team2;
+                let currentReferee = match.refereeTeamCode;
+                let currentStatus = match.status;
 
-                 switch (match.id) {
+                let newTeam1Code = null;
+                let newTeam2Code = null;
+
+                switch (match.id) {
                     case 'QF-1A-1C': newTeam1Code = getRankedTeamCode('A', 1); newTeam2Code = getRankedTeamCode('C', 1); break;
                     case 'QF-1B-2C': newTeam1Code = getRankedTeamCode('B', 1); newTeam2Code = getRankedTeamCode('C', 2); break;
                     case 'QF-2A-3B': newTeam1Code = getRankedTeamCode('A', 2); newTeam2Code = getRankedTeamCode('B', 3); break;
@@ -271,27 +276,36 @@ function App() {
                     case 'F-W1-W2': { const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3'); const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4'); newTeam1Code = sf1?.winner || null; newTeam2Code = sf2?.winner || null; break; }
                     case 'F3-L1-L2': { const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3'); const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4'); newTeam1Code = (sf1?.winner && sf1.team1 && sf1.team2) ? (sf1.winner === sf1.team1 ? sf1.team2 : sf1.team1) : null; newTeam2Code = (sf2?.winner && sf2.team1 && sf2.team2) ? (sf2.winner === sf2.team1 ? sf2.team2 : sf2.team1) : null; break; }
                     default: return match;
-                 }
+                }
 
-                const teamsDetermined = newTeam1Code && newTeam2Code;
-                const needsTeamUpdate = teamsDetermined && (match.status === 'waiting' || (match.status === 'not_started' && (currentTeam1 !== newTeam1Code || currentTeam2 !== newTeam2Code)));
+                const teamsDetermined = !!(newTeam1Code && newTeam2Code);
+                const needsTeamUpdate = teamsDetermined && (currentStatus === 'waiting' || (currentStatus === 'not_started' && (currentTeam1 !== newTeam1Code || currentTeam2 !== newTeam2Code)));
 
                 let newRefereeCode = currentReferee;
+                let refereeChanged = false;
                  if (refereeRule && potentialRefereeCodes[refereeRule]) {
                     const potentialRef = potentialRefereeCodes[refereeRule];
                      if (potentialRef && potentialRef !== newTeam1Code && potentialRef !== newTeam2Code) {
                          if (currentReferee !== potentialRef) {
                              newRefereeCode = potentialRef;
-                             console.log(`Матч ${match.id}: авто назначен предопределенный судья ${newRefereeCode} по ${refereeRule}`);
+                             refereeChanged = true;
                          }
                      } else if (currentReferee !== null && potentialRef && (potentialRef === newTeam1Code || potentialRef === newTeam2Code)) {
                          newRefereeCode = null;
-                         console.log(`Матч ${match.id}: авто сброс судьи ${potentialRef} т.к. играет`);
+                         refereeChanged = true;
                      }
                  }
 
-                if (needsTeamUpdate || newRefereeCode !== currentReferee) {
+                 // ОТЛАДКА: Выводим информацию перед принятием решения об обновлении
+                 if (match.round !== 'group') { // Логируем только для плей-офф
+                     console.log(`[${match.id}] Current: ${currentTeam1}-${currentTeam2} (Status: ${currentStatus}, Ref: ${currentReferee}). Calculated: ${newTeam1Code}-${newTeam2Code}. TeamsDetermined: ${teamsDetermined}. NeedsUpdate: ${needsTeamUpdate}. RefRule: ${refereeRule}. NewRef: ${newRefereeCode}. RefChanged: ${refereeChanged}`);
+                 }
+
+
+                if (needsTeamUpdate || (refereeChanged && currentReferee !== newRefereeCode)) {
                     changed = true;
+                    // ОТЛАДКА: Логируем, что обновление сейчас произойдет
+                    console.log(`---> UPDATING ${match.id}: Teams: ${newTeam1Code}-${newTeam2Code}, Status: ${teamsDetermined ? 'not_started' : 'waiting'}, Ref: ${newRefereeCode}`);
                     return {
                         ...match,
                         team1: newTeam1Code,
@@ -304,12 +318,13 @@ function App() {
 
                 return match;
             });
+             console.log("--- updatePlayoffTeams END --- Changed:", changed);
             return changed ? updatedMatchesArray : prevMatches;
         });
     }, [setMatches]);
 
     const forceUpdatePlayoffTeams = useCallback(() => {
-        console.log("Принудительное обновление команд плей-офф и ВСЕХ судей");
+        console.log("--- forceUpdatePlayoffTeams START (Button Click) ---");
 
         const groupRankings = {};
         ['A', 'B', 'C'].forEach(group => {
@@ -323,6 +338,7 @@ function App() {
                 );
         });
         const getRankedTeamCode = (group, rank) => groupRankings[group]?.[rank - 1]?.code || null;
+         console.log("ForceUpdate Calculated Rankings (Top 1):", "A:", getRankedTeamCode('A',1), "B:", getRankedTeamCode('B',1), "C:", getRankedTeamCode('C',1));
 
         const potentialRefereeCodes = {
             '1B': getRankedTeamCode('B', 1),
@@ -362,11 +378,10 @@ function App() {
                     const potentialRef = potentialRefereeCodes[refereeRule];
                      if (potentialRef && potentialRef !== newTeam1Code && potentialRef !== newTeam2Code) {
                          predefinedRefereeCode = potentialRef;
-                         console.log(`Матч ${match.id}: кнопка установила предопред. судью ${predefinedRefereeCode} по ${refereeRule}`);
-                     } else {
-                          console.log(`Матч ${match.id}: кнопка НЕ установила предопред. судью ${potentialRef} т.к. он играет или не найден`);
                      }
                  }
+                 // ОТЛАДКА: Логируем, что будет установлено этой функцией перед вызовом assignReferees
+                 console.log(`[${match.id} Button] Setting Teams: ${newTeam1Code}-${newTeam2Code}, Status: ${newStatus}, PredefinedRef: ${predefinedRefereeCode}`);
 
                 return {
                     ...match,
@@ -378,11 +393,34 @@ function App() {
                 };
             });
 
+            // Вызываем assignReferees ПОСЛЕ основного маппинга, чтобы он назначил динамических судей там, где predefinedRefereeCode остался null или некорректен
             const matchesWithReferees = assignReferees(updatedMatchesBase, teams);
-            console.log("Матчи плей-офф обновлены принудительно");
+            console.log("--- forceUpdatePlayoffTeams END ---");
             return matchesWithReferees;
         });
-    }, [teams, setMatches, assignReferees]);
+    }, [teams, setMatches, assignReferees]); // Добавили assignReferees в зависимости
+
+    
+     useEffect(() => { checkAllMatchesStatus(); }, [matches, checkAllMatchesStatus]);
+     useEffect(() => { recalculateAllTeamStats(matches); }, [matches, recalculateAllTeamStats]);
+     useEffect(() => { updatePlayoffTeams(matches, teams); }, [teams, matches, updatePlayoffTeams]); // Убедитесь, что updatePlayoffTeams в зависимостях
+    
+     return (
+         <>
+             {/* ... Структура JSX без изменений ... */}
+             <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+                <aside {/* ... */}> {/* ... */} </aside>
+                <main className="flex-1 p-0 md:p-6 pb-20 md:pb-6 overflow-y-auto">
+                    {view === 'matches' && renderMatches()}
+                    {view === 'groups' && renderGroups()}
+                    <div className="md:hidden p-4 mx-4 mt-4 mb-24 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 rounded-lg shadow-sm border border-[#0B8E8D]/20"> {/* ... */} </div>
+                 </main>
+                 <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-2 flex justify-around md:hidden z-30 border-t border-gray-200"> {/* ... */} </nav>
+             </div>
+             {showRules && renderRulesModal()}
+             {view === 'matchDetail' && renderMatchDetail()}
+         </>
+     );
 
     const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
         const score = parseInt(scoreStr);
