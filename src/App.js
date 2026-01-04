@@ -9,16 +9,16 @@ import { saveData, subscribeToData } from './firebase';
 
 // Начальные данные команд
 const initialTeams = [
-    { code: 'A1', name: 'Lážo Plážo Děčín', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'A2', name: 'Zlatý jádro Kladno', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'A3', name: 'Spořilov Praha', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'A4', name: 'Dobrá Parta Plzeň', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'A5', name: 'Prajd Pardubice', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B1', name: 'Sokol Benešov', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B2', name: 'Kondor Slaný', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B3', name: 'Všude zdejší Tuchlovice', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B4', name: 'UB Mongolsko', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B5', name: 'Dream team Praha', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'A1', name: 'Lážo Plážo Děčín', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'A2', name: 'Zlatý jádro Kladno', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'A3', name: 'Spořilov Praha', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'A4', name: 'Dobrá Parta Plzeň', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'A5', name: 'Prajd Pardubice', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'B1', name: 'Sokol Benešov', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'B2', name: 'Kondor Slaný', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'B3', name: 'Všude zdejší Tuchlovice', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'B4', name: 'UB Mongolsko', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'B5', name: 'Dream team Praha', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
 ];
 
 // Начальные данные матчей - правильное расписание без конфликтов
@@ -104,12 +104,15 @@ const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak) => {
 };
 
 // --- Вспомогательная функция сортировки команд ---
+// Приоритет: 1) Очки, 2) Разница сетов, 3) Выигранные сеты, 4) Разница мячей, 5) По имени
 const sortTeamsByRank = (teamsToSort) => {
     if (!teamsToSort || teamsToSort.length === 0) return [];
     return [...teamsToSort].sort((a, b) =>
         (b.points || 0) - (a.points || 0) ||
         ((b.setsWon || 0) - (b.setsLost || 0)) - ((a.setsWon || 0) - (a.setsLost || 0)) ||
         (b.setsWon || 0) - (a.setsWon || 0) ||
+        ((b.ballsWon || 0) - (b.ballsLost || 0)) - ((a.ballsWon || 0) - (a.ballsLost || 0)) ||
+        (b.ballsWon || 0) - (a.ballsWon || 0) ||
         a.name.localeCompare(b.name) // По имени для окончательного разрешения ничьих
     );
 };
@@ -259,7 +262,7 @@ function App() {
         setTeams(prevTeams => { // Используем функциональное обновление для prevTeams
             let calculatedTeams = initialTeams.map(initialTeam => ({
                 ...initialTeam, // Сброс статистики к начальным значениям
-                points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0
+                points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0
             }));
 
             const completedGroupMatches = currentMatches.filter(m =>
@@ -305,6 +308,12 @@ function App() {
                 // Обновление статистики сетов
                 team1.setsWon += team1SetsWonCount; team1.setsLost += team2SetsWonCount;
                 team2.setsWon += team2SetsWonCount; team2.setsLost += team1SetsWonCount;
+
+                // Обновление статистики мячей (míčů) - сумма всех очков во всех сетах
+                const team1Balls = (match.set1Team1 || 0) + (match.set2Team1 || 0) + (match.set3Team1 || 0);
+                const team2Balls = (match.set1Team2 || 0) + (match.set2Team2 || 0) + (match.set3Team2 || 0);
+                team1.ballsWon += team1Balls; team1.ballsLost += team2Balls;
+                team2.ballsWon += team2Balls; team2.ballsLost += team1Balls;
 
                 calculatedTeams[team1Index] = team1;
                 calculatedTeams[team2Index] = team2;
@@ -698,6 +707,8 @@ function App() {
                                                         <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.winsLosses || 'Победы/Поражения'}>{t.winsLossesShort || 'В/П'}</th>
                                                         <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.sets || 'Сеты'}>{t.setsShort || 'С'}</th>
                                                         <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.setsDifference || 'Разница сетов'}>{t.setsDiffShort || 'Р'}</th>
+                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.balls || 'Míčů'}>{t.ballsShort || 'М'}</th>
+                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.ballsDifference || 'Разница мячей'}>{t.ballsDiffShort || 'РМ'}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -711,6 +722,8 @@ function App() {
                                                                 <td className="p-3 text-sm md:text-base text-center">{team.wins || 0}/{team.losses || 0}</td>
                                                                 <td className="p-3 text-sm md:text-base text-center"><span className="font-semibold text-green-600">{team.setsWon || 0}</span><span className="mx-1 text-gray-400">:</span><span className="font-semibold text-red-600">{team.setsLost || 0}</span></td>
                                                                 <td className={`p-3 text-sm md:text-base text-center font-semibold ${(team.setsWon - team.setsLost) > 0 ? 'text-green-700' : (team.setsWon - team.setsLost) < 0 ? 'text-red-700' : 'text-gray-600'}`}>{(team.setsWon - team.setsLost) > 0 ? '+' : ''}{team.setsWon - team.setsLost || 0}</td>
+                                                                <td className="p-3 text-sm md:text-base text-center"><span className="text-green-600">{team.ballsWon || 0}</span><span className="mx-1 text-gray-400">:</span><span className="text-red-600">{team.ballsLost || 0}</span></td>
+                                                                <td className={`p-3 text-sm md:text-base text-center font-semibold ${((team.ballsWon || 0) - (team.ballsLost || 0)) > 0 ? 'text-green-700' : ((team.ballsWon || 0) - (team.ballsLost || 0)) < 0 ? 'text-red-700' : 'text-gray-600'}`}>{((team.ballsWon || 0) - (team.ballsLost || 0)) > 0 ? '+' : ''}{(team.ballsWon || 0) - (team.ballsLost || 0)}</td>
                                                             </tr>);
                                                     })}
                                                 </tbody>
