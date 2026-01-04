@@ -33,45 +33,41 @@ export const cs = {
   rules: 'Pravidla turnaje',
   showRules: 'Zobrazit pravidla',
   hideRules: 'Skrýt pravidla',
-  // tournamentRules оставлен без изменений, т.к. предоставленный текст детален
-  tournamentRules: `Rozdělení do skupiny a hrací systém
-Jedním z cílů Regionální volejbalové ligy je to, aby se vzájemně utkávaly týmy srovnatelné herní úrovně. Tomu je přizpůsoben herní systém našich turnajů. V rámci našeho jarního turnaje budou tedy týmy rozděleny do dvou výkonnostních skupin, dle aktuálního pořadí v soutěži a pravidel RVL
+  // tournamentRules - обновлено для зимнего турнира 11.1.2026
+  tournamentRules: `Rozdělení do skupin
 
-Skupina I.
-Kaliči Teplice
-Spořilov Praha
-Zlatý jádro Kladno
-Sokol Benešov
-Všude zdejší Slaný
-Lážo Plážo Děčín
-
-Skupina II.
-UB Mongolsko
-GNA Praha
-Bon Team Trutnov
-DREAM TEAM Pardubice
-
-
-Skupinová fáze
-
-Týmy ze skupiny I. jsou rozděleny do dvou herních skupin A a B takto:
+Přihlášené týmy jsou rozděleny do dvou skupin:
 
 Skupina A
 Lážo Plážo Děčín
-Spořilov Praha
 Zlatý jádro Kladno
+Spořilov Praha
+Dobrá Parta Plzeň
+Prajd Pardubice
 
 Skupina B
-Kaliči Teplice
 Sokol Benešov
-Všude zdejší Slaný
+Kondor Slaný
+Všude zdejší Tuchlovice
+UB Mongolsko
+Dream team Praha
 
-Týmy ve skupině sehrají zápasy každý s každým. Tím se určí pořadí ve skupině A a B.
 
-Skupina II. (dále pracovně označována jako C)
-Čtyři týmy ve skupině C sehraje zápasy každý s každým. Celkem tedy 3 zápasy pro každý tým. Tyto zápasy určí pořadí ve skupině C.
+Časový harmonogram na neděli 11.1.:
 
-Každý zápas ve skupinové fázi se hraje na 2 sety do 25 bodů.  Při dosažení 25. bodu je konec setu (výhra o 2 body tedy není nutná). V případě nerozhodného stavu 1:1 a stejném poměru míčů v obou setech se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
+08:00 – 08:30    Příjezd a registrace (účastnický poplatek 1000 Kč)
+08:30 – 08:55    Rozcvičení
+09:00                   Zahájení
+09:05 – 15:45     Zápasy (hrajeme na 3 hřištích současně)
+15:50 – 15:55     Vyhlášení výsledků a předání cen
+
+
+Organizace turnaje
+Základní kola se odehrají ve dvou 5-členných skupinách, každý s každým. Celkem tedy na každý tým čekají 4 zápasy.
+První 3 týmy každé skupiny pak ještě odehrají vzájemný zápas o celkové 1.- 2.,  3.- 4. a 5.- 6. místo v turnaji.
+
+Pravidla zápasů
+Každý zápas ve skupinové fázi se hraje na 2 sety do 25 bodů. Při dosažení 25. bodu je konec setu (výhra o 2 body tedy není nutná). V případě nerozhodného stavu 1:1 a stejném poměru míčů v obou setech se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
 
 Bodování zápasu:
 Výhra   2 : 0 … 3 body
@@ -79,21 +75,19 @@ Výhra   1 : 1 … 2 body
 Prohra 1 : 1 … 1 bod
 Prohra 0 : 2 … 0 bodů
 
-Získané body v zápasu  určí pořadí v tabulce (A / B / C). V případě rovnosti bodů rozhoduje počet vítězných setů. V případě stejného počtu setů pak více vítězných míčů.
-Play-off fáze
-Do playoff fáze postupují 2 nejlepší týmy ze skupiny II. (C) a všechna týmy ze skupiny I. (A a B).
-Ve čtvrtfinále se utkají týmy takto: 1A – 1C, 1B – 2C, 2A – 3B, 3A – 2B
-Vítězové QF zápasů postupují do SF. Vítězové SF postupují do Finále
-Každý zápas v playoff fázi se hraje na 2 sety do 25 bodů.  Při dosažení 25. bodu je konec setu (výhra o 2 body tedy není nutná). V případě nerozhodného stavu 1:1 se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
+Získané body v zápasu určí pořadí v tabulce. V případě rovnosti bodů rozhoduje počet vítězných setů. V případě stejného počtu setů pak více vítězných míčů.
 
 Finále turnaje
-Na závěr  turnaje se utkají vítězové SF o celkového vítěze turnaje. Tento zápas se hraje na 2 vítězné sety, přičemž případný rozhodující třetí set se hraje do 15 bodů.
-Finálový zápas rozhodne jak o držiteli první ceny (míč Molten) tak i o právu postupu do finálové části turnaje RVL 27.dubna, kde mají právo nastoupit  vítězové každého z dílčích turnajů RVL.
-
+Finálový zápas o 1.-2. místo se hraje na 2 vítězné sety, přičemž případný rozhodující třetí set se hraje do 15 bodů.
 
 Rozhodčí a zapisovatel
-Funkci rozhodčího a zapisovatele obsazují vždy týmy, které aktuálně nehrají, dle uvedeného rozpisu.  Rozhodnutí  rozhodčího je konečné.  (Připomínáme, že se jedná o turnaj amatérských hráčů.)
-Zapisovatel zaznamenává výsledek utkání na jednoduchý formulář, který po skončení zápasu předá ke stolku organizátorů.`,
+Funkci rozhodčího a zapisovatele obsazují vždy týmy, které aktuálně nehrají, dle uvedeného rozpisu. Rozhodnutí rozhodčího je konečné. (Připomínáme, že se jedná o turnaj amatérských hráčů.)
+
+Další informace
+Webové stránky RVL: https://rvl.hala-slany.cz/
+V hale je k dispozici sportbar s širokým výběrem nápojů a jídel.
+Info o lokalitě: https://hala-slany.cz/`,
+
 
   // --- Добавленные/Обновленные ключи ---
   tbd: 'Bude určeno', // Команда "Будет определено"
