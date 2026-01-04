@@ -23,7 +23,7 @@ export const ru = {
   tiebreak: 'Тайбрейк',
   group: 'Группа',
   aboutSection: 'О приложении',
-  tournamentDate: '6.4.2025',
+  tournamentDate: '11.1.2026',
   tournamentAddress: 'Václava Mouchy 2045, Slaný',
   tournamentWebsite: 'https://rvl.hala-slany.cz/',
   tournamentInfo: 'Информация о турнире',

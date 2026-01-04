@@ -23,7 +23,7 @@ export const cs = {
   tiebreak: 'Tiebreak',
   group: 'Skupina',
   aboutSection: 'O aplikaci',
-  tournamentDate: '6.4.2025', // Pozor, aktuální datum je 4. dubna 2025
+  tournamentDate: '11.1.2026',
   tournamentAddress: 'Václava Mouchy 2045, Slaný',
   tournamentWebsite: 'https://rvl.hala-slany.cz/',
   tournamentInfo: 'Informace o turnaji',

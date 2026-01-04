@@ -152,7 +152,7 @@ Všude zdejší Slaný
   addressLabel: 'Адреса залу:',
   websiteLabel: 'Веб-сайт:',
   dateLabel: 'Дата:',
-  tournamentDate: '6.4.2025', // Увага! Дата турніру, може потребувати оновлення
+  tournamentDate: '11.1.2026',
   tournamentAddress: 'Václava Mouchy 2045, Slaný', // Адреса може бути перекладена або залишена оригіналом
   tournamentWebsite: 'https://rvl.hala-slany.cz/',
 
