@@ -21,37 +21,51 @@ const initialTeams = [
     { code: 'B5', name: 'Dream team Praha', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
 ];
 
-// Начальные данные матчей
+// Начальные данные матчей - правильное расписание без конфликтов
+// 3 корта, слоты по 30 минут, каждая команда играет максимум 1 матч за слот
 const initialMatches = [
-    // Группа A (10 матчей - каждый с каждым)
-    { id: 'A1-A2', court: 1, time: '09:00', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null },
-    { id: 'A1-A3', court: 2, time: '09:00', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null },
-    { id: 'A1-A4', court: 3, time: '09:00', team1: 'A1', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null },
-    { id: 'A1-A5', court: 1, time: '10:00', team1: 'A1', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null },
-    { id: 'A2-A3', court: 2, time: '10:00', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
-    { id: 'A2-A4', court: 3, time: '10:00', team1: 'A2', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null },
-    { id: 'A2-A5', court: 1, time: '11:00', team1: 'A2', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null },
-    { id: 'A3-A4', court: 2, time: '11:00', team1: 'A3', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
-    { id: 'A3-A5', court: 3, time: '11:00', team1: 'A3', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null },
-    { id: 'A4-A5', court: 1, time: '12:00', team1: 'A4', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
+    // === РАУНД 1 (09:00) ===
+    { id: 'A1-A2', court: 1, time: '09:00', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null },
+    { id: 'A3-A4', court: 2, time: '09:00', team1: 'A3', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
+    { id: 'B1-B2', court: 3, time: '09:00', team1: 'B1', team2: 'B2', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
 
-    // Группа B (10 матчей - каждый с каждым)
-    { id: 'B1-B2', court: 2, time: '12:00', team1: 'B1', team2: 'B2', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null },
-    { id: 'B1-B3', court: 3, time: '12:00', team1: 'B1', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null },
-    { id: 'B1-B4', court: 1, time: '13:00', team1: 'B1', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
-    { id: 'B1-B5', court: 2, time: '13:00', team1: 'B1', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null },
-    { id: 'B2-B3', court: 3, time: '13:00', team1: 'B2', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
-    { id: 'B2-B4', court: 1, time: '14:00', team1: 'B2', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
-    { id: 'B2-B5', court: 2, time: '14:00', team1: 'B2', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null },
-    { id: 'B3-B4', court: 3, time: '14:00', team1: 'B3', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
-    { id: 'B3-B5', court: 1, time: '15:00', team1: 'B3', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null },
-    { id: 'B4-B5', court: 2, time: '15:00', team1: 'B4', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
+    // === РАУНД 2 (09:30) ===
+    { id: 'A1-A3', court: 1, time: '09:30', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null },
+    { id: 'A2-A5', court: 2, time: '09:30', team1: 'A2', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null },
+    { id: 'B3-B4', court: 3, time: '09:30', team1: 'B3', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
 
-    // Финальные матчи - топ-3 команды из каждой группы
-    { id: 'F-1A-1B', court: 1, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null },
-    { id: 'F3-2A-2B', court: 2, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null },
-    { id: 'F5-3A-3B', court: 3, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'fifth_place', refereeTeamCode: null, refereeRule: null }
+    // === РАУНД 3 (10:00) ===
+    { id: 'A1-A4', court: 1, time: '10:00', team1: 'A1', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null },
+    { id: 'A3-A5', court: 2, time: '10:00', team1: 'A3', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null },
+    { id: 'B1-B3', court: 3, time: '10:00', team1: 'B1', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null },
+
+    // === РАУНД 4 (10:30) ===
+    { id: 'A1-A5', court: 1, time: '10:30', team1: 'A1', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null },
+    { id: 'A2-A4', court: 2, time: '10:30', team1: 'A2', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null },
+    { id: 'B2-B5', court: 3, time: '10:30', team1: 'B2', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
+
+    // === РАУНД 5 (11:00) ===
+    { id: 'A2-A3', court: 1, time: '11:00', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
+    { id: 'A4-A5', court: 2, time: '11:00', team1: 'A4', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
+    { id: 'B1-B4', court: 3, time: '11:00', team1: 'B1', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
+
+    // === РАУНД 6 (11:30) ===
+    { id: 'B1-B5', court: 1, time: '11:30', team1: 'B1', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
+    { id: 'B2-B3', court: 2, time: '11:30', team1: 'B2', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null },
+
+    // === РАУНД 7 (12:00) ===
+    { id: 'B2-B4', court: 1, time: '12:00', team1: 'B2', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null },
+    { id: 'B3-B5', court: 2, time: '12:00', team1: 'B3', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null },
+
+    // === РАУНД 8 (12:30) ===
+    { id: 'B4-B5', court: 1, time: '12:30', team1: 'B4', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null },
+
+    // === ФИНАЛЫ (13:00) ===
+    { id: 'F-1A-1B', court: 1, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null },
+    { id: 'F3-2A-2B', court: 2, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null },
+    { id: 'F5-3A-3B', court: 3, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'fifth_place', refereeTeamCode: null, refereeRule: null }
 ];
+
 
 
 // --- Firebase Database Paths ---
