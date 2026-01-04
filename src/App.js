@@ -1181,6 +1181,7 @@ function App() {
                 <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 flex justify-around md:hidden z-30 border-t border-gray-200">
                     <button onClick={() => setView('matches')} className={`p-3 flex flex-col items-center transition-colors duration-150 ${view === 'matches' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600 hover:text-[#0B8E8D]'}`}><FaVolleyballBall className="text-2xl mb-1" /><span className="text-sm">{t.matches}</span></button>
                     <button onClick={() => setView('groups')} className={`p-3 flex flex-col items-center transition-colors duration-150 ${view === 'groups' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600 hover:text-[#0B8E8D]'}`}><FaUsers className="text-2xl mb-1" /><span className="text-sm">{t.groups}</span></button>
+                    <button onClick={() => setView('league')} className={`p-3 flex flex-col items-center transition-colors duration-150 ${view === 'league' ? 'text-[#FDD80F] font-semibold' : 'text-gray-600 hover:text-[#FDD80F]'}`}><FaChartBar className="text-2xl mb-1 text-[#FDD80F]" /><span className="text-sm">{t.leagueShort || 'Liga'}</span></button>
                     <button onClick={() => setShowRules(true)} className={`p-3 flex flex-col items-center text-gray-600 hover:text-[#0B8E8D] transition-colors duration-150`}><FaGlobe className="text-2xl mb-1 text-[#FDD80F]" /><span className="text-sm">{t.rules}</span></button>
                 </nav>
             </div>

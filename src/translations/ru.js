@@ -165,6 +165,7 @@ Dream team Praha
   // Турниры и лига
   selectTournament: 'Турнир',
   leagueStandings: 'Турнирная таблица лиги',
+  leagueShort: 'Лига',
   leagueCumulativeInfo: 'Сумма очков со всех турниров сезона.',
   total: 'Всего',
   completed: 'Завершен',

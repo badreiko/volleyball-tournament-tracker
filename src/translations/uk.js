@@ -183,6 +183,7 @@ Dream team Praha
   // Турніри та ліга
   selectTournament: 'Турнір',
   leagueStandings: 'Турнірна таблиця ліги',
+  leagueShort: 'Ліга',
   leagueCumulativeInfo: 'Сума очок з усіх турнірів сезону.',
   total: 'Разом',
   completed: 'Завершено',

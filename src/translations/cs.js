@@ -165,6 +165,7 @@ Info o lokalitě: https://hala-slany.cz/`,
   // Турниры и лига
   selectTournament: 'Turnaj',
   leagueStandings: 'Pořadí ligy',
+  leagueShort: 'Liga',
   leagueCumulativeInfo: 'Součet bodů ze všech turnajů sezóny.',
   total: 'Celkem',
   completed: 'Dokončeno',
