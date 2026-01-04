@@ -549,16 +549,16 @@ function App() {
         setView('matches');
     }, [setMatches, setSelectedMatch, setView /* initialMatches - константа */]);
 
-    // --- Обработчик ручного выбора судьи ---
-    const updateMatchReferee = useCallback((matchId, newRefereeCode) => {
+    // --- Обработчик редактирования деталей матча (корт, время, судья) ---
+    const updateMatchDetails = useCallback((matchId, field, value) => {
         setMatches(prevMatches =>
-            prevMatches.map(m =>
-                (m.id === matchId && m.round !== 'group') // Обновляем только для плей-офф
-                    ? { ...m, refereeTeamCode: newRefereeCode || null } // Сохраняем null если выбрано '-- Выбрать --'
-                    : m
-            )
+            prevMatches.map(m => {
+                if (m.id === matchId) {
+                    return { ...m, [field]: value || null };
+                }
+                return m;
+            })
         );
-        // console.log(`Manually set referee for playoff match ${matchId} to ${newRefereeCode}`);
     }, [setMatches]);
 
     // --- Главные useEffect для запуска логики ---
@@ -759,31 +759,55 @@ function App() {
                                 <span className={roundClass}><span className="flex items-center">{roundIcon}{roundText}</span></span>
                                 <span className={statusClass}><span className="flex items-center">{statusIcon}{statusText}</span></span>
                             </div>
-                            <div className="text-sm text-gray-600 flex flex-col items-end space-y-1">
-                                <div className="flex items-center"><FaCalendarAlt className="mr-2 text-indigo-500" />{currentMatchData.time} ({t.court} {currentMatchData.court})</div>
-                                {/* Секция Судьи */}
-                                <div className="flex items-center">
-                                    <FaBullhorn className={`mr-2 ${isPlayoffMatch && !currentMatchData.refereeTeamCode ? 'text-red-400 animate-pulse' : 'text-gray-400'} flex-shrink-0`} title={isPlayoffMatch && !currentMatchData.refereeTeamCode ? t.refereeNotAssignedTooltip || 'Судья не назначен!' : ''} />
-                                    <span className="mr-1">{t.referee || 'Судья'}:</span>
-                                    {/* Выпадающий список для плей-офф или текст для группы */}
-                                    {isPlayoffMatch && teamsAreSet ? (
-                                        <select
-                                            value={currentMatchData.refereeTeamCode || ""}
-                                            onChange={(e) => updateMatchReferee(currentMatchData.id, e.target.value)} // Вызываем новый обработчик
-                                            className={`ml-1 p-1 border rounded text-sm focus:ring-indigo-500 focus:border-indigo-500 min-w-[100px] ${!currentMatchData.refereeTeamCode ? 'border-red-300' : 'border-gray-300'}`} // Выделяем красным, если не выбран
-                                            disabled={!teamsAreSet} // Неактивен, если команды не определены
-                                        >
-                                            <option value="">{t.selectRefereePlaceholder || '-- Выбрать --'}</option>
-                                            {availableReferees.map(team => (
-                                                <option key={team.code} value={team.code}>
-                                                    {team.name} ({team.code}) {/* Добавляем код для ясности */}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        // Статический текст для группы или если команды не установлены
-                                        <span className={`ml-1 font-medium ${isPlayoffMatch && !currentMatchData.refereeTeamCode ? 'text-red-600' : ''}`}>{currentRefereeName}</span>
-                                    )}
+                            {/* Редактируемые поля: Корт, Время, Судья */}
+                            <div className="bg-gray-50 p-3 rounded-lg space-y-3 w-full">
+                                {/* Время */}
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-gray-700 flex items-center">
+                                        <FaCalendarAlt className="mr-2 text-indigo-500" />
+                                        {t.time || 'Время'}:
+                                    </label>
+                                    <input
+                                        type="time"
+                                        value={currentMatchData.time || ''}
+                                        onChange={(e) => updateMatchDetails(currentMatchData.id, 'time', e.target.value)}
+                                        className="p-2 border border-gray-300 rounded-lg text-center font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                </div>
+                                {/* Корт */}
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-gray-700 flex items-center">
+                                        <FaMapMarkerAlt className="mr-2 text-[#0B8E8D]" />
+                                        {t.court || 'Корт'}:
+                                    </label>
+                                    <select
+                                        value={currentMatchData.court || 1}
+                                        onChange={(e) => updateMatchDetails(currentMatchData.id, 'court', parseInt(e.target.value))}
+                                        className="p-2 border border-gray-300 rounded-lg font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    >
+                                        <option value={1}>{t.court || 'Корт'} 1</option>
+                                        <option value={2}>{t.court || 'Корт'} 2</option>
+                                        <option value={3}>{t.court || 'Корт'} 3</option>
+                                    </select>
+                                </div>
+                                {/* Судья */}
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-gray-700 flex items-center">
+                                        <FaBullhorn className={`mr-2 ${!currentMatchData.refereeTeamCode ? 'text-red-400' : 'text-gray-400'}`} />
+                                        {t.referee || 'Судья'}:
+                                    </label>
+                                    <select
+                                        value={currentMatchData.refereeTeamCode || ""}
+                                        onChange={(e) => updateMatchDetails(currentMatchData.id, 'refereeTeamCode', e.target.value)}
+                                        className={`p-2 border rounded-lg font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-w-[150px] ${!currentMatchData.refereeTeamCode ? 'border-red-300' : 'border-gray-300'}`}
+                                    >
+                                        <option value="">{t.selectRefereePlaceholder || '-- Не назначен --'}</option>
+                                        {availableReferees.map(team => (
+                                            <option key={team.code} value={team.code}>
+                                                {team.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -838,8 +862,8 @@ function App() {
                 </div>
             </div>
         );
-        // Добавили updateMatchReferee в зависимости
-    }, [selectedMatch, matches, teams, t, updateMatchScore, setView, setSelectedMatch, resetMatch, updateMatchReferee]);
+        // Добавили updateMatchDetails в зависимости
+    }, [selectedMatch, matches, teams, t, updateMatchScore, setView, setSelectedMatch, resetMatch, updateMatchDetails]);
 
     // Рендер модального окна правил (без изменений)
     const renderRulesModal = useCallback(() => {
