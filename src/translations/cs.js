@@ -159,4 +159,13 @@ Info o lokalitě: https://hala-slany.cz/`,
   finalTiebreakCondition: 'do 15',
   tiebreakInfo: 'Zadejte skóre tiebreaku (do 5, rozdíl 2).',
   finalTiebreakInfo: 'Třetí set finále se hraje do 15 bodů (rozdíl 2).',
+
+  // Турниры и лига
+  selectTournament: 'Turnaj',
+  leagueStandings: 'Pořadí ligy',
+  leagueCumulativeInfo: 'Součet bodů ze všech turnajů sezóny.',
+  total: 'Celkem',
+  completed: 'Dokončeno',
+  active: 'Aktivní',
+  upcoming: 'Připravuje se',
 };

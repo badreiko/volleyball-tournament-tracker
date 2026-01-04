@@ -1,6 +1,7 @@
 // Український переклад
 export const uk = {
   // Основні UI елементи
+  appTitle: 'RVL Волейбольний Турнір',
   appName: 'RVL Scoreboard', // Назва додатку
   aboutApp: 'RVL Турнір - додаток для відстеження результатів волейбольних матчів та турнірної таблиці.',
   matches: 'Матчі',
@@ -64,6 +65,7 @@ export const uk = {
 
   // Тайбрейк та його умови
   tiebreak: 'Тайбрейк',
+  group: 'Група',
   tiebreak_condition: 'до 5', // Умова звичайного тайбрейку
   finalTiebreakCondition: 'до 15', // Умова фінального тайбрейку
   tiebreakInfo: 'Введіть рахунок тай-брейку (до 5).', // Підказка для звичайного тайбрейку
@@ -177,4 +179,13 @@ Dream team Praha
 
   // Зміна сторін
   swapTeams: 'Поміняти сторони',
+
+  // Турніри та ліга
+  selectTournament: 'Турнір',
+  leagueStandings: 'Турнірна таблиця ліги',
+  leagueCumulativeInfo: 'Сума очок з усіх турнірів сезону.',
+  total: 'Разом',
+  completed: 'Завершено',
+  active: 'Активний',
+  upcoming: 'Майбутній',
 };
