@@ -155,22 +155,24 @@ function App() {
             subscribeToData(DB_PATHS.matches, (data) => {
                 if (data) {
                     const matchesArray = Array.isArray(data) ? data : Object.values(data);
-                    // Слияние с initialMatches для сохранения структуры
+                    // Firebase данные имеют приоритет! 
+                    // initialMatches используется только для получения списка ID матчей
+                    // и заполнения отсутствующих полей (fallback)
                     const mergedMatches = initialMatches.map(initialMatch => {
                         const loadedMatchData = matchesArray.find(lm => lm.id === initialMatch.id);
-                        const refereeToKeep = initialMatch.round !== 'group' ? loadedMatchData?.refereeTeamCode : initialMatch.refereeTeamCode;
-                        return {
-                            ...initialMatch,
-                            ...(loadedMatchData || {}),
-                            court: initialMatch.court,
-                            time: initialMatch.time,
-                            round: initialMatch.round,
-                            refereeRule: initialMatch.refereeRule,
-                            refereeTeamCode: refereeToKeep
-                        };
+                        if (loadedMatchData) {
+                            // Firebase данные имеют полный приоритет
+                            return {
+                                ...initialMatch, // Базовая структура (fallback для новых полей)
+                                ...loadedMatchData // Firebase данные перезаписывают всё
+                            };
+                        }
+                        // Матч не найден в Firebase - это новый матч, добавляем из initial
+                        return initialMatch;
                     });
                     setMatches(mergedMatches);
                 } else {
+                    // Первый запуск - инициализируем Firebase начальными данными
                     setMatches(initialMatches);
                     saveData(DB_PATHS.matches, initialMatches);
                 }
