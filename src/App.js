@@ -7,6 +7,58 @@ import { translations, languageNames } from './translations';
 // Firebase
 import { saveData, subscribeToData } from './firebase';
 
+// === КОНФИГУРАЦИЯ ТУРНИРОВ RVL 2025/26 ===
+const LEAGUE_SEASON = '2025-26';
+
+const TOURNAMENTS = {
+    autumn: {
+        id: 'autumn',
+        name: 'Podzimní',
+        nameRu: 'Осенний',
+        nameUk: 'Осінній',
+        date: '2.11.2025',
+        status: 'completed'
+    },
+    winter: {
+        id: 'winter',
+        name: 'Zimní',
+        nameRu: 'Зимний',
+        nameUk: 'Зимовий',
+        date: '11.1.2026',
+        status: 'active'
+    },
+    spring: {
+        id: 'spring',
+        name: 'Jarní',
+        nameRu: 'Весенний',
+        nameUk: 'Весняний',
+        date: '7.3.2026',
+        status: 'upcoming'
+    },
+    finals: {
+        id: 'finals',
+        name: 'Finále',
+        nameRu: 'Финал',
+        nameUk: 'Фінал',
+        date: '19.4.2026',
+        status: 'upcoming'
+    }
+};
+
+// Результаты осеннего турнира (2.11.2025) - спарсено с RVL сайта
+const AUTUMN_STANDINGS = [
+    { name: 'Lážo plážo Děčín', leaguePoints: 10 },
+    { name: 'Sokol Benešov', leaguePoints: 8 },
+    { name: 'Kondor Slaný', leaguePoints: 6 },
+    { name: 'Dvojka Za Praha', leaguePoints: 5 },
+    { name: 'Zlatý jádro Kladno', leaguePoints: 4 },
+    { name: 'Spořilov Praha', leaguePoints: 3 },
+    { name: 'Všude zdejší Tuchlovice', leaguePoints: 2 },
+    { name: 'Karpaty Liberec', leaguePoints: 1 },
+    // Команды не участвовавшие в осеннем турнире получают 0 очков
+];
+
+
 // Начальные данные команд
 const initialTeams = [
     { code: 'A1', name: 'Lážo Plážo Děčín', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
@@ -130,6 +182,7 @@ function App() {
     const [isLoading, setIsLoading] = useState(true); // Загрузка данных из Firebase
     const [isSaving, setIsSaving] = useState(false); // Индикатор сохранения
     const [isSwapped, setIsSwapped] = useState(false); // Перевёрнутый порядок команд в UI
+    const [currentTournament, setCurrentTournament] = useState('winter'); // Текущий выбранный турнир
 
     // Получаем объект перевода для текущего языка
     const t = translations[language] || translations['cs'];
@@ -934,6 +987,98 @@ function App() {
     // --- Основной рендер компонента App ---
 
     // Показываем спиннер загрузки пока данные загружаются из Firebase
+    // --- Рендер Cumulative League Standings ---
+    const renderLeagueStandings = useCallback(() => {
+        // Рассчитываем накопительные очки лиги
+        const leagueData = {};
+
+        // Добавляем очки из осеннего турнира
+        AUTUMN_STANDINGS.forEach(team => {
+            const normalizedName = team.name.toLowerCase().replace(/\s+/g, ' ').trim();
+            leagueData[normalizedName] = {
+                name: team.name,
+                autumn: team.leaguePoints,
+                winter: 0,
+                spring: 0,
+                total: team.leaguePoints
+            };
+        });
+
+        // Добавляем очки из зимнего турнира (текущий)
+        teams.forEach(team => {
+            const normalizedName = team.name.toLowerCase().replace(/\s+/g, ' ').trim();
+            if (!leagueData[normalizedName]) {
+                leagueData[normalizedName] = {
+                    name: team.name,
+                    autumn: 0,
+                    winter: 0,
+                    spring: 0,
+                    total: 0
+                };
+            }
+            leagueData[normalizedName].winter = team.points || 0;
+            leagueData[normalizedName].total = (leagueData[normalizedName].autumn || 0) + (team.points || 0);
+            leagueData[normalizedName].name = team.name; // Используем актуальное имя
+        });
+
+        // Сортируем по накопительным очкам
+        const sortedLeague = Object.values(leagueData).sort((a, b) => b.total - a.total);
+
+        return (
+            <div className="p-4 md:p-6">
+                <div className="bg-white rounded-xl shadow-md p-6 border border-[#FDD80F]/30">
+                    <h2 className="text-xl font-bold text-[#06324F] mb-4 flex items-center">
+                        <FaTrophy className="mr-3 text-[#FDD80F]" />
+                        {t.leagueStandings || 'Průběžné pořadí ligy'} RVL {LEAGUE_SEASON}
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-4">
+                        {t.leagueCumulativeInfo || 'Součet bodů ze všech turnajů sezóny.'}
+                    </p>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full">
+                            <thead className="bg-gradient-to-r from-[#FDD80F]/20 to-[#0B8E8D]/10">
+                                <tr>
+                                    <th className="p-3 text-left text-sm font-semibold text-[#06324F]">#</th>
+                                    <th className="p-3 text-left text-sm font-semibold text-[#06324F]">{t.team || 'Tým'}</th>
+                                    <th className="p-3 text-center text-sm font-semibold text-gray-600" title={TOURNAMENTS.autumn.name}>🍂</th>
+                                    <th className="p-3 text-center text-sm font-semibold text-gray-600" title={TOURNAMENTS.winter.name}>❄️</th>
+                                    <th className="p-3 text-center text-sm font-semibold text-gray-600" title={TOURNAMENTS.spring.name}>🌸</th>
+                                    <th className="p-3 text-center text-sm font-bold text-[#06324F]">{t.total || 'Celkem'}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sortedLeague.map((team, index) => {
+                                    const rank = index + 1;
+                                    let rowClass = 'border-b border-gray-100 hover:bg-gray-50';
+                                    let rankIcon = null;
+                                    if (rank === 1) { rowClass += ' bg-yellow-50 font-bold'; rankIcon = <FaTrophy className="inline text-yellow-500" />; }
+                                    else if (rank === 2) { rowClass += ' bg-gray-50'; rankIcon = <FaTrophy className="inline text-gray-400" />; }
+                                    else if (rank === 3) { rankIcon = <FaTrophy className="inline text-orange-400" />; }
+
+                                    return (
+                                        <tr key={team.name} className={rowClass}>
+                                            <td className="p-3 text-sm">{rankIcon || rank}.</td>
+                                            <td className="p-3 text-sm font-medium">{team.name}</td>
+                                            <td className="p-3 text-center text-sm text-gray-600">{team.autumn || '-'}</td>
+                                            <td className="p-3 text-center text-sm text-blue-600 font-medium">{team.winter || '-'}</td>
+                                            <td className="p-3 text-center text-sm text-gray-400">-</td>
+                                            <td className="p-3 text-center text-lg font-bold text-[#06324F]">{team.total}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="mt-4 text-xs text-gray-500">
+                        <p>🍂 {TOURNAMENTS.autumn.name} ({TOURNAMENTS.autumn.date}) - ✅ {t.completed || 'Dokončeno'}</p>
+                        <p>❄️ {TOURNAMENTS.winter.name} ({TOURNAMENTS.winter.date}) - 🟢 {t.active || 'Aktivní'}</p>
+                        <p>🌸 {TOURNAMENTS.spring.name} ({TOURNAMENTS.spring.date}) - 🔜 {t.upcoming || 'Připravuje se'}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }, [teams, t]);
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -944,6 +1089,7 @@ function App() {
             </div>
         );
     }
+
 
     return (
         <>
@@ -964,8 +1110,28 @@ function App() {
                     </div>
                     {/* Навигация Sidebar */}
                     <div className="p-4 space-y-2">
+                        {/* Селектор турнира */}
+                        <div className="mb-4 p-3 bg-gradient-to-r from-[#FDD80F]/20 to-[#0B8E8D]/10 rounded-lg border border-[#FDD80F]/30">
+                            <label className="block text-xs font-semibold text-[#06324F] mb-2">
+                                <FaTrophy className="inline mr-2 text-[#FDD80F]" />
+                                {t.selectTournament || 'Turnaj'}
+                            </label>
+                            <select
+                                value={currentTournament}
+                                onChange={(e) => setCurrentTournament(e.target.value)}
+                                className="w-full p-2 text-sm rounded border border-[#0B8E8D]/30 bg-white focus:ring-2 focus:ring-[#0B8E8D] focus:border-[#0B8E8D]"
+                            >
+                                {Object.values(TOURNAMENTS).map(t => (
+                                    <option key={t.id} value={t.id} disabled={t.status === 'upcoming'}>
+                                        {t.name} ({t.date}) {t.status === 'active' ? '🟢' : t.status === 'completed' ? '✅' : '🔜'}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
                         <button onClick={() => setView('matches')} className={`flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 ${view === 'matches' ? 'bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white shadow-md' : 'hover:bg-[#0B8E8D]/10 text-gray-700'}`}><FaVolleyballBall className="mr-3" /> {t.matches}</button>
                         <button onClick={() => setView('groups')} className={`flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 ${view === 'groups' ? 'bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white shadow-md' : 'hover:bg-[#0B8E8D]/10 text-gray-700'}`}><FaUsers className="mr-3" /> {t.groups}</button>
+                        <button onClick={() => setView('league')} className={`flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 ${view === 'league' ? 'bg-gradient-to-r from-[#FDD80F] to-[#0B8E8D] text-white shadow-md' : 'hover:bg-[#FDD80F]/10 text-gray-700'}`}><FaChartBar className="mr-3 text-[#FDD80F]" /> {t.leagueStandings || 'Pořadí ligy'}</button>
                         <button onClick={() => setShowRules(true)} className="flex items-center w-full text-left p-3 rounded-lg transition-all duration-200 hover:bg-[#0B8E8D]/10 text-gray-700 mt-2"><FaGlobe className="mr-3 text-[#FDD80F]" /> {t.rules}</button>
                     </div>
                     {/* Инфо-блок в Sidebar */}
@@ -986,6 +1152,7 @@ function App() {
                 <main className="flex-1 p-0 md:p-6 pb-20 md:pb-6 overflow-y-auto">
                     {view === 'matches' && renderMatches()}
                     {view === 'groups' && renderGroups()}
+                    {view === 'league' && renderLeagueStandings()}
 
                     {/* Инфо-блок (Mobile) */}
                     <div className="md:hidden p-4 mx-4 mt-4 mb-24 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 rounded-lg shadow-sm border border-[#0B8E8D]/20">
