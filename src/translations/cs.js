@@ -136,4 +136,27 @@ Info o lokalitě: https://hala-slany.cz/`,
   assignReferee: 'Přidělit rozhodčího',
   assignSecretary: 'Přidělit zapisovatele',
   assignedReferees: 'Přidělení rozhodčí',
+
+  // Новые ключи для мячей (míčů)
+  balls: 'Míče',
+  ballsShort: 'M',
+  ballsDifference: 'Rozdíl míčů',
+  ballsDiffShort: 'RM',
+
+  // Смена сторон
+  swapTeams: 'Prohodit strany',
+
+  // Сброс матча
+  resetMatch: 'Resetovat',
+  resetMatchTooltip: 'Resetovat skóre a stav zápasu',
+
+  // Плейсхолдер для арбітра
+  selectRefereePlaceholder: '-- Není přidělen --',
+  refereeTBD: 'Nepřiřazeno',
+  refereeNotAssignedTooltip: 'Rozhodčí nebyl přidělen!',
+
+  // Информация о тайбрейке
+  finalTiebreakCondition: 'do 15',
+  tiebreakInfo: 'Zadejte skóre tiebreaku (do 5, rozdíl 2).',
+  finalTiebreakInfo: 'Třetí set finále se hraje do 15 bodů (rozdíl 2).',
 };
