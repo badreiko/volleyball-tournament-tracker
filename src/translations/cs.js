@@ -107,11 +107,10 @@ Zapisovatel zaznamenává výsledek utkání na jednoduchý formulář, který p
 
   roundNames: {
     group: 'Skupinová fáze',
-    quarterfinal: 'Čtvrtfinále',
-    semifinal: 'Semifinále',
-    third_place: 'Zápas o 3. místo',
-    final: 'Finále',
-    unknown: 'Neznámé' // Добавлено на случай неопределенного раунда
+    final: 'Zápas o 1.-2. místo',
+    third_place: 'Zápas o 3.-4. místo',
+    fifth_place: 'Zápas o 5.-6. místo',
+    unknown: 'Neznámé'
   },
   statusNames: {
     not_started: 'Nezahájený', // Изменено для согласованности

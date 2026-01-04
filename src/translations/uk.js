@@ -47,10 +47,9 @@ export const uk = {
   // Статуси та раунди
   roundNames: {
     group: 'Груповий етап',
-    quarterfinal: 'Чвертьфінал',
-    semifinal: 'Півфінал',
-    third_place: 'Матч за 3-є місце',
-    final: 'Фінал',
+    final: 'Матч за 1-2 місце',
+    third_place: 'Матч за 3-4 місце',
+    fifth_place: 'Матч за 5-6 місце',
     unknown: 'Невідомо'
   },
   statusNames: {

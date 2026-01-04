@@ -45,15 +45,10 @@ const initialMatches = [
     { id: 'B3-B5', court: 1, time: '15:00', team1: 'B3', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null },
     { id: 'B4-B5', court: 2, time: '15:00', team1: 'B4', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
 
-    // Плей-офф - топ-4 команды из каждой группы (8 команд)
-    { id: 'QF-1A-4B', court: 1, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null },
-    { id: 'QF-2A-3B', court: 2, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null },
-    { id: 'QF-1B-4A', court: 3, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null },
-    { id: 'QF-2B-3A', court: 1, time: '17:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null },
-    { id: 'SF-W1-W2', court: 1, time: '18:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'semifinal', refereeTeamCode: null, refereeRule: null },
-    { id: 'SF-W3-W4', court: 2, time: '18:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'semifinal', refereeTeamCode: null, refereeRule: null },
-    { id: 'F3-L1-L2', court: 1, time: '19:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null },
-    { id: 'F-W1-W2', court: 2, time: '19:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null }
+    // Финальные матчи - топ-3 команды из каждой группы
+    { id: 'F-1A-1B', court: 1, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null },
+    { id: 'F3-2A-2B', court: 2, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null },
+    { id: 'F5-3A-3B', court: 3, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'fifth_place', refereeTeamCode: null, refereeRule: null }
 ];
 
 
@@ -286,44 +281,12 @@ function App() {
                 let newTeam1Code = null;
                 let newTeam2Code = null;
 
-                // Определение команд для плей-офф
+                // Определение команд для финальных матчей
                 switch (match.id) {
-                     // Четвертьфиналы
-                     case 'QF-1A-4B': newTeam1Code = getRankedTeamCode('A', 1); newTeam2Code = getRankedTeamCode('B', 4); break;
-                     case 'QF-2A-3B': newTeam1Code = getRankedTeamCode('A', 2); newTeam2Code = getRankedTeamCode('B', 3); break;
-                     case 'QF-1B-4A': newTeam1Code = getRankedTeamCode('B', 1); newTeam2Code = getRankedTeamCode('A', 4); break;
-                     case 'QF-2B-3A': newTeam1Code = getRankedTeamCode('B', 2); newTeam2Code = getRankedTeamCode('A', 3); break;
-                     // Полуфиналы
-                     case 'SF-W1-W2': {
-                         const qf1 = prevMatches.find(m => m.id === 'QF-1A-4B');
-                         const qf2 = prevMatches.find(m => m.id === 'QF-2A-3B');
-                         newTeam1Code = qf1?.winner || null;
-                         newTeam2Code = qf2?.winner || null;
-                         break;
-                     }
-                     case 'SF-W3-W4': {
-                         const qf3 = prevMatches.find(m => m.id === 'QF-1B-4A');
-                         const qf4 = prevMatches.find(m => m.id === 'QF-2B-3A');
-                         newTeam1Code = qf3?.winner || null;
-                         newTeam2Code = qf4?.winner || null;
-                         break;
-                     }
-                     // Финалы
-                     case 'F-W1-W2': {
-                         const sf1 = prevMatches.find(m => m.id === 'SF-W1-W2');
-                         const sf2 = prevMatches.find(m => m.id === 'SF-W3-W4');
-                         newTeam1Code = sf1?.winner || null;
-                         newTeam2Code = sf2?.winner || null;
-                         break;
-                     }
-                     case 'F3-L1-L2': {
-                         const sf1 = prevMatches.find(m => m.id === 'SF-W1-W2');
-                         const sf2 = prevMatches.find(m => m.id === 'SF-W3-W4');
-                         const getLoser = (sfMatch) => (!sfMatch || !sfMatch.winner || !sfMatch.team1 || !sfMatch.team2) ? null : (sfMatch.winner === sfMatch.team1 ? sfMatch.team2 : sfMatch.team1);
-                         newTeam1Code = getLoser(sf1);
-                         newTeam2Code = getLoser(sf2);
-                         break;
-                     }
+                     // Финальные матчи - топ-3 из каждой группы
+                     case 'F-1A-1B': newTeam1Code = getRankedTeamCode('A', 1); newTeam2Code = getRankedTeamCode('B', 1); break;
+                     case 'F3-2A-2B': newTeam1Code = getRankedTeamCode('A', 2); newTeam2Code = getRankedTeamCode('B', 2); break;
+                     case 'F5-3A-3B': newTeam1Code = getRankedTeamCode('A', 3); newTeam2Code = getRankedTeamCode('B', 3); break;
                     default: return match;
                 }
 
