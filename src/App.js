@@ -670,9 +670,9 @@ function App() {
                 <td className="p-2 text-sm md:text-base"><span className={roundClass}>{roundText}</span></td>
                 <td className="p-2 text-sm md:text-base font-medium"><span className={isTeam1Winner ? 'font-bold text-indigo-800' : ''}>{team1Name}</span><span className="text-gray-400 mx-1">vs</span><span className={isTeam2Winner ? 'font-bold text-indigo-800' : ''}>{team2Name}</span></td>
                 <td className="p-2 text-sm md:text-base text-center">{match.court}</td>
-                <td className="p-2 text-sm md:text-base text-gray-700 text-center"><div className="flex items-center justify-center"><FaCalendarAlt className="mr-1 text-indigo-500 hidden md:inline" />{match.time}</div></td>
+                <td className="p-2 text-sm md:text-base text-gray-700 text-center"><div className="flex items-center justify-center"><FaCalendarAlt className="mr-1 text-indigo-500" />{match.time}</div></td>
                 {/* Отображаем имя судьи (для плей-офф будет показан плейсхолдер, если не выбран) */}
-                <td className="p-2 text-xs text-gray-600"><div className="flex items-center"><FaBullhorn className={`mr-1 ${match.round !== 'group' && !match.refereeTeamCode ? 'text-red-400 animate-pulse' : 'text-gray-400'} flex-shrink-0`} title={match.round !== 'group' && !match.refereeTeamCode ? t.refereeNotAssignedTooltip || 'Судья не назначен!' : ''} /><span className={match.round !== 'group' && !match.refereeTeamCode ? 'text-red-600' : ''}>{refereeName}</span></div></td>
+                <td className="p-2 text-sm md:text-base text-gray-600"><div className="flex items-center"><FaBullhorn className={`mr-1 ${match.round !== 'group' && !match.refereeTeamCode ? 'text-red-400 animate-pulse' : 'text-gray-400'} flex-shrink-0`} title={match.round !== 'group' && !match.refereeTeamCode ? t.refereeNotAssignedTooltip || 'Судья не назначен!' : ''} /><span className={match.round !== 'group' && !match.refereeTeamCode ? 'text-red-600' : ''}>{refereeName}</span></div></td>
                 <td className="p-2 text-sm md:text-base font-bold text-center">{match.set1Team1 ?? 0}-{match.set1Team2 ?? 0}</td>
                 <td className="p-2 text-sm md:text-base font-bold text-center">{match.set2Team1 ?? 0}-{match.set2Team2 ?? 0}</td>
                 <td className={`p-2 text-sm md:text-base font-bold text-center ${!showThirdSet ? 'text-gray-400' : ''}`}>{showThirdSet ? `${match.set3Team1 ?? 0}-${match.set3Team2 ?? 0}` : '-'}</td>
@@ -709,15 +709,15 @@ function App() {
                             <thead className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white">
                                 {/* ... Заголовки таблицы ... */}
                                 <tr>
-                                    <th className="py-3 px-4 text-left text-xs md:text-sm">{t.round}</th>
-                                    <th className="py-3 px-4 text-left text-xs md:text-sm">{t.match}</th>
-                                    <th className="py-3 px-4 text-center text-xs md:text-sm">{t.court}</th>
-                                    <th className="py-3 px-4 text-center text-xs md:text-sm">{t.time}</th>
-                                    <th className="py-3 px-4 text-left text-xs md:text-sm">{t.referee || 'Судья'}</th>
-                                    <th className="py-3 px-4 text-center text-xs md:text-sm">{t.set1}</th>
-                                    <th className="py-3 px-4 text-center text-xs md:text-sm">{t.set2}</th>
-                                    <th className="py-3 px-4 text-center text-xs md:text-sm">{t.set3}</th>
-                                    <th className="py-3 px-4 text-left text-xs md:text-sm">{t.status}</th>
+                                    <th className="py-3 px-4 text-left text-sm md:text-base">{t.round}</th>
+                                    <th className="py-3 px-4 text-left text-sm md:text-base">{t.match}</th>
+                                    <th className="py-3 px-4 text-center text-sm md:text-base">{t.court}</th>
+                                    <th className="py-3 px-4 text-center text-sm md:text-base">{t.time}</th>
+                                    <th className="py-3 px-4 text-left text-sm md:text-base">{t.referee || 'Судья'}</th>
+                                    <th className="py-3 px-4 text-center text-sm md:text-base">{t.set1}</th>
+                                    <th className="py-3 px-4 text-center text-sm md:text-base">{t.set2}</th>
+                                    <th className="py-3 px-4 text-center text-sm md:text-base">{t.set3}</th>
+                                    <th className="py-3 px-4 text-left text-sm md:text-base">{t.status}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -755,13 +755,13 @@ function App() {
                                             <table className="min-w-full bg-white shadow-sm rounded-lg overflow-hidden">
                                                 <thead className="bg-gray-50">
                                                     <tr>
-                                                        <th className="p-3 text-left text-xs md:text-sm font-semibold text-gray-700">{t.team}</th>
-                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700">{t.points}</th>
-                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.winsLosses || 'Победы/Поражения'}>{t.winsLossesShort || 'В/П'}</th>
-                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.sets || 'Сеты'}>{t.setsShort || 'С'}</th>
-                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.setsDifference || 'Разница сетов'}>{t.setsDiffShort || 'Р'}</th>
-                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.balls || 'Míčů'}>{t.ballsShort || 'М'}</th>
-                                                        <th className="p-3 text-center text-xs md:text-sm font-semibold text-gray-700" title={t.ballsDifference || 'Разница мячей'}>{t.ballsDiffShort || 'РМ'}</th>
+                                                        <th className="p-3 text-left text-sm md:text-base font-semibold text-gray-700">{t.team}</th>
+                                                        <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700">{t.points}</th>
+                                                        <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.winsLosses || 'Победы/Поражения'}>{t.winsLossesShort || 'В/П'}</th>
+                                                        <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.sets || 'Сеты'}>{t.setsShort || 'С'}</th>
+                                                        <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.setsDifference || 'Разница сетов'}>{t.setsDiffShort || 'Р'}</th>
+                                                        <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.balls || 'Míčů'}>{t.ballsShort || 'М'}</th>
+                                                        <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.ballsDifference || 'Разница мячей'}>{t.ballsDiffShort || 'РМ'}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -781,6 +781,17 @@ function App() {
                                                     })}
                                                 </tbody>
                                             </table>)}
+                                        {groupTeams.length > 0 && (
+                                            <div className="mt-3 px-2 text-xs md:text-sm text-gray-600 border-t border-gray-200 pt-2">
+                                                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                                                    <span><strong>{t.winsLossesShort || 'В/П'}:</strong> {t.winsLosses || 'Победы/Поражения'}</span>
+                                                    <span><strong>{t.setsShort || 'С'}:</strong> {t.sets || 'Сеты'}</span>
+                                                    <span><strong>{t.setsDiffShort || 'Р'}:</strong> {t.setsDifference || 'Разница сетов'}</span>
+                                                    <span><strong>{t.ballsShort || 'М'}:</strong> {t.balls || 'Мячи'}</span>
+                                                    <span><strong>{t.ballsDiffShort || 'РМ'}:</strong> {t.ballsDifference || 'Разница мячей'}</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>);
                         })}
@@ -1167,10 +1178,10 @@ function App() {
                 </main>
 
                 {/* Нижняя навигация (Mobile) */}
-                <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-2 flex justify-around md:hidden z-30 border-t border-gray-200">
-                    <button onClick={() => setView('matches')} className={`p-2 flex flex-col items-center transition-colors duration-150 ${view === 'matches' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600 hover:text-[#0B8E8D]'}`}><FaVolleyballBall className="text-xl mb-1" /><span className="text-xs">{t.matches}</span></button>
-                    <button onClick={() => setView('groups')} className={`p-2 flex flex-col items-center transition-colors duration-150 ${view === 'groups' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600 hover:text-[#0B8E8D]'}`}><FaUsers className="text-xl mb-1" /><span className="text-xs">{t.groups}</span></button>
-                    <button onClick={() => setShowRules(true)} className={`p-2 flex flex-col items-center text-gray-600 hover:text-[#0B8E8D] transition-colors duration-150`}><FaGlobe className="text-xl mb-1 text-[#FDD80F]" /><span className="text-xs">{t.rules}</span></button>
+                <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-3 flex justify-around md:hidden z-30 border-t border-gray-200">
+                    <button onClick={() => setView('matches')} className={`p-3 flex flex-col items-center transition-colors duration-150 ${view === 'matches' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600 hover:text-[#0B8E8D]'}`}><FaVolleyballBall className="text-2xl mb-1" /><span className="text-sm">{t.matches}</span></button>
+                    <button onClick={() => setView('groups')} className={`p-3 flex flex-col items-center transition-colors duration-150 ${view === 'groups' ? 'text-[#0B8E8D] font-semibold' : 'text-gray-600 hover:text-[#0B8E8D]'}`}><FaUsers className="text-2xl mb-1" /><span className="text-sm">{t.groups}</span></button>
+                    <button onClick={() => setShowRules(true)} className={`p-3 flex flex-col items-center text-gray-600 hover:text-[#0B8E8D] transition-colors duration-150`}><FaGlobe className="text-2xl mb-1 text-[#FDD80F]" /><span className="text-sm">{t.rules}</span></button>
                 </nav>
             </div>
 

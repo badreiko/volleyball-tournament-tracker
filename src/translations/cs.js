@@ -92,8 +92,10 @@ Info o lokalitě: https://hala-slany.cz/`,
   // --- Добавленные/Обновленные ключи ---
   tbd: 'Bude určeno', // Команда "Будет определено"
   winner: 'Vítěz',
+  winsLosses: 'Výhry/Prohry',
   winsLossesShort: 'V/P', // Коротко: Výhry/Prohry
   setsShort: 'S', // Коротко: Sety
+  setsDifference: 'Rozdíl setů',
   setsDiffShort: 'RS', // Коротко: Rozdíl setů
   tiebreak_condition: 'do 5', // Условие тайбрейка
 

@@ -129,8 +129,10 @@ Dream team Praha
   winner: 'Победитель',
 
   // Короткие обозначения
+  winsLosses: 'Победы/Поражения',
   winsLossesShort: 'П/П',
   setsShort: 'С',
+  setsDifference: 'Разница сетов',
   setsDiffShort: 'РС',
 
   // Мячи
