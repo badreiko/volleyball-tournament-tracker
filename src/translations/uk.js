@@ -47,10 +47,9 @@ export const uk = {
   // Статуси та раунди
   roundNames: {
     group: 'Груповий етап',
-    quarterfinal: 'Чвертьфінал',
-    semifinal: 'Півфінал',
-    third_place: 'Матч за 3-є місце',
-    final: 'Фінал',
+    final: 'Матч за 1-2 місце',
+    third_place: 'Матч за 3-4 місце',
+    fifth_place: 'Матч за 5-6 місце',
     unknown: 'Невідомо'
   },
   statusNames: {
@@ -152,7 +151,7 @@ Všude zdejší Slaný
   addressLabel: 'Адреса залу:',
   websiteLabel: 'Веб-сайт:',
   dateLabel: 'Дата:',
-  tournamentDate: '6.4.2025', // Увага! Дата турніру, може потребувати оновлення
+  tournamentDate: '11.1.2026',
   tournamentAddress: 'Václava Mouchy 2045, Slaný', // Адреса може бути перекладена або залишена оригіналом
   tournamentWebsite: 'https://rvl.hala-slany.cz/',
 

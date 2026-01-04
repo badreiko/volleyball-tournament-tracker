@@ -23,7 +23,7 @@ export const ru = {
   tiebreak: 'Тайбрейк',
   group: 'Группа',
   aboutSection: 'О приложении',
-  tournamentDate: '6.4.2025',
+  tournamentDate: '11.1.2026',
   tournamentAddress: 'Václava Mouchy 2045, Slaný',
   tournamentWebsite: 'https://rvl.hala-slany.cz/',
   tournamentInfo: 'Информация о турнире',
@@ -97,10 +97,10 @@ Všude zdejší Slaný
 Секретарь записывает результат матча на простую форму, которую после окончания матча передает к столу организаторов.`,
   roundNames: {
     group: 'Групповой этап',
-    quarterfinal: 'Четвертьфинал',
-    semifinal: 'Полуфинал',
-    third_place: 'Матч за 3-е место',
-    final: 'Финал'
+    final: 'Матч за 1-2 место',
+    third_place: 'Матч за 3-4 место',
+    fifth_place: 'Матч за 5-6 место',
+    unknown: 'Неизвестно'
   },
   statusNames: {
     not_started: 'Не начат',

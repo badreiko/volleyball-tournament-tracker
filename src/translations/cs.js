@@ -23,7 +23,7 @@ export const cs = {
   tiebreak: 'Tiebreak',
   group: 'Skupina',
   aboutSection: 'O aplikaci',
-  tournamentDate: '6.4.2025', // Pozor, aktuální datum je 4. dubna 2025
+  tournamentDate: '11.1.2026',
   tournamentAddress: 'Václava Mouchy 2045, Slaný',
   tournamentWebsite: 'https://rvl.hala-slany.cz/',
   tournamentInfo: 'Informace o turnaji',
@@ -107,11 +107,10 @@ Zapisovatel zaznamenává výsledek utkání na jednoduchý formulář, který p
 
   roundNames: {
     group: 'Skupinová fáze',
-    quarterfinal: 'Čtvrtfinále',
-    semifinal: 'Semifinále',
-    third_place: 'Zápas o 3. místo',
-    final: 'Finále',
-    unknown: 'Neznámé' // Добавлено на случай неопределенного раунда
+    final: 'Zápas o 1.-2. místo',
+    third_place: 'Zápas o 3.-4. místo',
+    fifth_place: 'Zápas o 5.-6. místo',
+    unknown: 'Neznámé'
   },
   statusNames: {
     not_started: 'Nezahájený', // Изменено для согласованности

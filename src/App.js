@@ -7,47 +7,48 @@ import { translations, languageNames } from './translations';
 
 // Начальные данные команд
 const initialTeams = [
-    { code: 'A1', name: 'Zlatý jádro Kladno', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'A2', name: 'Spořilov Praha', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'A3', name: 'Lážo Plážo Děčín', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B1', name: 'Všude zdejší Slaný', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B2', name: 'Sokol Benešov', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'B3', name: 'Kaliči Teplice', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'C1', name: 'DREAM TEAM Pardubice', group: 'C', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'C2', name: 'UB Mongolsko', group: 'C', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'C3', name: 'GNA Praha', group: 'C', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
-    { code: 'C4', name: 'Bon Team Trutnov', group: 'C', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'A1', name: 'Lážo Plážo Děčín', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'A2', name: 'Zlatý jádro Kladno', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'A3', name: 'Spořilov Praha', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'A4', name: 'Dobrá Parta Plzeň', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'A5', name: 'Prajd Pardubice', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'B1', name: 'Sokol Benešov', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'B2', name: 'Kondor Slaný', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'B3', name: 'Všude zdejší Tuchlovice', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'B4', name: 'UB Mongolsko', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
+    { code: 'B5', name: 'Dream team Praha', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0 },
 ];
 
-// Начальные данные матчей (убедитесь, что refereeRule здесь не нужны, т.к. выбор ручной)
+// Начальные данные матчей
 const initialMatches = [
-    // Группа A
-    { id: 'A1-A2', court: 1, time: '09:00', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null }, // Корт 1 - OK
-    { id: 'A2-A3', court: 1, time: '10:40', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null }, // Корт 1 - OK
-    { id: 'A1-A3', court: 2, time: '09:50', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'C4', refereeRule: null }, // ИСПРАВЛЕНО: Корт 2 (был 1)
+    // Группа A (10 матчей - каждый с каждым)
+    { id: 'A1-A2', court: 1, time: '09:00', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null },
+    { id: 'A1-A3', court: 2, time: '09:00', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null },
+    { id: 'A1-A4', court: 3, time: '09:00', team1: 'A1', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null },
+    { id: 'A1-A5', court: 1, time: '10:00', team1: 'A1', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null },
+    { id: 'A2-A3', court: 2, time: '10:00', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
+    { id: 'A2-A4', court: 3, time: '10:00', team1: 'A2', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null },
+    { id: 'A2-A5', court: 1, time: '11:00', team1: 'A2', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null },
+    { id: 'A3-A4', court: 2, time: '11:00', team1: 'A3', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
+    { id: 'A3-A5', court: 3, time: '11:00', team1: 'A3', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null },
+    { id: 'A4-A5', court: 1, time: '12:00', team1: 'A4', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null },
 
-    // Группа B
-    { id: 'B1-B2', court: 1, time: '09:50', team1: 'B1', team2: 'B2', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null }, // ИСПРАВЛЕНО: Корт 1 (был 2)
-    { id: 'B2-B3', court: 1, time: '11:30', team1: 'B2', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null }, // ИСПРАВЛЕНО: Корт 1 (был 2)
-    { id: 'B1-B3', court: 3, time: '10:40', team1: 'B1', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null }, // ИСПРАВЛЕНО: Корт 3 (был 2)
+    // Группа B (10 матчей - каждый с каждым)
+    { id: 'B1-B2', court: 2, time: '12:00', team1: 'B1', team2: 'B2', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null },
+    { id: 'B1-B3', court: 3, time: '12:00', team1: 'B1', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null },
+    { id: 'B1-B4', court: 1, time: '13:00', team1: 'B1', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
+    { id: 'B1-B5', court: 2, time: '13:00', team1: 'B1', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null },
+    { id: 'B2-B3', court: 3, time: '13:00', team1: 'B2', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
+    { id: 'B2-B4', court: 1, time: '14:00', team1: 'B2', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null },
+    { id: 'B2-B5', court: 2, time: '14:00', team1: 'B2', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null },
+    { id: 'B3-B4', court: 3, time: '14:00', team1: 'B3', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
+    { id: 'B3-B5', court: 1, time: '15:00', team1: 'B3', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null },
+    { id: 'B4-B5', court: 2, time: '15:00', team1: 'B4', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null },
 
-    // Группа C
-    { id: 'C1-C2', court: 2, time: '09:00', team1: 'C1', team2: 'C2', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null }, // ИСПРАВЛЕНО: Корт 2 (был 3)
-    { id: 'C3-C4', court: 3, time: '09:00', team1: 'C3', team2: 'C4', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null }, // Корт 3 - OK
-    { id: 'C1-C3', court: 3, time: '11:30', team1: 'C1', team2: 'C3', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null }, // Корт 3 - OK
-    { id: 'C2-C4', court: 2, time: '11:30', team1: 'C2', team2: 'C4', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null }, // ИСПРАВЛЕНО: Корт 2 (был 3)
-    { id: 'C1-C4', court: 2, time: '10:40', team1: 'C1', team2: 'C4', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'C2', refereeRule: null }, // ИСПРАВЛЕНО: Корт 2 (был 3)
-    { id: 'C2-C3', court: 3, time: '09:50', team1: 'C2', team2: 'C3', group: 'C', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'C1', refereeRule: null }, // Корт 3 - OK
-
-    // Плей-офф (судьи назначаются вручную, refereeRule не используется)
-    { id: 'QF-1A-1C', court: 1, time: '12:30', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null }, // Корт 1 - OK
-    { id: 'QF-1B-2C', court: 2, time: '13:20', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null }, // Корт 2 - OK
-    { id: 'QF-2A-3B', court: 2, time: '12:30', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null }, // ИСПРАВЛЕНО: Корт 2 (был 1)
-    { id: 'QF-3A-2B', court: 3, time: '12:30', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'quarterfinal', refereeTeamCode: null, refereeRule: null }, // ИСПРАВЛЕНО: Корт 3 (был 2)
-    { id: 'SF-W1-W3', court: 1, time: '14:10', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'semifinal', refereeTeamCode: null, refereeRule: null }, // Корт 1 - OK
-    { id: 'SF-W2-W4', court: 2, time: '14:10', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'semifinal', refereeTeamCode: null, refereeRule: null }, // Корт 2 - OK
-    { id: 'F3-L1-L2', court: 2, time: '15:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null }, // Корт 2 - Оставляем (не подтверждено)
-    { id: 'F-W1-W2', court: 1, time: '15:10', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null }  // Корт 1 - OK
+    // Финальные матчи - топ-3 команды из каждой группы
+    { id: 'F-1A-1B', court: 1, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null },
+    { id: 'F3-2A-2B', court: 2, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null },
+    { id: 'F5-3A-3B', court: 3, time: '16:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'fifth_place', refereeTeamCode: null, refereeRule: null }
 ];
 
 
@@ -228,7 +229,7 @@ function App() {
                 (m.status === 'completed' || m.status === 'completed_by_points')
             );
             const completedGroupMatchesCount = completedGroupMatches.length;
-            const requiredMatchesBeforePlayoff = 6; // Половина от 12 групповых матчей
+            const requiredMatchesBeforePlayoff = 10; // Половина от 20 групповых матчей
 
             let changed = false; // Флаг, указывающий были ли изменения
 
@@ -260,7 +261,7 @@ function App() {
             // console.log(`Updating playoffs: ${completedGroupMatchesCount}/${requiredMatchesBeforePlayoff} group matches completed.`);
 
             // 1. Ранжирование (на основе текущих 'teams')
-            const groupLetters = ['A', 'B', 'C'];
+            const groupLetters = ['A', 'B'];
             const groupRankings = {};
             groupLetters.forEach(group => {
                 const teamsInGroup = teams.filter(t => t.group === group);
@@ -280,22 +281,12 @@ function App() {
                 let newTeam1Code = null;
                 let newTeam2Code = null;
 
-                // Определение команд (логика switch без изменений)
+                // Определение команд для финальных матчей
                 switch (match.id) {
-                     case 'QF-1A-1C': newTeam1Code = getRankedTeamCode('A', 1); newTeam2Code = getRankedTeamCode('C', 1); break;
-                     case 'QF-1B-2C': newTeam1Code = getRankedTeamCode('B', 1); newTeam2Code = getRankedTeamCode('C', 2); break;
-                     case 'QF-2A-3B': newTeam1Code = getRankedTeamCode('A', 2); newTeam2Code = getRankedTeamCode('B', 3); break;
-                     case 'QF-3A-2B': newTeam1Code = getRankedTeamCode('A', 3); newTeam2Code = getRankedTeamCode('B', 2); break;
-                     case 'SF-W1-W3': { const qf1 = prevMatches.find(m => m.id === 'QF-1A-1C'); const qf3 = prevMatches.find(m => m.id === 'QF-2A-3B'); newTeam1Code = qf1?.winner || null; newTeam2Code = qf3?.winner || null; break; }
-                     case 'SF-W2-W4': { const qf2 = prevMatches.find(m => m.id === 'QF-1B-2C'); const qf4 = prevMatches.find(m => m.id === 'QF-3A-2B'); newTeam1Code = qf2?.winner || null; newTeam2Code = qf4?.winner || null; break; }
-                     case 'F-W1-W2': { const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3'); const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4'); newTeam1Code = sf1?.winner || null; newTeam2Code = sf2?.winner || null; break; }
-                     case 'F3-L1-L2': {
-                         const sf1 = prevMatches.find(m => m.id === 'SF-W1-W3');
-                         const sf2 = prevMatches.find(m => m.id === 'SF-W2-W4');
-                         const getLoser = (sfMatch) => (!sfMatch || !sfMatch.winner || !sfMatch.team1 || !sfMatch.team2) ? null : (sfMatch.winner === sfMatch.team1 ? sfMatch.team2 : sfMatch.team1);
-                         newTeam1Code = getLoser(sf1); newTeam2Code = getLoser(sf2);
-                         break;
-                     }
+                     // Финальные матчи - топ-3 из каждой группы
+                     case 'F-1A-1B': newTeam1Code = getRankedTeamCode('A', 1); newTeam2Code = getRankedTeamCode('B', 1); break;
+                     case 'F3-2A-2B': newTeam1Code = getRankedTeamCode('A', 2); newTeam2Code = getRankedTeamCode('B', 2); break;
+                     case 'F5-3A-3B': newTeam1Code = getRankedTeamCode('A', 3); newTeam2Code = getRankedTeamCode('B', 3); break;
                     default: return match;
                 }
 
@@ -591,8 +582,8 @@ function App() {
                  <h2 className="text-2xl font-bold mb-6 text-indigo-700 flex items-center"><FaUsers className="mr-3 text-indigo-600" /><span>{t.groups}</span></h2>
                  {teams.length === 0 && <p className="text-center p-4">{t.noTeams || 'Команды не найдены.'}</p>}
                  {teams.length > 0 && (
-                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                         {['A', 'B', 'C'].map(group => {
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         {['A', 'B'].map(group => {
                              const groupColors = {'A':{bg:'from-[#C1CBA7] to-[#0B8E8D]', lightBg:'from-[#C1CBA7]/20 to-[#0B8E8D]/10', text:'text-blue-700', border:'border-blue-200'},'B':{bg:'from-[#06324F] to-[#0B8E8D]', lightBg:'from-[#06324F]/10 to-[#0B8E8D]/10', text:'text-purple-700', border:'border-purple-200'},'C':{bg:'from-[#FDD80F] to-[#0B8E8D]', lightBg:'from-[#FDD80F]/10 to-[#0B8E8D]/10', text:'text-green-700', border:'border-green-200'}};
                              const colors = groupColors[group] || groupColors['A'];
                              const groupTeams = teams.filter(tm => tm.group === group);
