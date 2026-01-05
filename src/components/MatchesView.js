@@ -17,43 +17,62 @@ const MatchesView = ({ matches, teams, t, setView, setSelectedMatch, tournamentS
     };
 
     return (
-        <div className="p-4 overflow-x-auto">
+        <div className="p-4">
             <div className="flex justify-between items-center mb-6 gap-4">
-                <h2 className="text-2xl font-bold text-indigo-700 flex items-center">
+                <h2 className="text-2xl font-bold text-indigo-700 flex items-center px-1">
                     <FaVolleyballBall className="mr-3 text-indigo-600" />
                     <span>{t.matches}</span>
                 </h2>
             </div>
+            
             {matches.length === 0 && <p className="text-center p-4">{t.noMatches || 'Матчи не найдены.'}</p>}
+            
             {matches.length > 0 && (
-                <div className="bg-gradient-to-r from-[#C1CBA7] to-[#0B8E8D]/10 p-4 md:p-6 rounded-xl shadow-lg">
-                    <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-                        <thead className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] text-white">
-                            <tr>
-                                <th className="py-3 px-4 text-left text-sm md:text-base">{t.round}</th>
-                                <th className="py-3 px-4 text-left text-sm md:text-base">{t.match}</th>
-                                <th className="py-3 px-4 text-center text-sm md:text-base">{t.court}</th>
-                                <th className="py-3 px-4 text-center text-sm md:text-base">{t.time}</th>
-                                <th className="py-3 px-4 text-left text-sm md:text-base">{t.referee || 'Судья'}</th>
-                                <th className="py-3 px-4 text-center text-sm md:text-base">{t.set1}</th>
-                                <th className="py-3 px-4 text-center text-sm md:text-base">{t.set2}</th>
-                                <th className="py-3 px-4 text-center text-sm md:text-base">{t.set3}</th>
-                                <th className="py-3 px-4 text-left text-sm md:text-base">{t.status}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sortedMatches.map(match => (
-                                <MatchRow 
-                                    key={match.id} 
-                                    match={match} 
-                                    teams={teams} 
-                                    t={t} 
-                                    onRowClick={handleRowClick}
-                                    tournamentSettings={tournamentSettings} 
-                                />
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="md:bg-gradient-to-r md:from-[#C1CBA7] md:to-[#0B8E8D]/10 md:p-6 md:rounded-xl md:shadow-lg">
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+                            <thead className="bg-[#06324F] text-white">
+                                <tr>
+                                    <th className="py-3 px-4 text-left text-xs font-bold uppercase tracking-wider">{t.round}</th>
+                                    <th className="py-3 px-4 text-left text-xs font-bold uppercase tracking-wider">{t.match}</th>
+                                    <th className="py-3 px-4 text-center text-xs font-bold uppercase tracking-wider">{t.court}</th>
+                                    <th className="py-3 px-4 text-center text-xs font-bold uppercase tracking-wider">{t.time}</th>
+                                    <th className="py-3 px-4 text-left text-xs font-bold uppercase tracking-wider">{t.referee}</th>
+                                    <th className="py-3 px-4 text-center text-xs font-bold uppercase tracking-wider">{t.set1}</th>
+                                    <th className="py-3 px-4 text-center text-xs font-bold uppercase tracking-wider">{t.set2}</th>
+                                    <th className="py-3 px-4 text-center text-xs font-bold uppercase tracking-wider">{t.set3}</th>
+                                    <th className="py-3 px-4 text-left text-xs font-bold uppercase tracking-wider">{t.status}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sortedMatches.map(match => (
+                                    <MatchRow 
+                                        key={match.id} 
+                                        match={match} 
+                                        teams={teams} 
+                                        t={t} 
+                                        onRowClick={handleRowClick}
+                                        tournamentSettings={tournamentSettings} 
+                                    />
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile List (only cards) */}
+                    <div className="md:hidden">
+                        {sortedMatches.map(match => (
+                            <MatchRow 
+                                key={match.id} 
+                                match={match} 
+                                teams={teams} 
+                                t={t} 
+                                onRowClick={handleRowClick}
+                                tournamentSettings={tournamentSettings} 
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
