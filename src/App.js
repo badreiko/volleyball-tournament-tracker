@@ -467,7 +467,7 @@ function App() {
         setMatches(prevMatches =>
             prevMatches.map(m => {
                 if (m.id === matchId) {
-                    return { ...m, [field]: value || null };
+                    return { ...m, [field]: value !== undefined ? value : null };
                 }
                 return m;
             })
