@@ -40,6 +40,19 @@ const MatchDetailModal = ({
     // === УМНАЯ ЛОГИКА АВТО-ПЕРЕКЛЮЧЕНИЯ СЕТОВ ===
     useEffect(() => {
         const { set1Team1, set1Team2, set2Team1, set2Team2 } = currentMatchData;
+        
+        // ПРОВЕРКА НА СБРОС: если все очки по нулям, возвращаемся к 1-му сету
+        const isReset = !set1Team1 && !set1Team2 && !set2Team1 && !set2Team2;
+        if (isReset) {
+            setActiveSet(1);
+            lastAutoSetRef.current = 1;
+            return;
+        }
+
+        const isPlayoff = currentRound !== 'group';
+        const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
+        const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
+
         const set1Done = isSetCompleted(set1Team1, set1Team2, false, false, setLimit, winDiff);
         const set2Done = isSetCompleted(set2Team1, set2Team2, false, false, setLimit, winDiff);
         

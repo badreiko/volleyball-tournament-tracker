@@ -463,6 +463,8 @@ function App() {
             const updatedMatch = {
                 ...matchToReset,
                 set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0,
+                set1History: [], set2History: [], set3History: [],
+                baseIsSwapped: false,
                 winner: null,
                 status: originalStatus,
                 refereeTeamCode: refereeToKeep
