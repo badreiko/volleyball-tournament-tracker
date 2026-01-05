@@ -1,17 +1,17 @@
 import React from 'react';
 import { FaGlobe, FaCheck } from 'react-icons/fa';
 
-const RulesModal = ({ 
-    t, 
-    language, 
-    changeLanguage, 
-    onClose, 
-    tournamentSettings, 
-    setTournamentSettings, 
-    languageNames, 
-    translations 
+const RulesModal = ({
+    t,
+    language,
+    changeLanguage,
+    onClose,
+    tournamentSettings,
+    setTournamentSettings,
+    languageNames,
+    translations
 }) => {
-    
+
     const handleSettingsChange = (newSettingValue) => {
         const newSettings = { ...tournamentSettings, useTotalPointsForTie: newSettingValue };
         setTournamentSettings(newSettings);
@@ -37,7 +37,7 @@ const RulesModal = ({
 
                         <div className="mt-4 pt-4 border-t border-gray-200">
                             <h5 className="text-sm font-bold text-[#06324F] mb-3 flex items-center">
-                                <span className="bg-[#C1CBA7]/50 px-2 py-1 rounded mr-2">Skupina</span>
+                                <span className="bg-[#C1CBA7]/50 px-2 py-1 rounded mr-2">{t.group || 'Skupina'}</span>
                                 {t.groupMatchSettings || "Групповые матчи"}
                             </h5>
                             <div className="grid grid-cols-2 gap-4">
@@ -66,7 +66,7 @@ const RulesModal = ({
 
                         <div className="mt-4 pt-4 border-t border-gray-200">
                             <h5 className="text-sm font-bold text-[#06324F] mb-3 flex items-center">
-                                <span className="bg-[#FDD80F]/30 px-2 py-1 rounded mr-2">Play-off</span>
+                                <span className="bg-[#FDD80F]/30 px-2 py-1 rounded mr-2">{t.playoffLabel || 'Play-off'}</span>
                                 {t.playoffMatchSettings || "Плей-офф / Финалы"}
                             </h5>
                             <div className="grid grid-cols-2 gap-4">

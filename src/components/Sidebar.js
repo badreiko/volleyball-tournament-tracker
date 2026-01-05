@@ -2,24 +2,24 @@ import React from 'react';
 import { FaVolleyballBall, FaTrophy, FaCalendarAlt, FaMapMarkerAlt, FaLink, FaUsers, FaChartBar, FaGlobe } from 'react-icons/fa';
 import { TOURNAMENTS } from '../constants';
 
-const Sidebar = ({ 
-    t, 
-    view, 
-    setView, 
-    setShowRules, 
-    currentTournament, 
-    setCurrentTournament, 
-    language, 
-    changeLanguage, 
-    languageNames, 
-    translations 
+const Sidebar = ({
+    t,
+    view,
+    setView,
+    setShowRules,
+    currentTournament,
+    setCurrentTournament,
+    language,
+    changeLanguage,
+    languageNames,
+    translations
 }) => {
     return (
         <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky md:top-0 z-40 border-b md:border-b-0 md:border-r border-gray-200 shrink-0">
             {/* Шапка Sidebar */}
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h1 className="text-xl font-bold text-[#06324F] flex items-center"><FaVolleyballBall className="mr-2 text-[#0B8E8D]" /> {t.appName || 'RVL Scoreboard'}</h1>
-                <div className="hidden md:flex space-x-1">{Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (<button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 py-1 text-xs rounded transition-colors duration-150 ${language === lang ? 'bg-[#0B8E8D] text-white shadow-sm font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`} title={languageNames[lang]}>{lang.toUpperCase()}</button>))}</div>
+                <div className="hidden md:flex flex-wrap gap-1 max-w-[100px]">{Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (<button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 py-1 text-xs rounded transition-colors duration-150 ${language === lang ? 'bg-[#0B8E8D] text-white shadow-sm font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`} title={languageNames[lang]}>{lang.toUpperCase()}</button>))}</div>
             </div>
             {/* Навигация Sidebar */}
             <div className="p-4 space-y-2">

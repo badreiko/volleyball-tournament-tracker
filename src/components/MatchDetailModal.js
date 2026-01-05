@@ -3,28 +3,28 @@ import { FaCalendarAlt, FaMapMarkerAlt, FaBullhorn, FaSpinner, FaCheck, FaExchan
 import { isSetCompleted } from '../utils';
 import TimePickerModal from './TimePickerModal';
 
-const MatchDetailModal = ({ 
-    match, 
-    matches, 
-    teams, 
-    t, 
-    onClose, 
-    onUpdateScore, 
-    onUpdateDetails, 
-    onResetMatch, 
+const MatchDetailModal = ({
+    match,
+    matches,
+    teams,
+    t,
+    onClose,
+    onUpdateScore,
+    onUpdateDetails,
+    onResetMatch,
     tournamentSettings,
-    isSaving 
+    isSaving
 }) => {
     const [activeSet, setActiveSet] = useState(1);
     const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
-    
+
     const currentMatchData = matches.find(m => m.id === match.id) || match;
     const team1 = teams.find(t => t.code === currentMatchData.team1) || { name: t.tbd };
     const team2 = teams.find(t => t.code === currentMatchData.team2) || { name: t.tbd };
-    
+
     const availableReferees = teams.filter(tm => tm.code !== currentMatchData.team1 && tm.code !== currentMatchData.team2);
     const currentRound = currentMatchData.round || 'unknown';
-    const isFinalMatch = currentRound === 'final' || currentRound === 'third_place' || currentRound === 'fifth_place'; 
+    const isFinalMatch = currentRound === 'final' || currentRound === 'third_place' || currentRound === 'fifth_place';
 
     const baseIsSwapped = currentMatchData.baseIsSwapped || false;
     const isCurrentlySwapped = activeSet % 2 === 0 ? !baseIsSwapped : baseIsSwapped;
@@ -40,7 +40,7 @@ const MatchDetailModal = ({
     // === УМНАЯ ЛОГИКА АВТО-ПЕРЕКЛЮЧЕНИЯ СЕТОВ ===
     useEffect(() => {
         const { set1Team1, set1Team2, set2Team1, set2Team2 } = currentMatchData;
-        
+
         // ПРОВЕРКА НА СБРОС: если все очки по нулям, возвращаемся к 1-му сету
         const isReset = !set1Team1 && !set1Team2 && !set2Team1 && !set2Team2;
         if (isReset) {
@@ -55,10 +55,10 @@ const MatchDetailModal = ({
 
         const set1Done = isSetCompleted(set1Team1, set1Team2, false, false, setLimit, winDiff);
         const set2Done = isSetCompleted(set2Team1, set2Team2, false, false, setLimit, winDiff);
-        
+
         const isSetTie = set1Done && set2Done && (set1Team1 > set1Team2) !== (set2Team1 > set2Team2);
         const needsThirdSet = isSetTie || (currentMatchData.status === 'tie_needs_tiebreak');
-        
+
         let autoTargetSet = 1;
         if (set1Done) autoTargetSet = 2;
         if (set1Done && set2Done && needsThirdSet) autoTargetSet = 3;
@@ -68,8 +68,8 @@ const MatchDetailModal = ({
             lastAutoSetRef.current = autoTargetSet;
         }
     }, [
-        currentMatchData.set1Team1, currentMatchData.set1Team2, 
-        currentMatchData.set2Team1, currentMatchData.set2Team2, 
+        currentMatchData.set1Team1, currentMatchData.set1Team2,
+        currentMatchData.set2Team1, currentMatchData.set2Team2,
         currentMatchData.status, currentRound, tournamentSettings, isFinalMatch
     ]);
 
@@ -88,7 +88,7 @@ const MatchDetailModal = ({
 
         const newScore = Math.max(0, currentScore + delta);
         let newHistory = [...(currentMatchData[`set${set}History`] || [])];
-        
+
         if (delta > 0) {
             newHistory.push({ team: teamKey, score: newScore });
         } else {
@@ -99,7 +99,7 @@ const MatchDetailModal = ({
                 }
             }
         }
-        
+
         onUpdateScore(currentMatchData.id, set, teamKey, newScore.toString());
         onUpdateDetails(currentMatchData.id, `set${set}History`, newHistory);
     };
@@ -115,11 +115,11 @@ const MatchDetailModal = ({
         const s2 = currentMatchData[`set${activeSet}Team2`] || 0;
         const score = teamKey === 'team1' ? s1 : s2;
         const otherScore = teamKey === 'team1' ? s2 : s1;
-        
+
         const isTiebreak = activeSet === 3;
         const isFinished = isSetCompleted(s1, s2, isFinalMatch, isTiebreak, setLimit, winDiff);
         const isServing = currentSetHistory[currentSetHistory.length - 1]?.team === teamKey;
-        
+
         return (
             <div className="flex flex-col items-center flex-1 min-w-0 px-1">
                 <div className={`text-[10px] font-black uppercase mb-1 h-4 ${isServing ? 'text-orange-500 animate-pulse' : 'text-transparent'}`}>
@@ -129,8 +129,8 @@ const MatchDetailModal = ({
                     {team.name}
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                    <button 
-                        onClick={() => handleScoreChange(activeSet, teamKey, 1)} 
+                    <button
+                        onClick={() => handleScoreChange(activeSet, teamKey, 1)}
                         disabled={isFinished}
                         className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-[#0B8E8D] text-white shadow-lg active:scale-95 transition-all ${isFinished ? 'opacity-20 cursor-not-allowed grayscale' : 'hover:bg-[#097b7a]'}`}
                     >
@@ -139,8 +139,8 @@ const MatchDetailModal = ({
                     <div className={`text-5xl font-black font-mono select-none ${isFinished && score > otherScore ? 'text-green-600' : 'text-[#06324F]'}`}>
                         {score}
                     </div>
-                    <button 
-                        onClick={() => handleScoreChange(activeSet, teamKey, -1)} 
+                    <button
+                        onClick={() => handleScoreChange(activeSet, teamKey, -1)}
                         className="w-14 h-14 flex items-center justify-center rounded-2xl bg-gray-100 text-gray-400 active:scale-95 active:bg-red-50 active:text-red-500 transition-all"
                     >
                         <FaMinus className="text-xl" />
@@ -153,7 +153,7 @@ const MatchDetailModal = ({
     return (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-2 md:p-4 z-[70] backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-2xl p-0 w-full max-w-md overflow-hidden flex flex-col max-h-[98vh]">
-                
+
                 <div className="bg-[#06324F] p-4 text-white shrink-0 flex justify-between items-center shadow-md">
                     <div className="flex items-center gap-2">
                         <FaVolleyballBall className="text-[#0B8E8D]" />
@@ -164,7 +164,7 @@ const MatchDetailModal = ({
                 </div>
 
                 <div className="p-4 overflow-y-auto flex-1 space-y-6">
-                    
+
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-4 shadow-inner text-[#06324F]">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1">
@@ -205,7 +205,7 @@ const MatchDetailModal = ({
                             return (
                                 <button key={setNum} onClick={() => setActiveSet(setNum)}
                                     className={`flex-1 flex flex-col items-center px-4 py-2 rounded-xl border-2 transition-all min-w-[80px] ${isActive ? 'border-[#0B8E8D] bg-white shadow-md scale-105' : 'border-transparent bg-gray-100 opacity-50'}`}>
-                                    <span className="text-[9px] font-black text-gray-400 uppercase mb-1">{setNum === 3 ? (t.tiebreak || 'ТБ') : `${t.set || 'Сет'} ${setNum}`}</span>
+                                    <span className="text-[9px] font-black text-gray-400 uppercase mb-1">{setNum === 3 ? (t.tiebreakShort || 'TB') : `${t.set || 'Set'} ${setNum}`}</span>
                                     <span className="text-base font-black text-[#06324F]">{s1}:{s2}</span>
                                 </button>
                             );
@@ -213,11 +213,11 @@ const MatchDetailModal = ({
                     </div>
 
                     <div className="flex items-start justify-between gap-2 py-2">
-                        <TeamScoreBlock 
-                            teamKey={isCurrentlySwapped ? 'team2' : 'team1'} 
-                            team={isCurrentlySwapped ? team2 : team1} 
+                        <TeamScoreBlock
+                            teamKey={isCurrentlySwapped ? 'team2' : 'team1'}
+                            team={isCurrentlySwapped ? team2 : team1}
                         />
-                        
+
                         <div className="flex flex-col items-center justify-center self-stretch pt-16">
                             <div className="text-gray-200 font-black text-2xl mb-6">:</div>
                             <button onClick={toggleSides} title={t.swapTeams} className="p-3 text-gray-400 hover:text-[#0B8E8D] bg-gray-50 rounded-full border border-gray-100 shadow-sm active:rotate-180 transition-all duration-300">
@@ -225,9 +225,9 @@ const MatchDetailModal = ({
                             </button>
                         </div>
 
-                        <TeamScoreBlock 
-                            teamKey={isCurrentlySwapped ? 'team1' : 'team2'} 
-                            team={isCurrentlySwapped ? team1 : team2} 
+                        <TeamScoreBlock
+                            teamKey={isCurrentlySwapped ? 'team1' : 'team2'}
+                            team={isCurrentlySwapped ? team1 : team2}
                         />
                     </div>
 
@@ -243,7 +243,7 @@ const MatchDetailModal = ({
                                             <div className={`flex-1 rounded flex items-center justify-center text-[10px] font-black ${!isLeft ? 'bg-[#0B8E8D] text-white shadow-sm' : 'bg-gray-50 text-gray-300'}`}>{!isLeft ? event.score : ''}</div>
                                         </div>
                                     );
-                                }) : <span className="text-[10px] text-gray-300 italic">{t.scoreHistory || 'Сет начат...'}</span>}
+                                }) : <span className="text-[10px] text-gray-300 italic">{t.scoreHistoryEmpty || 'Set started...'}</span>}
                             </div>
                         </div>
                     </div>

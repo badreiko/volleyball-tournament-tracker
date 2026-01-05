@@ -33,7 +33,7 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
 
     const currentRound = match.round || 'unknown';
     const roundText = t.roundNames?.[currentRound] || currentRound;
-    
+
     let roundClass = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider inline-block';
     if (currentRound === 'group') roundClass += ' bg-[#C1CBA7]/30 text-[#06324F]';
     else if (currentRound === 'final') roundClass += ' bg-[#FDD80F]/30 text-[#06324F]';
@@ -47,13 +47,13 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
     const set2Completed = isSetCompleted(match.set2Team1, match.set2Team2, false, false, setLimit, winDiff);
     const set3Completed = (match.set3Team1 > 0 || match.set3Team2 > 0) && isSetCompleted(match.set3Team1, match.set3Team2, currentRound === 'final', currentRound !== 'final', setLimit, winDiff);
 
-    const team1SetWins = (set1Completed && match.set1Team1 > match.set1Team2 ? 1 : 0) + 
-                        (set2Completed && match.set2Team1 > match.set2Team2 ? 1 : 0) +
-                        (set3Completed && match.set3Team1 > match.set3Team2 ? 1 : 0);
-    
-    const team2SetWins = (set1Completed && match.set1Team1 < match.set1Team2 ? 1 : 0) + 
-                        (set2Completed && match.set2Team1 < match.set2Team2 ? 1 : 0) +
-                        (set3Completed && match.set3Team1 < match.set3Team2 ? 1 : 0);
+    const team1SetWins = (set1Completed && match.set1Team1 > match.set1Team2 ? 1 : 0) +
+        (set2Completed && match.set2Team1 > match.set2Team2 ? 1 : 0) +
+        (set3Completed && match.set3Team1 > match.set3Team2 ? 1 : 0);
+
+    const team2SetWins = (set1Completed && match.set1Team1 < match.set1Team2 ? 1 : 0) +
+        (set2Completed && match.set2Team1 < match.set2Team2 ? 1 : 0) +
+        (set3Completed && match.set3Team1 < match.set3Team2 ? 1 : 0);
 
     const showThirdSet = currentRound === 'final' || currentStatus === 'tie_needs_tiebreak' || (set1Completed && set2Completed && (match.set1Team1 > match.set1Team2) !== (match.set2Team1 > match.set2Team2)) || (match.set3Team1 ?? 0) > 0 || (match.set3Team2 ?? 0) > 0;
 
@@ -68,7 +68,7 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
                 <td className="p-3 text-sm"><span className={roundClass}>{roundText}</span></td>
                 <td className="p-3 text-sm font-medium">
                     <span className={isTeam1Winner ? 'font-bold text-indigo-800 underline decoration-2 decoration-[#0B8E8D]' : ''}>{team1Name}</span>
-                    <span className="text-gray-300 mx-2 text-xs">VS</span>
+                    <span className="text-gray-300 mx-2 text-xs">{t.vs || 'VS'}</span>
                     <span className={isTeam2Winner ? 'font-bold text-indigo-800 underline decoration-2 decoration-[#0B8E8D]' : ''}>{team2Name}</span>
                 </td>
                 <td className="p-3 text-sm text-center font-bold text-gray-600">{match.court}</td>
@@ -83,7 +83,7 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
             </tr>
 
             {/* Mobile View (Card) */}
-            <div 
+            <div
                 className={`md:hidden bg-white mb-4 rounded-2xl border-2 transition-all p-4 active:scale-[0.98] shadow-sm ${canOpenDetail ? 'border-gray-100' : 'border-gray-50 opacity-60'} ${currentStatus === 'in_progress' ? 'border-[#0B8E8D]/30 ring-4 ring-[#0B8E8D]/5' : ''}`}
                 onClick={canOpenDetail ? () => onRowClick(match) : undefined}
             >
@@ -91,7 +91,7 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
                 <div className="flex justify-between items-center mb-3 border-b border-gray-50 pb-2">
                     <span className={roundClass}>{roundText}</span>
                     <div className="flex gap-3 text-[10px] font-black uppercase">
-                        <span className="flex items-center text-gray-400"><FaMapMarkerAlt className="mr-1 text-[#0B8E8D]" /> К{match.court}</span>
+                        <span className="flex items-center text-gray-400"><FaMapMarkerAlt className="mr-1 text-[#0B8E8D]" />{t.courtShort || 'К'}{match.court}</span>
                         <span className="flex items-center text-[#06324F]"><FaCalendarAlt className="mr-1 text-indigo-500" /> {match.time}</span>
                     </div>
                 </div>

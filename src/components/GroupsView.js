@@ -27,7 +27,7 @@ const GroupsView = ({ teams, t }) => {
                                                     <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.winsLosses || 'Победы/Поражения'}>{t.winsLossesShort || 'В/П'}</th>
                                                     <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.sets || 'Сеты'}>{t.setsShort || 'С'}</th>
                                                     <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.setsDifference || 'Разница сетов'}>{t.setsDiffShort || 'Р'}</th>
-                                                    <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.balls || 'Míčů'}>{t.ballsShort || 'М'}</th>
+                                                    <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.balls || 'Balls'}>{t.ballsShort || 'B'}</th>
                                                     <th className="p-3 text-center text-sm md:text-base font-semibold text-gray-700" title={t.ballsDifference || 'Разница мячей'}>{t.ballsDiffShort || 'РМ'}</th>
                                                 </tr>
                                             </thead>

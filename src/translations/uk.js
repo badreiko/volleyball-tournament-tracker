@@ -16,7 +16,9 @@ export const uk = {
   // Елементи списку матчів та деталей
   round: 'Раунд',
   match: 'Матч',
+  vs: 'VS',
   court: 'Корт',
+  courtShort: 'К',
   time: 'Час',
   set1: 'Сет 1',
   set2: 'Сет 2',
@@ -65,6 +67,7 @@ export const uk = {
 
   // Тайбрейк та його умови
   tiebreak: 'Тайбрейк',
+  tiebreakShort: 'ТБ',
   group: 'Група',
   tiebreak_condition: 'до 5', // Умова звичайного тайбрейку
   finalTiebreakCondition: 'до 15', // Умова фінального тайбрейку
@@ -193,6 +196,7 @@ Dream team Praha
   // Налаштування сету
   groupMatchSettings: 'Групові матчі',
   playoffMatchSettings: 'Плей-офф / Фінали',
+  playoffLabel: 'Плей-офф',
   setPointsLabel: 'Очок у сеті',
   winDifferenceLabel: 'Різниця для перемоги',
   point: 'очко',
@@ -206,6 +210,7 @@ Dream team Praha
   // Нові ключі для Live-режиму та TimePicker
   edit: 'Протокол',
   scoreHistory: 'Історія сету',
+  scoreHistoryEmpty: 'Сет розпочато...',
   service: 'ПОДАЧА',
   apply: 'Застосувати',
   hours: 'Години',
@@ -214,4 +219,5 @@ Dream team Praha
   reset: 'Скидання',
   set: 'Сет',
   scores: 'Підсумковий протокол',
+  loading: 'Завантаження...',
 };

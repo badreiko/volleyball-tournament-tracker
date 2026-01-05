@@ -1,12 +1,15 @@
 // Русский язык
 export const ru = {
   appTitle: 'RVL Волейбольный Турнир',
+  appName: 'RVL Scoreboard',
   aboutApp: 'RVL Турнир - приложение для отслеживания результатов волейбольных матчей и турнирной таблицы.',
   matches: 'Матчи',
   groups: 'Группы',
   round: 'Раунд',
   match: 'Матч',
+  vs: 'VS',
   court: 'Корт',
+  courtShort: 'К',
   time: 'Время',
   set1: 'Сет 1',
   set2: 'Сет 2',
@@ -21,6 +24,7 @@ export const ru = {
   save: 'Сохранить',
   matchDetail: 'Детали матча',
   tiebreak: 'Тайбрейк',
+  tiebreakShort: 'ТБ',
   group: 'Группа',
   aboutSection: 'О приложении',
   tournamentDate: '11.1.2026',
@@ -175,6 +179,7 @@ Dream team Praha
   // Настройки сета
   groupMatchSettings: 'Групповые матчи',
   playoffMatchSettings: 'Плей-офф / Финалы',
+  playoffLabel: 'Плей-офф',
   setPointsLabel: 'Очков в сете',
   winDifferenceLabel: 'Разница для победы',
   point: 'очко',
@@ -188,6 +193,7 @@ Dream team Praha
   // Новые ключи для Live-режима и TimePicker
   edit: 'Протокол',
   scoreHistory: 'История сета',
+  scoreHistoryEmpty: 'Сет начат...',
   service: 'ПОДАЧА',
   apply: 'Применить',
   hours: 'Часы',
@@ -196,4 +202,8 @@ Dream team Praha
   reset: 'Сброс',
   set: 'Сет',
   scores: 'Итоговый протокол',
+  noMatches: 'Матчи не найдены.',
+  noTeams: 'Команды не найдены.',
+  noTeamsInGroup: 'В группе нет команд.',
+  loading: 'Загрузка...',
 };
