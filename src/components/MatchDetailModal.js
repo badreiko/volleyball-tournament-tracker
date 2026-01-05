@@ -18,9 +18,7 @@ const MatchDetailModal = ({
     const [activeSet, setActiveSet] = useState(1);
     const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
     
-    // Живые данные матча из Firebase через пропс matches
     const currentMatchData = matches.find(m => m.id === match.id) || match;
-    
     const team1 = teams.find(t => t.code === currentMatchData.team1) || { name: t.tbd };
     const team2 = teams.find(t => t.code === currentMatchData.team2) || { name: t.tbd };
     
@@ -28,27 +26,25 @@ const MatchDetailModal = ({
     const currentRound = currentMatchData.round || 'unknown';
     const isFinalMatch = currentRound === 'final' || currentRound === 'third_place' || currentRound === 'fifth_place'; 
 
-    // Стороны теперь зависят от глобального состояния baseIsSwapped из Firebase
     const baseIsSwapped = currentMatchData.baseIsSwapped || false;
-    
-    // Ротация: в четных сетах (2-й) стороны инвертируются относительно базовых
     const isCurrentlySwapped = activeSet % 2 === 0 ? !baseIsSwapped : baseIsSwapped;
-
-    // История теперь берется из Firebase для конкретного сета
     const currentSetHistory = currentMatchData[`set${activeSet}History`] || [];
 
     const lastAutoSetRef = useRef(0);
 
+    // Параметры завершения сета (лимиты)
+    const isPlayoff = currentRound !== 'group';
+    const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
+    const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
+
     // === УМНАЯ ЛОГИКА АВТО-ПЕРЕКЛЮЧЕНИЯ СЕТОВ ===
     useEffect(() => {
         const { set1Team1, set1Team2, set2Team1, set2Team2 } = currentMatchData;
-        const isPlayoff = currentRound !== 'group';
-        const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
-        const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
-
         const set1Done = isSetCompleted(set1Team1, set1Team2, false, false, setLimit, winDiff);
         const set2Done = isSetCompleted(set2Team1, set2Team2, false, false, setLimit, winDiff);
-        const needsThirdSet = isFinalMatch || (set1Done && set2Done && (set1Team1 > set1Team2) !== (set2Team1 > set2Team2));
+        
+        const isSetTie = set1Done && set2Done && (set1Team1 > set1Team2) !== (set2Team1 > set2Team2);
+        const needsThirdSet = isSetTie || (currentMatchData.status === 'tie_needs_tiebreak');
         
         let autoTargetSet = 1;
         if (set1Done) autoTargetSet = 2;
@@ -61,19 +57,28 @@ const MatchDetailModal = ({
     }, [
         currentMatchData.set1Team1, currentMatchData.set1Team2, 
         currentMatchData.set2Team1, currentMatchData.set2Team2, 
-        currentRound, tournamentSettings, isFinalMatch
+        currentMatchData.status, currentRound, tournamentSettings, isFinalMatch
     ]);
 
     const handleScoreChange = (set, teamKey, delta) => {
-        const currentScore = currentMatchData[`set${set}${teamKey === 'team1' ? 'Team1' : 'Team2'}`] || 0;
+        const s1 = currentMatchData[`set${set}Team1`] || 0;
+        const s2 = currentMatchData[`set${set}Team2`] || 0;
+        const currentScore = teamKey === 'team1' ? s1 : s2;
+
+        // ПРОВЕРКА: Если сет уже завершен, блокируем добавление очков
+        if (delta > 0) {
+            const isTiebreak = set === 3;
+            if (isSetCompleted(s1, s2, isFinalMatch, isTiebreak, setLimit, winDiff)) {
+                return; // СТОП! Сет уже закончен.
+            }
+        }
+
         const newScore = Math.max(0, currentScore + delta);
+        let newHistory = [...(currentMatchData[`set${set}History`] || [])];
         
-        // Обновляем историю в Firebase
-        let newHistory = [...currentSetHistory];
         if (delta > 0) {
             newHistory.push({ team: teamKey, score: newScore });
         } else {
-            // Удаляем последнее взятое очко этой команды
             for (let i = newHistory.length - 1; i >= 0; i--) {
                 if (newHistory[i].team === teamKey) {
                     newHistory.splice(i, 1);
@@ -82,7 +87,6 @@ const MatchDetailModal = ({
             }
         }
         
-        // Сохраняем и счет, и историю в Firebase
         onUpdateScore(currentMatchData.id, set, teamKey, newScore.toString());
         onUpdateDetails(currentMatchData.id, `set${set}History`, newHistory);
     };
@@ -91,26 +95,16 @@ const MatchDetailModal = ({
         onUpdateDetails(currentMatchData.id, 'baseIsSwapped', !baseIsSwapped);
     };
 
-    // === СТРОГАЯ ЛОГИКА ОТОБРАЖЕНИЯ 3-ГО СЕТА ===
-    const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = currentMatchData;
-    const isPlayoff = currentRound !== 'group';
-    const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
-    const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
-
-    const set1Done = isSetCompleted(set1Team1, set1Team2, false, false, setLimit, winDiff);
-    const set2Done = isSetCompleted(set2Team1, set2Team2, false, false, setLimit, winDiff);
-    
-    // 3-й сет показываем ТОЛЬКО если:
-    // 1. В нем уже есть очки (матч в процессе или завершен)
-    // 2. ИЛИ система определила, что он нужен (статус tie_needs_tiebreak)
-    // 3. ИЛИ это плей-офф и счет по сетам 1:1
-    const showThirdSet = (set3Team1 > 0 || set3Team2 > 0) || 
-                         (currentMatchData.status === 'tie_needs_tiebreak') ||
-                         (isPlayoff && set1Done && set2Done && (set1Team1 > set1Team2) !== (set2Team1 > set2Team2));
+    const showThirdSet = isFinalMatch || currentMatchData.status === 'tie_needs_tiebreak' || ((currentMatchData.set1Team1 > 0 || currentMatchData.set1Team2 > 0) && (currentMatchData.set2Team1 > 0 || currentMatchData.set2Team2 > 0)) || (currentMatchData.set3Team1 ?? 0) || (currentMatchData.set3Team2 ?? 0);
 
     const TeamScoreBlock = ({ teamKey, team }) => {
-        const score = currentMatchData[`set${activeSet}${teamKey === 'team1' ? 'Team1' : 'Team2'}`] || 0;
-        const otherScore = currentMatchData[`set${activeSet}${teamKey === 'team1' ? 'Team2' : 'Team1'}`] || 0;
+        const s1 = currentMatchData[`set${activeSet}Team1`] || 0;
+        const s2 = currentMatchData[`set${activeSet}Team2`] || 0;
+        const score = teamKey === 'team1' ? s1 : s2;
+        const otherScore = teamKey === 'team1' ? s2 : s1;
+        
+        const isTiebreak = activeSet === 3;
+        const isFinished = isSetCompleted(s1, s2, isFinalMatch, isTiebreak, setLimit, winDiff);
         const isServing = currentSetHistory[currentSetHistory.length - 1]?.team === teamKey;
         
         return (
@@ -122,13 +116,20 @@ const MatchDetailModal = ({
                     {team.name}
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                    <button onClick={() => handleScoreChange(activeSet, teamKey, 1)} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-[#0B8E8D] text-white shadow-lg active:scale-95 transition-all">
+                    <button 
+                        onClick={() => handleScoreChange(activeSet, teamKey, 1)} 
+                        disabled={isFinished}
+                        className={`w-14 h-14 flex items-center justify-center rounded-2xl bg-[#0B8E8D] text-white shadow-lg active:scale-95 transition-all ${isFinished ? 'opacity-20 cursor-not-allowed grayscale' : 'hover:bg-[#097b7a]'}`}
+                    >
                         <FaPlus className="text-2xl" />
                     </button>
-                    <div className="text-5xl font-black text-[#06324F] font-mono select-none">
+                    <div className={`text-5xl font-black font-mono select-none ${isFinished && score > otherScore ? 'text-green-600' : 'text-[#06324F]'}`}>
                         {score}
                     </div>
-                    <button onClick={() => handleScoreChange(activeSet, teamKey, -1)} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-gray-100 text-gray-400 active:scale-95 active:bg-red-50 active:text-red-500 transition-all">
+                    <button 
+                        onClick={() => handleScoreChange(activeSet, teamKey, -1)} 
+                        className="w-14 h-14 flex items-center justify-center rounded-2xl bg-gray-100 text-gray-400 active:scale-95 active:bg-red-50 active:text-red-500 transition-all"
+                    >
                         <FaMinus className="text-xl" />
                     </button>
                 </div>
@@ -151,15 +152,11 @@ const MatchDetailModal = ({
 
                 <div className="p-4 overflow-y-auto flex-1 space-y-6">
                     
-                    {/* Настройки */}
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-4 shadow-inner text-[#06324F]">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t.time || 'Время'}</label>
-                                <button 
-                                    onClick={() => setIsTimePickerOpen(true)}
-                                    className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm text-sm hover:border-[#0B8E8D] transition-colors"
-                                >
+                                <button onClick={() => setIsTimePickerOpen(true)} className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm text-sm hover:border-[#0B8E8D] transition-colors">
                                     <FaCalendarAlt className="text-indigo-500" />
                                     <span className="font-bold text-[#06324F]">{currentMatchData.time || '00:00'}</span>
                                 </button>
@@ -249,14 +246,7 @@ const MatchDetailModal = ({
                 </div>
             </div>
 
-            {/* Модалка выбора времени */}
-            <TimePickerModal 
-                isOpen={isTimePickerOpen}
-                onClose={() => setIsTimePickerOpen(false)}
-                currentTime={currentMatchData.time}
-                onSave={(newTime) => onUpdateDetails(currentMatchData.id, 'time', newTime)}
-                t={t}
-            />
+            <TimePickerModal isOpen={isTimePickerOpen} onClose={() => setIsTimePickerOpen(false)} currentTime={currentMatchData.time} onSave={(newTime) => onUpdateDetails(currentMatchData.id, 'time', newTime)} t={t} />
         </div>
     );
 };
