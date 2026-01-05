@@ -554,12 +554,16 @@ function App() {
             prevMatches.map(m => {
                 if (m.id === matchId) {
                     const isPlayoff = m.round !== 'group';
+                    const isFinal = m.round === 'final' || m.round === 'third_place' || m.round === 'fifth_place';
                     const setPointLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
 
                     let maxScore;
                     if (set === 3) {
-                        maxScore = 20; // max для тай-брейка
+                        // Тайбрейк: для финала до 15, для группы до 5
+                        // Добавляем запас для овертайма (разница должна быть 2)
+                        maxScore = isFinal ? 30 : 10;
                     } else {
+                        // Обычный сет: лимит + запас для овертайма
                         maxScore = (setPointLimit || 25) + 15;
                     }
 
@@ -904,6 +908,9 @@ function App() {
         let roundClass = 'px-3 py-1 rounded-full text-sm font-semibold inline-block mb-3'; let roundIcon; const roundText = t.roundNames?.[currentRound] || currentRound; if (currentRound === 'group') { roundClass += ' bg-[#C1CBA7]/50 text-[#06324F]'; roundIcon = <FaUsers className="mr-2" />; } else if (currentRound === 'quarterfinal') { roundClass += ' bg-[#0B8E8D]/20 text-[#0B8E8D]'; roundIcon = <FaChartBar className="mr-2" />; } else if (currentRound === 'semifinal') { roundClass += ' bg-[#06324F]/20 text-[#06324F]'; roundIcon = <FaChartBar className="mr-2" />; } else if (currentRound === 'third_place') { roundClass += ' bg-orange-100 text-orange-700'; roundIcon = <FaTrophy className="mr-2" />; } else if (currentRound === 'final') { roundClass += ' bg-[#FDD80F]/20 text-[#FDD80F]/90'; roundIcon = <FaTrophy className="mr-2" />; } else { roundClass += ' bg-gray-200 text-gray-700'; roundIcon = <FaVolleyballBall className="mr-2" />; }
         let statusClass = 'px-3 py-1 rounded-full text-sm font-semibold inline-block ml-2'; let statusIcon; const currentStatus = currentMatchData.status || 'unknown'; const statusText = t.statusNames?.[currentStatus] || currentStatus; if (currentStatus === 'completed') { statusClass += ' bg-green-100 text-green-800'; statusIcon = <FaCheck className="mr-2" />; } else if (currentStatus === 'completed_by_points') { statusClass += ' bg-blue-100 text-blue-800'; statusIcon = <FaCheck className="mr-2" />; } else if (currentStatus === 'tie_needs_tiebreak') { statusClass += ' bg-red-100 text-red-800'; statusIcon = <FaExclamationTriangle className="mr-2" />; } else if (currentStatus === 'in_progress') { statusClass += ' bg-yellow-100 text-yellow-800'; statusIcon = <FaRegClock className="mr-2 animate-spin" style={{ animationDuration: '2s' }} />; } else if (currentStatus === 'waiting') { statusClass += ' bg-gray-100 text-gray-500'; statusIcon = <FaRegClock className="mr-2" />; } else { statusClass += ' bg-gray-100 text-gray-800'; statusIcon = <FaRegClock className="mr-2" />; }
         const isFinal = currentRound === 'final' || currentRound === 'third_place' || currentRound === 'fifth_place'; const isPlayoff = currentRound !== 'group'; const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit; const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference; const set1Completed = isSetCompleted(currentMatchData.set1Team1, currentMatchData.set1Team2, false, false, setLimit, winDiff); const set2Completed = isSetCompleted(currentMatchData.set2Team1, currentMatchData.set2Team2, false, false, setLimit, winDiff); const isTieSituation = set1Completed && set2Completed && (currentMatchData.set1Team1 > currentMatchData.set1Team2 !== currentMatchData.set2Team1 > currentMatchData.set2Team2); const showThirdSetInput = isFinal || currentStatus === 'tie_needs_tiebreak' || isTieSituation || (currentMatchData.set3Team1 ?? 0) > 0 || (currentMatchData.set3Team2 ?? 0) > 0; const isThirdSetTiebreak = showThirdSetInput && (isFinal || currentStatus === 'tie_needs_tiebreak' || isTieSituation); const tiebreakScoreLimit = isFinal ? 15 : 5;
+        // Max значения для inputs на основе настроек
+        const maxScoreRegularSet = (setLimit || 25) + 15; // Обычный сет с запасом для овертайма
+        const maxScoreTiebreak = isFinal ? 30 : 10; // Тайбрейк: финал до 15+запас, группа до 5+запас
 
         return (
             <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 z-[70] backdrop-blur-sm">
@@ -1017,18 +1024,18 @@ function App() {
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">{t.set1}</label>
                                 <div className="flex items-center justify-between">
-                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set1Team2 ?? 0) : (currentMatchData.set1Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max={maxScoreRegularSet} value={isSwapped ? (currentMatchData.set1Team2 ?? 0) : (currentMatchData.set1Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                     <span className="text-gray-400 text-xl font-bold">:</span>
-                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set1Team1 ?? 0) : (currentMatchData.set1Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max={maxScoreRegularSet} value={isSwapped ? (currentMatchData.set1Team1 ?? 0) : (currentMatchData.set1Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                 </div>
                             </div>
                             {/* Сет 2 */}
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">{t.set2}</label>
                                 <div className="flex items-center justify-between">
-                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set2Team2 ?? 0) : (currentMatchData.set2Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max={maxScoreRegularSet} value={isSwapped ? (currentMatchData.set2Team2 ?? 0) : (currentMatchData.set2Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                     <span className="text-gray-400 text-xl font-bold">:</span>
-                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set2Team1 ?? 0) : (currentMatchData.set2Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max={maxScoreRegularSet} value={isSwapped ? (currentMatchData.set2Team1 ?? 0) : (currentMatchData.set2Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                 </div>
                             </div>
                             {/* Сет 3 / Тай-брейк */}
@@ -1036,9 +1043,9 @@ function App() {
                                 <div className={`bg-white p-4 rounded-lg shadow-sm border ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300' : 'border-gray-200'}`}>
                                     <label className={`block text-sm font-medium ${currentStatus === 'tie_needs_tiebreak' ? 'text-red-700' : 'text-gray-700'} mb-2`}>{isFinal ? t.set3 : t.tiebreak}{isThirdSetTiebreak && ` (${isFinal ? (t.finalTiebreakCondition || 'до 15') : (t.tiebreak_condition || 'до 5')})`}</label>
                                     <div className="flex items-center justify-between">
-                                        <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set3Team2 ?? 0) : (currentMatchData.set3Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team2' : 'team1', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
+                                        <input type="number" min="0" max={maxScoreTiebreak} value={isSwapped ? (currentMatchData.set3Team2 ?? 0) : (currentMatchData.set3Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team2' : 'team1', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
                                         <span className="text-gray-400 text-xl font-bold">:</span>
-                                        <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set3Team1 ?? 0) : (currentMatchData.set3Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team1' : 'team2', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
+                                        <input type="number" min="0" max={maxScoreTiebreak} value={isSwapped ? (currentMatchData.set3Team1 ?? 0) : (currentMatchData.set3Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team1' : 'team2', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
                                     </div>
                                     {currentStatus === 'tie_needs_tiebreak' && !isFinal && <p className="text-xs text-red-600 mt-2">{t.tiebreakInfo || `Введите счет тай-брейка (до ${tiebreakScoreLimit}, разница 2).`}</p>}
                                     {isFinal && showThirdSetInput && <p className="text-xs text-gray-500 mt-2">{t.finalTiebreakInfo || `Третий сет финала играется до ${tiebreakScoreLimit} (разница 2).`}</p>}
