@@ -1173,6 +1173,24 @@ function App() {
                             <p className="flex items-start"><FaMapMarkerAlt className="mr-2 text-[#0B8E8D] mt-0.5 flex-shrink-0" /><div><span className="font-semibold mr-1">{t.addressLabel}:</span> {t.tournamentAddress} <span className="ml-2 space-x-2"><a href="https://maps.app.goo.gl/6jAwW9cVsyf11EEg6" target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] hover:underline text-xs">[Google]</a><a href="https://mapy.com/s/lobalakeru" target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] hover:underline text-xs">[Mapy.cz]</a></span></div></p>
                             <p className="flex items-center"><FaLink className="mr-2 text-[#06324F]" /><span className="font-semibold mr-1">{t.websiteLabel}:</span><a href={t.tournamentWebsite} target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] ml-1 hover:underline truncate">{t.tournamentWebsite?.replace(/^(https?:\/\/)?(www\.)?/, '')}</a></p>
                         </div>
+                        {/* Селектор турнира (Mobile) */}
+                        <div className="mt-3 pt-2 border-t border-[#0B8E8D]/20">
+                            <label className="block text-xs font-semibold text-[#06324F] mb-2">
+                                <FaTrophy className="inline mr-2 text-[#FDD80F]" />
+                                {t.selectTournament || 'Turnaj'}
+                            </label>
+                            <select 
+                                value={currentTournament} 
+                                onChange={(e) => setCurrentTournament(e.target.value)}
+                                className="w-full p-2 text-sm rounded border border-[#0B8E8D]/30 bg-white focus:ring-2 focus:ring-[#0B8E8D]"
+                            >
+                                {Object.values(TOURNAMENTS).map(tour => (
+                                    <option key={tour.id} value={tour.id} disabled={tour.status === 'upcoming'}>
+                                        {tour.name} ({tour.date}) {tour.status === 'active' ? '🟢' : tour.status === 'completed' ? '✅' : '🔜'}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex space-x-1 mt-3 pt-2 border-t border-[#0B8E8D]/20">{Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (<button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 py-1 text-xs rounded transition-colors duration-150 ${language === lang ? 'bg-[#0B8E8D] text-white shadow-sm font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`} title={languageNames[lang]}>{lang.toUpperCase()}</button>))}</div>
                     </div>
                 </main>
