@@ -28,6 +28,14 @@ if (typeof window !== 'undefined') {
 // Database helper functions
 export const dbRef = (path) => ref(database, path);
 
+// Dynamic tournament path helper
+export const getTournamentPath = (tournament, subPath) => `tournaments/${tournament}/${subPath}`;
+
+// Global paths (not tournament-specific)
+export const GLOBAL_PATHS = {
+    language: 'league/language'
+};
+
 // Save data to database
 export const saveData = async (path, data) => {
     try {

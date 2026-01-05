@@ -5,7 +5,7 @@ import { FaVolleyballBall, FaUsers, FaTrophy, FaRegClock, FaCheck, FaGlobe, FaEx
 // Переводы и названия языков должны быть в './translations.js'
 import { translations, languageNames } from './translations';
 // Firebase
-import { saveData, subscribeToData } from './firebase';
+import { saveData, subscribeToData, getTournamentPath, GLOBAL_PATHS } from './firebase';
 
 // === КОНФИГУРАЦИЯ ТУРНИРОВ RVL 2025/26 ===
 const LEAGUE_SEASON = '2025-26';
@@ -120,13 +120,9 @@ const initialMatches = [
 
 
 
-// --- Firebase Database Paths ---
-const DB_PATHS = {
-    teams: 'tournament/teams',
-    matches: 'tournament/matches',
-    settings: 'tournament/settings',
-    language: 'tournament/language'
-};
+// --- Firebase Database Paths теперь динамические ---
+// Используем getTournamentPath(tournament, 'teams') и т.д.
+// Глобальные пути в GLOBAL_PATHS (language)
 
 // --- Функции валидации счета и сета ---
 const validateScore = (score, isFinalSet, isTiebreak) => {
@@ -188,79 +184,76 @@ function App() {
     const t = translations[language] || translations['cs'];
 
     // --- Эффект для загрузки данных из Firebase (подписка на изменения) ---
+    // Переподписывается при смене турнира
     useEffect(() => {
         const unsubscribers = [];
+        setIsLoading(true);
+
+        // Динамические пути для текущего турнира
+        const teamsPath = getTournamentPath(currentTournament, 'teams');
+        const matchesPath = getTournamentPath(currentTournament, 'matches');
+        const settingsPath = getTournamentPath(currentTournament, 'settings');
 
         // Подписка на teams
         unsubscribers.push(
-            subscribeToData(DB_PATHS.teams, (data) => {
+            subscribeToData(teamsPath, (data) => {
                 if (data) {
-                    // Преобразуем объект в массив, если нужно
                     const teamsArray = Array.isArray(data) ? data : Object.values(data);
                     setTeams(teamsArray);
                 } else {
-                    // Если данных нет, инициализируем начальными и сохраняем в Firebase
+                    // Если данных нет для этого турнира, инициализируем начальными
                     setTeams(initialTeams);
-                    saveData(DB_PATHS.teams, initialTeams);
+                    saveData(teamsPath, initialTeams);
                 }
             })
         );
 
         // Подписка на matches
         unsubscribers.push(
-            subscribeToData(DB_PATHS.matches, (data) => {
+            subscribeToData(matchesPath, (data) => {
                 if (data) {
                     const matchesArray = Array.isArray(data) ? data : Object.values(data);
-                    // Firebase данные имеют приоритет! 
-                    // initialMatches используется только для получения списка ID матчей
-                    // и заполнения отсутствующих полей (fallback)
                     const mergedMatches = initialMatches.map(initialMatch => {
                         const loadedMatchData = matchesArray.find(lm => lm.id === initialMatch.id);
                         if (loadedMatchData) {
-                            // Firebase данные имеют полный приоритет
-                            return {
-                                ...initialMatch, // Базовая структура (fallback для новых полей)
-                                ...loadedMatchData // Firebase данные перезаписывают всё
-                            };
+                            return { ...initialMatch, ...loadedMatchData };
                         }
-                        // Матч не найден в Firebase - это новый матч, добавляем из initial
                         return initialMatch;
                     });
                     setMatches(mergedMatches);
                 } else {
-                    // Первый запуск - инициализируем Firebase начальными данными
                     setMatches(initialMatches);
-                    saveData(DB_PATHS.matches, initialMatches);
+                    saveData(matchesPath, initialMatches);
                 }
                 setIsLoading(false);
             })
         );
 
-        // Подписка на settings
+        // Подписка на settings (турнир-специфичные)
         unsubscribers.push(
-            subscribeToData(DB_PATHS.settings, (data) => {
+            subscribeToData(settingsPath, (data) => {
                 if (data) {
                     setTournamentSettings(data);
                 }
             })
         );
 
-        // Подписка на language
+        // Подписка на language (глобальный)
         unsubscribers.push(
-            subscribeToData(DB_PATHS.language, (data) => {
+            subscribeToData(GLOBAL_PATHS.language, (data) => {
                 if (data) {
                     setLanguage(data);
                 }
             })
         );
 
-        // Отписка при размонтировании
+        // Отписка при размонтировании или смене турнира
         return () => {
             unsubscribers.forEach(unsub => {
                 if (typeof unsub === 'function') unsub();
             });
         };
-    }, []); // Выполняется один раз при монтировании
+    }, [currentTournament]); // Переподписка при смене турнира!
 
     // --- Эффект для сохранения в Firebase при изменении данных ---
     const saveToFirebase = useCallback(async (path, data) => {
@@ -272,34 +265,34 @@ function App() {
     // Ref для отслеживания первой загрузки (чтобы не сохранять при инициализации)
     const isInitialLoad = React.useRef(true);
 
-    // Автосохранение matches в Firebase
+    // Автосохранение matches в Firebase (динамический путь)
     useEffect(() => {
         if (isInitialLoad.current) return;
         const timer = setTimeout(() => {
-            saveData(DB_PATHS.matches, matches);
+            saveData(getTournamentPath(currentTournament, 'matches'), matches);
         }, 500); // Debounce 500ms
         return () => clearTimeout(timer);
-    }, [matches]);
+    }, [matches, currentTournament]);
 
-    // Автосохранение teams в Firebase
+    // Автосохранение teams в Firebase (динамический путь)
     useEffect(() => {
         if (isInitialLoad.current) return;
         const timer = setTimeout(() => {
-            saveData(DB_PATHS.teams, teams);
+            saveData(getTournamentPath(currentTournament, 'teams'), teams);
         }, 500);
         return () => clearTimeout(timer);
-    }, [teams]);
+    }, [teams, currentTournament]);
 
-    // Автосохранение settings в Firebase
+    // Автосохранение settings в Firebase (динамический путь)
     useEffect(() => {
         if (isInitialLoad.current) return;
-        saveData(DB_PATHS.settings, tournamentSettings);
-    }, [tournamentSettings]);
+        saveData(getTournamentPath(currentTournament, 'settings'), tournamentSettings);
+    }, [tournamentSettings, currentTournament]);
 
-    // Автосохранение language в Firebase
+    // Автосохранение language в Firebase (глобальный путь)
     useEffect(() => {
         if (isInitialLoad.current) return;
-        saveData(DB_PATHS.language, language);
+        saveData(GLOBAL_PATHS.language, language);
     }, [language]);
 
     // Сброс флага первой загрузки после инициализации
