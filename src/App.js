@@ -134,7 +134,7 @@ const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak, setPoint
     const score1 = team1Score ?? 0;
     const score2 = team2Score ?? 0;
 
-    // Тай-брейк группы (до 5, первый достигший побеждает)
+    // Тай-брейк группы (до 5, первый достигший побеждает БЕЗ разницы)
     if (isTiebreak && !isFinalSet) {
         return score1 === 5 || score2 === 5;
     }
@@ -144,7 +144,8 @@ const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak, setPoint
         return (score1 >= 15 || score2 >= 15) && Math.abs(score1 - score2) >= 2;
     }
 
-    // Обычный сет: setPointLimit с указанной разницей
+    // Обычный сет: setPointLimit + разница winDifference
+    // winDifference берется из настроек (groupWinDifference или playoffWinDifference)
     return (score1 >= setPointLimit || score2 >= setPointLimit) &&
         Math.abs(score1 - score2) >= winDifference;
 };
@@ -280,14 +281,36 @@ function App() {
     const isInitialLoad = React.useRef(true);
 
     // Автосохранение matches в Firebase (динамический путь)
-    // Используем ref для хранения таймера, чтобы не отменять при быстрых изменениях
+    // Используем ref для хранения таймера с debounce для оптимизации
     const saveMatchesRef = React.useRef(null);
     useEffect(() => {
         if (isInitialLoad.current) return;
+
         // Очищаем предыдущий таймер
         if (saveMatchesRef.current) clearTimeout(saveMatchesRef.current);
-        // Сохраняем немедленно (без debounce для надёжности)
-        saveData(getTournamentPath(currentTournament, 'matches'), matches);
+
+        // Устанавливаем индикатор "сохранение"
+        setIsSaving(true);
+
+        // Debounce: сохраняем через 1 секунду после последнего изменения
+        saveMatchesRef.current = setTimeout(async () => {
+            try {
+                await saveData(getTournamentPath(currentTournament, 'matches'), matches);
+                setIsSaving(false);
+            } catch (error) {
+                console.error('Error saving matches:', error);
+                setIsSaving(false);
+                // TODO: показать уведомление об ошибке пользователю
+            }
+        }, 1000);
+
+        // Cleanup: при размонтировании сохраняем немедленно
+        return () => {
+            if (saveMatchesRef.current) {
+                clearTimeout(saveMatchesRef.current);
+                saveData(getTournamentPath(currentTournament, 'matches'), matches);
+            }
+        };
     }, [matches, currentTournament]);
 
     // Автосохранение teams в Firebase (динамический путь)
@@ -853,7 +876,21 @@ function App() {
                     {/* Шапка модального окна */}
                     <div className="bg-gradient-to-r from-[#0B8E8D] to-[#06324F] p-6 text-white">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-2xl font-bold">{t.matchDetail}</h2>
+                            <div className="flex items-center gap-3">
+                                <h2 className="text-2xl font-bold">{t.matchDetail}</h2>
+                                {isSaving && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <FaSpinner className="animate-spin" />
+                                        <span>{t.saving || 'Сохранение...'}</span>
+                                    </div>
+                                )}
+                                {!isSaving && (
+                                    <div className="flex items-center gap-1 text-sm text-green-300">
+                                        <FaCheck className="text-xs" />
+                                        <span>{t.saved || 'Сохранено'}</span>
+                                    </div>
+                                )}
+                            </div>
                             <button onClick={() => { setView('matches'); setSelectedMatch(null); }} className="text-white hover:text-red-200 transition-colors duration-150 text-3xl leading-none">&times;</button>
                         </div>
                     </div>
@@ -945,18 +982,18 @@ function App() {
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">{t.set1}</label>
                                 <div className="flex items-center justify-between">
-                                    <input type="number" min="0" max="99" defaultValue={isSwapped ? (currentMatchData.set1Team2 ?? 0) : (currentMatchData.set1Team1 ?? 0)} key={`s1t1-${isSwapped}`} onBlur={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set1Team2 ?? 0) : (currentMatchData.set1Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                     <span className="text-gray-400 text-xl font-bold">:</span>
-                                    <input type="number" min="0" max="99" defaultValue={isSwapped ? (currentMatchData.set1Team1 ?? 0) : (currentMatchData.set1Team2 ?? 0)} key={`s1t2-${isSwapped}`} onBlur={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set1Team1 ?? 0) : (currentMatchData.set1Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 1, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                 </div>
                             </div>
                             {/* Сет 2 */}
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">{t.set2}</label>
                                 <div className="flex items-center justify-between">
-                                    <input type="number" min="0" max="99" defaultValue={isSwapped ? (currentMatchData.set2Team2 ?? 0) : (currentMatchData.set2Team1 ?? 0)} key={`s2t1-${isSwapped}`} onBlur={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set2Team2 ?? 0) : (currentMatchData.set2Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team2' : 'team1', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                     <span className="text-gray-400 text-xl font-bold">:</span>
-                                    <input type="number" min="0" max="99" defaultValue={isSwapped ? (currentMatchData.set2Team1 ?? 0) : (currentMatchData.set2Team2 ?? 0)} key={`s2t2-${isSwapped}`} onBlur={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                    <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set2Team1 ?? 0) : (currentMatchData.set2Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 2, isSwapped ? 'team1' : 'team2', e.target.value)} className="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                                 </div>
                             </div>
                             {/* Сет 3 / Тай-брейк */}
@@ -964,9 +1001,9 @@ function App() {
                                 <div className={`bg-white p-4 rounded-lg shadow-sm border ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300' : 'border-gray-200'}`}>
                                     <label className={`block text-sm font-medium ${currentStatus === 'tie_needs_tiebreak' ? 'text-red-700' : 'text-gray-700'} mb-2`}>{isFinal ? t.set3 : t.tiebreak}{isThirdSetTiebreak && ` (${isFinal ? (t.finalTiebreakCondition || 'до 15') : (t.tiebreak_condition || 'до 5')})`}</label>
                                     <div className="flex items-center justify-between">
-                                        <input type="number" min="0" max="99" defaultValue={isSwapped ? (currentMatchData.set3Team2 ?? 0) : (currentMatchData.set3Team1 ?? 0)} key={`s3t1-${isSwapped}`} onBlur={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team2' : 'team1', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
+                                        <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set3Team2 ?? 0) : (currentMatchData.set3Team1 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team2' : 'team1', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
                                         <span className="text-gray-400 text-xl font-bold">:</span>
-                                        <input type="number" min="0" max="99" defaultValue={isSwapped ? (currentMatchData.set3Team1 ?? 0) : (currentMatchData.set3Team2 ?? 0)} key={`s3t2-${isSwapped}`} onBlur={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team1' : 'team2', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
+                                        <input type="number" min="0" max="99" value={isSwapped ? (currentMatchData.set3Team1 ?? 0) : (currentMatchData.set3Team2 ?? 0)} onChange={(e) => updateMatchScore(currentMatchData.id, 3, isSwapped ? 'team1' : 'team2', e.target.value)} className={`w-20 p-2 border rounded-lg text-center font-bold text-lg focus:ring-2 ${currentStatus === 'tie_needs_tiebreak' ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'}`} />
                                     </div>
                                     {currentStatus === 'tie_needs_tiebreak' && !isFinal && <p className="text-xs text-red-600 mt-2">{t.tiebreakInfo || `Введите счет тай-брейка (до ${tiebreakScoreLimit}, разница 2).`}</p>}
                                     {isFinal && showThirdSetInput && <p className="text-xs text-gray-500 mt-2">{t.finalTiebreakInfo || `Третий сет финала играется до ${tiebreakScoreLimit} (разница 2).`}</p>}

@@ -180,4 +180,8 @@ Info o lokalitě: https://hala-slany.cz/`,
   point: 'bod',
   points: 'body',
   scanQR: 'Naskenujte QR kód',
+
+  // Индикация сохранения
+  saving: 'Ukládání...',
+  saved: 'Uloženo',
 };
