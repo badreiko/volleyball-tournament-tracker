@@ -1155,6 +1155,15 @@ function App() {
                                 <p className="flex items-center"><FaLink className="mr-2 text-[#06324F]" /><span className="font-semibold mr-1">{t.websiteLabel}:</span><a href={t.tournamentWebsite} target="_blank" rel="noopener noreferrer" className="text-[#0B8E8D] ml-1 hover:underline truncate">{t.tournamentWebsite?.replace(/^(https?:\/\/)?(www\.)?/, '')}</a></p>
                             </div>
                             <div className="mt-3 pt-2 border-t border-[#0B8E8D]/20"><h3 className="text-sm font-semibold text-[#06324F] mb-1">{t.aboutSection}</h3><p className="text-xs text-gray-600">{t.aboutApp}</p></div>
+                            {/* QR Code */}
+                            <div className="mt-3 pt-2 border-t border-[#0B8E8D]/20 text-center">
+                                <p className="text-xs text-gray-500 mb-2">{t.scanQR || 'Naskenujte QR kód'}</p>
+                                <img
+                                    src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://rvl-2025-26.netlify.app/"
+                                    alt="QR Code"
+                                    className="mx-auto w-20 h-20 rounded shadow-sm"
+                                />
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -1179,8 +1188,8 @@ function App() {
                                 <FaTrophy className="inline mr-2 text-[#FDD80F]" />
                                 {t.selectTournament || 'Turnaj'}
                             </label>
-                            <select 
-                                value={currentTournament} 
+                            <select
+                                value={currentTournament}
                                 onChange={(e) => setCurrentTournament(e.target.value)}
                                 className="w-full p-2 text-sm rounded border border-[#0B8E8D]/30 bg-white focus:ring-2 focus:ring-[#0B8E8D]"
                             >
