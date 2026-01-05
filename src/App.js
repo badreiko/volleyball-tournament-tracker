@@ -78,7 +78,7 @@ function App() {
                     });
 
                     setMatches(mergedMatches);
-                    
+
                     // Если данные в базе устарели (нет новых полей), принудительно сохраняем новую структуру
                     if (needsMigration) {
                         console.log("Migrating matches data to new structure...");
@@ -127,15 +127,17 @@ function App() {
 
     const saveMatchesRef = React.useRef(null);
     useEffect(() => {
-        if (isInitialLoad.current || isUpdatingFromFirebase.current) {
+        // Пропускаем автосохранение при первой загрузке
+        if (isInitialLoad.current) return;
+
+        // Пропускаем при обновлении из Firebase (чтобы не было циклического сохранения)
+        if (isUpdatingFromFirebase.current) {
             isUpdatingFromFirebase.current = false;
             return;
         }
 
         if (saveMatchesRef.current) clearTimeout(saveMatchesRef.current);
-
         setIsSaving(true);
-
         saveMatchesRef.current = setTimeout(async () => {
             try {
                 await saveData(getTournamentPath(currentTournament, 'matches'), matches);
@@ -414,20 +416,20 @@ function App() {
                             const t1Pts = (set1Team1 ?? 0) + (set2Team1 ?? 0); const t2Pts = (set1Team2 ?? 0) + (set2Team2 ?? 0);
                             if (t1Pts > t2Pts) { newStatus = 'completed_by_points'; newWinner = match.team1; }
                             else if (t2Pts > t1Pts) { newStatus = 'completed_by_points'; newWinner = match.team2; }
-                            else { 
+                            else {
                                 if (set3Completed) { newStatus = 'completed'; newWinner = (set3Team1 > set3Team2) ? match.team1 : match.team2; }
                                 else if ((set3Team1 ?? 0) > 0 || (set3Team2 ?? 0) > 0) { newStatus = 'in_progress'; newWinner = null; }
                                 else { newStatus = 'tie_needs_tiebreak'; newWinner = null; }
                             }
-                        } else { 
+                        } else {
                             if (set3Completed) { newStatus = 'completed'; newWinner = (set3Team1 > set3Team2) ? match.team1 : match.team2; }
                             else if ((set3Team1 ?? 0) > 0 || (set3Team2 ?? 0) > 0) { newStatus = 'in_progress'; newWinner = null; }
                             else { newStatus = 'tie_needs_tiebreak'; newWinner = null; }
                         }
                     }
-                } else if (!allScoresZero) { 
+                } else if (!allScoresZero) {
                     newStatus = 'in_progress'; newWinner = null;
-                } else { 
+                } else {
                     newStatus = match.team1 && match.team2 ? 'not_started' : 'waiting'; newWinner = null;
                 }
 
@@ -453,11 +455,11 @@ function App() {
             const matchToReset = prevMatches[matchIndex];
 
             const originalStatus = initialMatch
-                ? (matchToReset.team1 && matchToReset.team2 ? 'not_started' : 'waiting') 
+                ? (matchToReset.team1 && matchToReset.team2 ? 'not_started' : 'waiting')
                 : 'not_started';
 
             const refereeToKeep = matchToReset.round !== 'group'
-                ? matchToReset.refereeTeamCode 
+                ? matchToReset.refereeTeamCode
                 : (initialMatch?.refereeTeamCode || matchToReset.refereeTeamCode);
 
             const updatedMatch = {
@@ -521,10 +523,10 @@ function App() {
                 </div>
             )}
             <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
-                <Sidebar 
-                    t={t} 
-                    view={view} 
-                    setView={setView} 
+                <Sidebar
+                    t={t}
+                    view={view}
+                    setView={setView}
                     setShowRules={setShowRules}
                     currentTournament={currentTournament}
                     setCurrentTournament={setCurrentTournament}
@@ -536,13 +538,13 @@ function App() {
 
                 <main className="flex-1 p-0 md:p-6 pb-20 md:pb-6 overflow-y-auto">
                     {view === 'matches' && (
-                        <MatchesView 
-                            matches={matches} 
-                            teams={teams} 
-                            t={t} 
-                            setView={setView} 
-                            setSelectedMatch={setSelectedMatch} 
-                            tournamentSettings={tournamentSettings} 
+                        <MatchesView
+                            matches={matches}
+                            teams={teams}
+                            t={t}
+                            setView={setView}
+                            setSelectedMatch={setSelectedMatch}
+                            tournamentSettings={tournamentSettings}
                         />
                     )}
                     {view === 'groups' && <GroupsView teams={teams} t={t} />}
@@ -585,10 +587,10 @@ function App() {
             </div>
 
             {showRules && (
-                <RulesModal 
-                    t={t} 
-                    language={language} 
-                    changeLanguage={changeLanguage} 
+                <RulesModal
+                    t={t}
+                    language={language}
+                    changeLanguage={changeLanguage}
                     onClose={() => setShowRules(false)}
                     tournamentSettings={tournamentSettings}
                     setTournamentSettings={setTournamentSettings}
@@ -597,7 +599,7 @@ function App() {
                 />
             )}
             {view === 'matchDetail' && selectedMatch && (
-                <MatchDetailModal 
+                <MatchDetailModal
                     match={selectedMatch}
                     matches={matches}
                     teams={teams}
