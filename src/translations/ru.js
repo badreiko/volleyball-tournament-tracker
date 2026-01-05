@@ -171,4 +171,13 @@ Dream team Praha
   completed: 'Завершен',
   active: 'Активный',
   upcoming: 'Предстоящий',
+
+  // Настройки сета
+  groupMatchSettings: 'Групповые матчи',
+  playoffMatchSettings: 'Плей-офф / Финалы',
+  setPointsLabel: 'Очков в сете',
+  winDifferenceLabel: 'Разница для победы',
+  point: 'очко',
+  points: 'очка',
+  scanQR: 'Сканируйте QR-код',
 };

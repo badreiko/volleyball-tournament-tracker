@@ -171,4 +171,13 @@ Info o lokalitě: https://hala-slany.cz/`,
   completed: 'Dokončeno',
   active: 'Aktivní',
   upcoming: 'Připravuje se',
+
+  // Настройки сета
+  groupMatchSettings: 'Skupinové zápasy',
+  playoffMatchSettings: 'Play-off / Finále',
+  setPointsLabel: 'Bodů v setu',
+  winDifferenceLabel: 'Rozdíl pro výhru',
+  point: 'bod',
+  points: 'body',
+  scanQR: 'Naskenujte QR kód',
 };
