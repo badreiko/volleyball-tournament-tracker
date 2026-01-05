@@ -171,7 +171,7 @@ function App() {
     const [teams, setTeams] = useState(initialTeams);
     const [matches, setMatches] = useState(initialMatches);
     const [language, setLanguage] = useState('cs'); // Язык по умолчанию 'cs'
-    const [tournamentSettings, setTournamentSettings] = useState({ useTotalPointsForTie: true });
+    const [tournamentSettings, setTournamentSettings] = useState({ useTotalPointsForTie: true, setPointLimit: 25 });
     const [view, setView] = useState('matches'); // Начальный вид - матчи
     const [selectedMatch, setSelectedMatch] = useState(null); // Для открытия деталей матча
     const [showRules, setShowRules] = useState(false); // Для модального окна правил
@@ -474,19 +474,30 @@ function App() {
     // --- Обновление счета матча ---
     const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
         const score = parseInt(scoreStr);
-        const validScore = isNaN(score) || score < 0 ? 0 : score;
+
+        // Определяем максимальный счёт в зависимости от типа сета
+        const setPointLimit = tournamentSettings.setPointLimit || 25;
+        let maxScore;
+        if (set === 3) {
+            // Тай-брейк: до 5 (группы) или до 15 (финалы) + запас
+            maxScore = 20; // max для тай-брейка
+        } else {
+            // Обычный сет: setPointLimit + 15 (для разницы 2)
+            maxScore = setPointLimit + 15;
+        }
+
+        // Жёсткая валидация: 0 <= score <= maxScore
+        const validScore = isNaN(score) || score < 0 ? 0 : Math.min(score, maxScore);
+
         setMatches(prevMatches =>
             prevMatches.map(m => {
                 if (m.id === matchId) {
-                    // const isFinalSet = m.round === 'final' && set === 3;
-                    // const isTiebreak = set === 3 && (m.status === 'tie_needs_tiebreak' || isFinalSet);
-                    // const validatedScore = validateScore(validScore, isFinalSet, isTiebreak); // Валидация больше не нужна?
                     return { ...m, [`set${set}${team === 'team1' ? 'Team1' : 'Team2'}`]: validScore };
                 }
                 return m;
             })
         );
-    }, [setMatches]); // Зависит только от setMatches
+    }, [setMatches, tournamentSettings.setPointLimit]); // Зависит от setPointLimit
 
     // --- Проверка статуса всех матчей ---
     const checkAllMatchesStatus = useCallback(() => {
@@ -974,6 +985,23 @@ function App() {
                             <h4 className="text-lg font-semibold text-[#06324F] mb-3">{t.tieRules?.settingsTitle || "Настройки определения победителя (при 1:1 по сетам)"}</h4>
                             <div className="flex items-center space-x-3"><input type="checkbox" id="useTotalPointsForTie" checked={tournamentSettings.useTotalPointsForTie} onChange={(e) => handleSettingsChange(e.target.checked)} className="h-5 w-5 rounded text-[#0B8E8D] focus:ring-2 focus:ring-[#0B8E8D]/50 border-gray-300 cursor-pointer" /><label htmlFor="useTotalPointsForTie" className="text-gray-700 select-none cursor-pointer">{t.tieRules?.usePointsOption || "Учитывать общее кол-во очков в 2 сетах"}</label></div>
                             <p className="text-xs text-gray-500 mt-2">{tournamentSettings.useTotalPointsForTie ? (t.tieRules?.usePointsOptionDescription || "Если счет 1:1, выигрывает команда с большим кол-вом очков за 2 сета. При равенстве очков играется тай-брейк до 5.") : (t.tieRules?.useTiebreakOptionDescription || "Если счет 1:1, всегда играется тай-брейк до 5.")} ({t.scoreDifferenceLabel || "Разница в 2 очка"})</p>
+
+                            {/* Настройка очков сета */}
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                <label className="block text-sm font-semibold text-[#06324F] mb-2">{t.setPointLimitLabel || "Сет играется до (очков):"}</label>
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="number"
+                                        min="15"
+                                        max="25"
+                                        value={tournamentSettings.setPointLimit || 25}
+                                        onChange={(e) => setTournamentSettings({ ...tournamentSettings, setPointLimit: Math.min(25, Math.max(15, parseInt(e.target.value) || 25)) })}
+                                        className="w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B8E8D] focus:border-[#0B8E8D]"
+                                    />
+                                    <span className="text-sm text-gray-500">{t.pointsLabel || "очков"} ({t.maxScoreInfo || "макс. ввод"}: {(tournamentSettings.setPointLimit || 25) + 15})</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">{t.setPointLimitInfo || "Стандарт: 25. Некоторые турниры играют до 21 или 15."}</p>
+                            </div>
                         </div>
                         <div className="mb-8 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-6 rounded-xl shadow-md border border-[#0B8E8D]/20">
                             <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.tieRules?.title || "Правила определения победителя (при 1:1 по сетам)"}</h3>
