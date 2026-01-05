@@ -24,7 +24,6 @@ const MatchDetailModal = ({
     
     const availableReferees = teams.filter(tm => tm.code !== currentMatchData.team1 && tm.code !== currentMatchData.team2);
     const currentRound = currentMatchData.round || 'unknown';
-    const refereeName = teams.find(t => t.code === currentMatchData.refereeTeamCode)?.name || t.tbd;
 
     useEffect(() => {
         const { set1Team1, set1Team2, set2Team1, set2Team2 } = currentMatchData;
@@ -77,7 +76,7 @@ const MatchDetailModal = ({
                 <div className={`text-[10px] font-black uppercase mb-1 h-4 flex items-center ${isServing ? 'text-orange-500 animate-pulse' : 'text-gray-400'}`}>
                     {isServing ? 'Подача' : ''}
                 </div>
-                <div className="text-xs font-bold text-[#06324F] text-center mb-3 h-8 flex items-center justify-center line-clamp-2 px-1">
+                <div className="text-xs font-bold text-[#06324F] text-center mb-3 h-8 flex items-center justify-center line-clamp-2 px-1 leading-tight">
                     {team.name}
                 </div>
                 <div className="flex flex-col items-center gap-2">
@@ -111,7 +110,32 @@ const MatchDetailModal = ({
 
                 <div className="p-4 overflow-y-auto flex-1 space-y-5">
                     
-                    {/* 1. Селектор сетов (Компактный) */}
+                    {/* 1. Настройки (ТЕПЕРЬ ВВЕРХУ) */}
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 grid grid-cols-1 gap-3">
+                        <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+                            <span className="bg-[#C1CBA7]/50 text-[#06324F] px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
+                                {t.roundNames?.[currentRound] || currentRound}
+                            </span>
+                            <div className="flex items-center gap-2 text-[11px] font-bold">
+                                <FaCalendarAlt className="text-indigo-500" />
+                                <input type="time" value={currentMatchData.time || ''} onChange={(e) => onUpdateDetails(currentMatchData.id, 'time', e.target.value)} className="bg-transparent border-none outline-none w-14 p-0 text-[#06324F]" />
+                                <span className="text-gray-300">|</span>
+                                <FaMapMarkerAlt className="text-[#0B8E8D]" />
+                                <select value={currentMatchData.court || 1} onChange={(e) => onUpdateDetails(currentMatchData.id, 'court', parseInt(e.target.value))} className="bg-transparent border-none outline-none p-0 text-[#06324F]">
+                                    <option value={1}>К1</option><option value={2}>К2</option><option value={3}>К3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">Судья</label>
+                            <select value={currentMatchData.refereeTeamCode || ""} onChange={(e) => onUpdateDetails(currentMatchData.id, 'refereeTeamCode', e.target.value)} className="w-full p-1.5 border rounded bg-white text-xs font-bold text-[#06324F] focus:ring-1 focus:ring-[#0B8E8D] outline-none">
+                                <option value="">-- Выберите судью --</option>
+                                {availableReferees.map(tm => <option key={tm.code} value={tm.code}>{tm.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* 2. Селектор сетов */}
                     <div className="flex gap-1.5 justify-center">
                         {[1, 2, 3].map(setNum => {
                             if (setNum === 3 && !showThirdSet) return null;
@@ -128,15 +152,15 @@ const MatchDetailModal = ({
                         })}
                     </div>
 
-                    {/* 2. LIVE Табло (Бок о бок) */}
-                    <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 shadow-inner">
+                    {/* 3. LIVE Табло */}
+                    <div className="bg-white rounded-2xl p-4 border-2 border-gray-50 shadow-sm relative overflow-hidden">
                         <div className="flex items-start justify-between gap-2">
                             <TeamScoreBlock teamKey={isSwapped ? 'team2' : 'team1'} team={isSwapped ? team2 : team1} />
                             
                             <div className="flex flex-col items-center justify-center pt-12 self-stretch">
-                                <div className="text-gray-300 font-black text-xl mb-4">:</div>
-                                <button onClick={() => setIsSwapped(!isSwapped)} className="p-2 text-gray-400 hover:text-[#0B8E8D] bg-white rounded-full shadow-sm">
-                                    <FaExchangeAlt className={`text-xs ${isSwapped ? 'rotate-180' : ''} transition-transform`} />
+                                <div className="text-gray-200 font-black text-xl mb-4">:</div>
+                                <button onClick={() => setIsSwapped(!isSwapped)} className="p-2 text-gray-400 hover:text-[#0B8E8D] bg-gray-50 rounded-full shadow-inner border border-gray-100">
+                                    <FaExchangeAlt className={`text-[10px] ${isSwapped ? 'rotate-180' : ''} transition-transform`} />
                                 </button>
                             </div>
 
@@ -144,7 +168,7 @@ const MatchDetailModal = ({
                         </div>
                     </div>
 
-                    {/* 3. Хроника */}
+                    {/* 4. Хроника */}
                     <div className="pt-2 overflow-x-auto no-scrollbar">
                         <div className="flex items-center gap-3">
                             <div className="text-[9px] font-black text-gray-300 uppercase shrink-0"><FaHistory /></div>
@@ -153,8 +177,8 @@ const MatchDetailModal = ({
                                     const isLeft = (event.team === 'team1' && !isSwapped) || (event.team === 'team2' && isSwapped);
                                     return (
                                         <div key={idx} className="w-5 h-8 flex flex-col gap-0.5 shrink-0">
-                                            <div className={`flex-1 rounded-sm text-[8px] font-black flex items-center justify-center ${isLeft ? 'bg-[#0B8E8D] text-white' : 'bg-gray-100 text-gray-300'}`}>{isLeft ? event.score : ''}</div>
-                                            <div className={`flex-1 rounded-sm text-[8px] font-black flex items-center justify-center ${!isLeft ? 'bg-[#0B8E8D] text-white' : 'bg-gray-100 text-gray-300'}`}>{!isLeft ? event.score : ''}</div>
+                                            <div className={`flex-1 rounded-sm text-[8px] font-black flex items-center justify-center ${isLeft ? 'bg-[#0B8E8D] text-white shadow-sm' : 'bg-gray-50 text-gray-300'}`}>{isLeft ? event.score : ''}</div>
+                                            <div className={`flex-1 rounded-sm text-[8px] font-black flex items-center justify-center ${!isLeft ? 'bg-[#0B8E8D] text-white shadow-sm' : 'bg-gray-50 text-gray-300'}`}>{!isLeft ? event.score : ''}</div>
                                         </div>
                                     );
                                 })}
@@ -162,34 +186,14 @@ const MatchDetailModal = ({
                             </div>
                         </div>
                     </div>
-
-                    {/* 4. Настройки (Нижний блок) */}
-                    <div className="grid grid-cols-2 gap-3 pt-4 border-t text-[11px]">
-                        <div className="flex flex-col gap-1">
-                            <label className="font-black text-gray-400 uppercase tracking-tighter">Судья</label>
-                            <select value={currentMatchData.refereeTeamCode || ""} onChange={(e) => onUpdateDetails(currentMatchData.id, 'refereeTeamCode', e.target.value)} className="p-1.5 border rounded bg-white font-bold outline-none">
-                                <option value="">--</option>
-                                {availableReferees.map(tm => <option key={tm.code} value={tm.code}>{tm.name}</option>)}
-                            </select>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <label className="font-black text-gray-400 uppercase tracking-tighter">Время и Корт</label>
-                            <div className="flex gap-1">
-                                <input type="time" value={currentMatchData.time || ''} onChange={(e) => onUpdateDetails(currentMatchData.id, 'time', e.target.value)} className="flex-1 p-1.5 border rounded bg-white font-bold outline-none" />
-                                <select value={currentMatchData.court || 1} onChange={(e) => onUpdateDetails(currentMatchData.id, 'court', parseInt(e.target.value))} className="p-1.5 border rounded bg-white font-bold outline-none">
-                                    <option value={1}>К1</option><option value={2}>К2</option><option value={3}>К3</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Footer */}
                 <div className="p-3 bg-gray-50 border-t flex gap-3 shrink-0">
-                    <button onClick={() => onResetMatch(currentMatchData.id)} className="p-2 text-red-400 hover:text-red-600 transition-colors">
+                    <button onClick={() => onResetMatch(currentMatchData.id)} className="p-2 text-red-400 hover:text-red-600 transition-colors" title="Сброс матча">
                         <FaUndo className="text-xs" />
                     </button>
-                    <button onClick={onClose} className="flex-1 bg-[#0B8E8D] text-white py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95">
+                    <button onClick={onClose} className="flex-1 bg-[#0B8E8D] text-white py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest active:scale-95 transition-all">
                         <FaCheck /> {t.close || 'Готово'}
                     </button>
                 </div>
