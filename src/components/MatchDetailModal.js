@@ -116,14 +116,26 @@ const MatchDetailModal = ({
                             <span className="bg-[#C1CBA7]/50 text-[#06324F] px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
                                 {t.roundNames?.[currentRound] || currentRound}
                             </span>
-                            <div className="flex items-center gap-2 text-[11px] font-bold">
-                                <FaCalendarAlt className="text-indigo-500" />
-                                <input type="time" value={currentMatchData.time || ''} onChange={(e) => onUpdateDetails(currentMatchData.id, 'time', e.target.value)} className="bg-transparent border-none outline-none w-14 p-0 text-[#06324F]" />
-                                <span className="text-gray-300">|</span>
-                                <FaMapMarkerAlt className="text-[#0B8E8D]" />
-                                <select value={currentMatchData.court || 1} onChange={(e) => onUpdateDetails(currentMatchData.id, 'court', parseInt(e.target.value))} className="bg-transparent border-none outline-none p-0 text-[#06324F]">
-                                    <option value={1}>К1</option><option value={2}>К2</option><option value={3}>К3</option>
-                                </select>
+                            <div className="flex items-center gap-3 text-[11px] font-bold">
+                                <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-2 py-1 rounded-md shadow-sm">
+                                    <FaCalendarAlt className="text-indigo-500" />
+                                    <input 
+                                        type="time" 
+                                        value={currentMatchData.time || ''} 
+                                        onChange={(e) => onUpdateDetails(currentMatchData.id, 'time', e.target.value)} 
+                                        className="bg-transparent border-none outline-none w-[70px] text-[#06324F] cursor-pointer" 
+                                    />
+                                </div>
+                                <div className="flex items-center gap-1.5 bg-white border border-gray-200 px-2 py-1 rounded-md shadow-sm">
+                                    <FaMapMarkerAlt className="text-[#0B8E8D]" />
+                                    <select 
+                                        value={currentMatchData.court || 1} 
+                                        onChange={(e) => onUpdateDetails(currentMatchData.id, 'court', parseInt(e.target.value))} 
+                                        className="bg-transparent border-none outline-none text-[#06324F] cursor-pointer"
+                                    >
+                                        <option value={1}>Корт 1</option><option value={2}>Корт 2</option><option value={3}>Корт 3</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div className="flex flex-col gap-1">
