@@ -16,7 +16,9 @@ const MatchDetailModal = ({
 }) => {
     const [isSwapped, setIsSwapped] = useState(false);
 
-    const currentMatchData = match;
+    // Find the live match object from the matches array to ensure we have the latest data
+    const currentMatchData = matches.find(m => m.id === match.id) || match;
+    
     const team1 = teams.find(t => t.code === currentMatchData.team1) || { name: t.tbd };
     const team2 = teams.find(t => t.code === currentMatchData.team2) || { name: t.tbd };
     const currentRefereeTeam = teams.find(t => t.code === currentMatchData.refereeTeamCode);
