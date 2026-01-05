@@ -280,12 +280,14 @@ function App() {
     const isInitialLoad = React.useRef(true);
 
     // Автосохранение matches в Firebase (динамический путь)
+    // Используем ref для хранения таймера, чтобы не отменять при быстрых изменениях
+    const saveMatchesRef = React.useRef(null);
     useEffect(() => {
         if (isInitialLoad.current) return;
-        const timer = setTimeout(() => {
-            saveData(getTournamentPath(currentTournament, 'matches'), matches);
-        }, 500); // Debounce 500ms
-        return () => clearTimeout(timer);
+        // Очищаем предыдущий таймер
+        if (saveMatchesRef.current) clearTimeout(saveMatchesRef.current);
+        // Сохраняем немедленно (без debounce для надёжности)
+        saveData(getTournamentPath(currentTournament, 'matches'), matches);
     }, [matches, currentTournament]);
 
     // Автосохранение teams в Firebase (динамический путь)
