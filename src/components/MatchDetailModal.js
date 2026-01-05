@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaCalendarAlt, FaMapMarkerAlt, FaBullhorn, FaSpinner, FaCheck, FaExchangeAlt, FaUndo, FaVolleyballBall, FaPlus, FaMinus, FaHistory } from 'react-icons/fa';
 import { isSetCompleted } from '../utils';
+import TimePickerModal from './TimePickerModal';
 
-const MatchDetailModal = ({ 
-    match, 
-    matches, 
-    teams, 
-    t, 
-    onClose, 
-    onUpdateScore, 
-    onUpdateDetails, 
-    onResetMatch, 
+const MatchDetailModal = ({
+    match,
+    matches,
+    teams,
+    t,
+    onClose,
+    onUpdateScore,
+    onUpdateDetails,
+    onResetMatch,
     tournamentSettings,
-    isSaving 
+    isSaving
 }) => {
     const [activeSet, setActiveSet] = useState(1);
-    
+    const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);    
     // Получаем живые данные матча из Firebase через пропс matches
     const currentMatchData = matches.find(m => m.id === match.id) || match;
     
@@ -140,10 +141,13 @@ const MatchDetailModal = ({
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div className="flex flex-col gap-1">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Время</label>
-                                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm">
+                                <button 
+                                    onClick={() => setIsTimePickerOpen(true)}
+                                    className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm text-sm hover:border-[#0B8E8D] transition-colors"
+                                >
                                     <FaCalendarAlt className="text-indigo-500" />
-                                    <input type="time" value={currentMatchData.time || ''} onChange={(e) => onUpdateDetails(currentMatchData.id, 'time', e.target.value)} className="w-full bg-transparent outline-none font-bold" />
-                                </div>
+                                    <span className="font-bold text-[#06324F]">{currentMatchData.time || '00:00'}</span>
+                                </button>
                             </div>
                             <div className="flex flex-col gap-1">
                                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Корт</label>
@@ -233,6 +237,14 @@ const MatchDetailModal = ({
                     </button>
                 </div>
             </div>
+
+            {/* Модалка выбора времени */}
+            <TimePickerModal 
+                isOpen={isTimePickerOpen}
+                onClose={() => setIsTimePickerOpen(false)}
+                currentTime={currentMatchData.time}
+                onSave={(newTime) => onUpdateDetails(currentMatchData.id, 'time', newTime)}
+            />
         </div>
     );
 };
