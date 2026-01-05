@@ -130,25 +130,23 @@ const validateScore = (score, isFinalSet, isTiebreak) => {
     return validated;
 };
 
-const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak) => {
-    const score1 = team1Score ?? 0; // Обработка null/undefined
-    const score2 = team2Score ?? 0; // Обработка null/undefined
+const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak, setPointLimit = 25, winDifference = 2) => {
+    const score1 = team1Score ?? 0;
+    const score2 = team2Score ?? 0;
 
-    // --- ИСПРАВЛЕНИЕ: Особая логика для обычного тай-брейка (до 5) ---
+    // Тай-брейк группы (до 5, первый достигший побеждает)
     if (isTiebreak && !isFinalSet) {
-        // Победа наступает сразу при достижении 5 очков любой командой.
         return score1 === 5 || score2 === 5;
     }
-    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
-    // --- Стандартная логика для обычных сетов (до 25) и тай-брейка финала (до 15) ---
-    const minWinDiff = 2; // Требуется разница в 2 очка
-    // Порог победы: 15 для финального тай-брейка, 25 для обычного сета
-    const winThreshold = isTiebreak /* && isFinalSet */ ? 15 : 25; // Если это isTiebreak, то это может быть только финальный (isFinalSet=true)
+    // Тай-брейк финала (до 15, разница 2)
+    if (isTiebreak && isFinalSet) {
+        return (score1 >= 15 || score2 >= 15) && Math.abs(score1 - score2) >= 2;
+    }
 
-    // Должен быть достигнут порог И должна быть разница в 2 очка
-    return (score1 >= winThreshold || score2 >= winThreshold) &&
-        Math.abs(score1 - score2) >= minWinDiff;
+    // Обычный сет: setPointLimit с указанной разницей
+    return (score1 >= setPointLimit || score2 >= setPointLimit) &&
+        Math.abs(score1 - score2) >= winDifference;
 };
 
 // --- Вспомогательная функция сортировки команд ---
@@ -171,7 +169,15 @@ function App() {
     const [teams, setTeams] = useState(initialTeams);
     const [matches, setMatches] = useState(initialMatches);
     const [language, setLanguage] = useState('cs'); // Язык по умолчанию 'cs'
-    const [tournamentSettings, setTournamentSettings] = useState({ useTotalPointsForTie: true, setPointLimit: 25 });
+    const [tournamentSettings, setTournamentSettings] = useState({
+        useTotalPointsForTie: true,
+        // Групповые матчи
+        groupSetPointLimit: 20,    // Сет до X очков
+        groupWinDifference: 1,     // Разница для победы (1 или 2)
+        // Плей-офф/Финалы
+        playoffSetPointLimit: 25,  // Сет до X очков
+        playoffWinDifference: 2    // Разница для победы
+    });
     const [view, setView] = useState('matches'); // Начальный вид - матчи
     const [selectedMatch, setSelectedMatch] = useState(null); // Для открытия деталей матча
     const [showRules, setShowRules] = useState(false); // Для модального окна правил
@@ -328,15 +334,15 @@ function App() {
                 let team2SetsWonCount = 0;
 
                 // Подсчет выигранных сетов в этом матче
-                if (isSetCompleted(match.set1Team1, match.set1Team2, false, false)) {
+                if (isSetCompleted(match.set1Team1, match.set1Team2, false, false, tournamentSettings.groupSetPointLimit, tournamentSettings.groupWinDifference)) {
                     match.set1Team1 > match.set1Team2 ? team1SetsWonCount++ : team2SetsWonCount++;
                 }
-                if (isSetCompleted(match.set2Team1, match.set2Team2, false, false)) {
+                if (isSetCompleted(match.set2Team1, match.set2Team2, false, false, tournamentSettings.groupSetPointLimit, tournamentSettings.groupWinDifference)) {
                     match.set2Team1 > match.set2Team2 ? team1SetsWonCount++ : team2SetsWonCount++;
                 }
                 // Тай-брейк в группе учитывается только если он был сыгран и завершен
                 const wasTie = team1SetsWonCount === 1 && team2SetsWonCount === 1;
-                if (wasTie && match.status !== 'completed_by_points' && isSetCompleted(match.set3Team1, match.set3Team2, false, true)) {
+                if (wasTie && match.status !== 'completed_by_points' && isSetCompleted(match.set3Team1, match.set3Team2, false, true, tournamentSettings.groupSetPointLimit, tournamentSettings.groupWinDifference)) {
                     match.set3Team1 > match.set3Team2 ? team1SetsWonCount++ : team2SetsWonCount++;
                 }
 
@@ -370,7 +376,7 @@ function App() {
             }
             return calculatedTeams;
         });
-    }, [/* initialTeams - константа */]); // Зависимостей нет
+    }, [tournamentSettings.groupSetPointLimit, tournamentSettings.groupWinDifference]); // Зависит от настроек группы
 
     // --- Автоматическое обновление плей-офф (только команды и статус) ---
     const updatePlayoffTeams = useCallback(() => {
@@ -475,29 +481,27 @@ function App() {
     const updateMatchScore = useCallback((matchId, set, team, scoreStr) => {
         const score = parseInt(scoreStr);
 
-        // Определяем максимальный счёт в зависимости от типа сета
-        const setPointLimit = tournamentSettings.setPointLimit || 25;
-        let maxScore;
-        if (set === 3) {
-            // Тай-брейк: до 5 (группы) или до 15 (финалы) + запас
-            maxScore = 20; // max для тай-брейка
-        } else {
-            // Обычный сет: setPointLimit + 15 (для разницы 2)
-            maxScore = setPointLimit + 15;
-        }
-
-        // Жёсткая валидация: 0 <= score <= maxScore
-        const validScore = isNaN(score) || score < 0 ? 0 : Math.min(score, maxScore);
-
+        // Находим матч для определения типа (группа или плей-офф)
         setMatches(prevMatches =>
             prevMatches.map(m => {
                 if (m.id === matchId) {
+                    const isPlayoff = m.round !== 'group';
+                    const setPointLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
+
+                    let maxScore;
+                    if (set === 3) {
+                        maxScore = 20; // max для тай-брейка
+                    } else {
+                        maxScore = (setPointLimit || 25) + 15;
+                    }
+
+                    const validScore = isNaN(score) || score < 0 ? 0 : Math.min(score, maxScore);
                     return { ...m, [`set${set}${team === 'team1' ? 'Team1' : 'Team2'}`]: validScore };
                 }
                 return m;
             })
         );
-    }, [setMatches, tournamentSettings.setPointLimit]); // Зависит от setPointLimit
+    }, [setMatches, tournamentSettings.playoffSetPointLimit, tournamentSettings.groupSetPointLimit]);
 
     // --- Проверка статуса всех матчей ---
     const checkAllMatchesStatus = useCallback(() => {
@@ -519,14 +523,19 @@ function App() {
                     return match;
                 }
 
-                // Логика определения статуса и победителя (остается без изменений)
+                // Логика определения статуса и победителя
                 const isFinal = match.round === 'final' || match.round === 'third_place' || match.round === 'fifth_place';
-                const set1Completed = isSetCompleted(set1Team1, set1Team2, false, false);
-                const set2Completed = isSetCompleted(set2Team1, set2Team2, false, false);
+                const isPlayoff = match.round !== 'group';
+                // Выбор настроек в зависимости от типа матча
+                const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
+                const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
+
+                const set1Completed = isSetCompleted(set1Team1, set1Team2, false, false, setLimit, winDiff);
+                const set2Completed = isSetCompleted(set2Team1, set2Team2, false, false, setLimit, winDiff);
                 const needThirdSet = (set1Completed && set2Completed && (set1Team1 > set1Team2 !== set2Team1 > set2Team2)) || isFinal;
                 const isThirdSetTiebreak = needThirdSet && !isFinal;
                 const set3Relevant = needThirdSet || (set3Team1 ?? 0) > 0 || (set3Team2 ?? 0) > 0;
-                const set3Completed = set3Relevant && isSetCompleted(set3Team1, set3Team2, isFinal, isThirdSetTiebreak);
+                const set3Completed = set3Relevant && isSetCompleted(set3Team1, set3Team2, isFinal, isThirdSetTiebreak, setLimit, winDiff);
                 let team1Wins = 0, team2Wins = 0;
                 if (set1Completed) (set1Team1 > set1Team2) ? team1Wins++ : team2Wins++;
                 if (set2Completed) (set2Team1 > set2Team2) ? team1Wins++ : team2Wins++;
@@ -569,7 +578,7 @@ function App() {
             });
             return needsUpdate ? updatedMatches : prevMatches;
         });
-    }, [tournamentSettings.useTotalPointsForTie, setMatches]); // Зависит от настроек
+    }, [tournamentSettings.useTotalPointsForTie, tournamentSettings.groupSetPointLimit, tournamentSettings.groupWinDifference, tournamentSettings.playoffSetPointLimit, tournamentSettings.playoffWinDifference, setMatches]); // Зависит от всех настроек
 
     // --- Обработчики настроек, языка, сброса матча ---
     const handleSettingsChange = useCallback((newSettingValue) => {
@@ -660,8 +669,11 @@ function App() {
         let roundClass = 'px-2 py-1 rounded text-xs font-semibold inline-block'; const currentRound = match.round || 'unknown'; const roundText = t.roundNames?.[currentRound] || currentRound;
         if (currentRound === 'group') { roundClass += ' bg-[#C1CBA7]/50 text-[#06324F]'; } else if (currentRound === 'quarterfinal') { roundClass += ' bg-[#0B8E8D]/20 text-[#0B8E8D]'; } else if (currentRound === 'semifinal') { roundClass += ' bg-[#06324F]/20 text-[#06324F]'; } else if (currentRound === 'third_place') { roundClass += ' bg-orange-100 text-orange-700'; } else if (currentRound === 'final') { roundClass += ' bg-[#FDD80F]/20 text-[#FDD80F]/90'; } else { roundClass += ' bg-gray-200 text-gray-700'; }
         const isFinal = currentRound === 'final' || currentRound === 'third_place' || currentRound === 'fifth_place';
-        const set1Completed = isSetCompleted(match.set1Team1, match.set1Team2, false, false);
-        const set2Completed = isSetCompleted(match.set2Team1, match.set2Team2, false, false);
+        const isPlayoff = currentRound !== 'group';
+        const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
+        const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
+        const set1Completed = isSetCompleted(match.set1Team1, match.set1Team2, false, false, setLimit, winDiff);
+        const set2Completed = isSetCompleted(match.set2Team1, match.set2Team2, false, false, setLimit, winDiff);
         const team1SetWins = (set1Completed && match.set1Team1 > match.set1Team2 ? 1 : 0) + (set2Completed && match.set2Team1 > match.set2Team2 ? 1 : 0);
         const team2SetWins = (set1Completed && match.set1Team1 < match.set1Team2 ? 1 : 0) + (set2Completed && match.set2Team1 < match.set2Team2 ? 1 : 0);
         const showThirdSet = isFinal || currentStatus === 'tie_needs_tiebreak' || (set1Completed && set2Completed && team1SetWins === 1 && team2SetWins === 1) || (match.set3Team1 ?? 0) > 0 || (match.set3Team2 ?? 0) > 0;
@@ -823,7 +835,7 @@ function App() {
         // Логика статусов/раундов/3го сета - без изменений
         let roundClass = 'px-3 py-1 rounded-full text-sm font-semibold inline-block mb-3'; let roundIcon; const roundText = t.roundNames?.[currentRound] || currentRound; if (currentRound === 'group') { roundClass += ' bg-[#C1CBA7]/50 text-[#06324F]'; roundIcon = <FaUsers className="mr-2" />; } else if (currentRound === 'quarterfinal') { roundClass += ' bg-[#0B8E8D]/20 text-[#0B8E8D]'; roundIcon = <FaChartBar className="mr-2" />; } else if (currentRound === 'semifinal') { roundClass += ' bg-[#06324F]/20 text-[#06324F]'; roundIcon = <FaChartBar className="mr-2" />; } else if (currentRound === 'third_place') { roundClass += ' bg-orange-100 text-orange-700'; roundIcon = <FaTrophy className="mr-2" />; } else if (currentRound === 'final') { roundClass += ' bg-[#FDD80F]/20 text-[#FDD80F]/90'; roundIcon = <FaTrophy className="mr-2" />; } else { roundClass += ' bg-gray-200 text-gray-700'; roundIcon = <FaVolleyballBall className="mr-2" />; }
         let statusClass = 'px-3 py-1 rounded-full text-sm font-semibold inline-block ml-2'; let statusIcon; const currentStatus = currentMatchData.status || 'unknown'; const statusText = t.statusNames?.[currentStatus] || currentStatus; if (currentStatus === 'completed') { statusClass += ' bg-green-100 text-green-800'; statusIcon = <FaCheck className="mr-2" />; } else if (currentStatus === 'completed_by_points') { statusClass += ' bg-blue-100 text-blue-800'; statusIcon = <FaCheck className="mr-2" />; } else if (currentStatus === 'tie_needs_tiebreak') { statusClass += ' bg-red-100 text-red-800'; statusIcon = <FaExclamationTriangle className="mr-2" />; } else if (currentStatus === 'in_progress') { statusClass += ' bg-yellow-100 text-yellow-800'; statusIcon = <FaRegClock className="mr-2 animate-spin" style={{ animationDuration: '2s' }} />; } else if (currentStatus === 'waiting') { statusClass += ' bg-gray-100 text-gray-500'; statusIcon = <FaRegClock className="mr-2" />; } else { statusClass += ' bg-gray-100 text-gray-800'; statusIcon = <FaRegClock className="mr-2" />; }
-        const isFinal = currentRound === 'final' || currentRound === 'third_place' || currentRound === 'fifth_place'; const set1Completed = isSetCompleted(currentMatchData.set1Team1, currentMatchData.set1Team2, false, false); const set2Completed = isSetCompleted(currentMatchData.set2Team1, currentMatchData.set2Team2, false, false); const isTieSituation = set1Completed && set2Completed && (currentMatchData.set1Team1 > currentMatchData.set1Team2 !== currentMatchData.set2Team1 > currentMatchData.set2Team2); const showThirdSetInput = isFinal || currentStatus === 'tie_needs_tiebreak' || isTieSituation || (currentMatchData.set3Team1 ?? 0) > 0 || (currentMatchData.set3Team2 ?? 0) > 0; const isThirdSetTiebreak = showThirdSetInput && (isFinal || currentStatus === 'tie_needs_tiebreak' || isTieSituation); const tiebreakScoreLimit = isFinal ? 15 : 5;
+        const isFinal = currentRound === 'final' || currentRound === 'third_place' || currentRound === 'fifth_place'; const isPlayoff = currentRound !== 'group'; const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit; const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference; const set1Completed = isSetCompleted(currentMatchData.set1Team1, currentMatchData.set1Team2, false, false, setLimit, winDiff); const set2Completed = isSetCompleted(currentMatchData.set2Team1, currentMatchData.set2Team2, false, false, setLimit, winDiff); const isTieSituation = set1Completed && set2Completed && (currentMatchData.set1Team1 > currentMatchData.set1Team2 !== currentMatchData.set2Team1 > currentMatchData.set2Team2); const showThirdSetInput = isFinal || currentStatus === 'tie_needs_tiebreak' || isTieSituation || (currentMatchData.set3Team1 ?? 0) > 0 || (currentMatchData.set3Team2 ?? 0) > 0; const isThirdSetTiebreak = showThirdSetInput && (isFinal || currentStatus === 'tie_needs_tiebreak' || isTieSituation); const tiebreakScoreLimit = isFinal ? 15 : 5;
 
         return (
             <div className="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center p-4 z-[70] backdrop-blur-sm">
@@ -986,21 +998,64 @@ function App() {
                             <div className="flex items-center space-x-3"><input type="checkbox" id="useTotalPointsForTie" checked={tournamentSettings.useTotalPointsForTie} onChange={(e) => handleSettingsChange(e.target.checked)} className="h-5 w-5 rounded text-[#0B8E8D] focus:ring-2 focus:ring-[#0B8E8D]/50 border-gray-300 cursor-pointer" /><label htmlFor="useTotalPointsForTie" className="text-gray-700 select-none cursor-pointer">{t.tieRules?.usePointsOption || "Учитывать общее кол-во очков в 2 сетах"}</label></div>
                             <p className="text-xs text-gray-500 mt-2">{tournamentSettings.useTotalPointsForTie ? (t.tieRules?.usePointsOptionDescription || "Если счет 1:1, выигрывает команда с большим кол-вом очков за 2 сета. При равенстве очков играется тай-брейк до 5.") : (t.tieRules?.useTiebreakOptionDescription || "Если счет 1:1, всегда играется тай-брейк до 5.")} ({t.scoreDifferenceLabel || "Разница в 2 очка"})</p>
 
-                            {/* Настройка очков сета */}
+                            {/* Настройка очков сета - ГРУППОВЫЕ МАТЧИ */}
                             <div className="mt-4 pt-4 border-t border-gray-200">
-                                <label className="block text-sm font-semibold text-[#06324F] mb-2">{t.setPointLimitLabel || "Сет играется до (очков):"}</label>
-                                <div className="flex items-center space-x-2">
-                                    <input
-                                        type="number"
-                                        min="15"
-                                        max="25"
-                                        value={tournamentSettings.setPointLimit || 25}
-                                        onChange={(e) => setTournamentSettings({ ...tournamentSettings, setPointLimit: Math.min(25, Math.max(15, parseInt(e.target.value) || 25)) })}
-                                        className="w-20 p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B8E8D] focus:border-[#0B8E8D]"
-                                    />
-                                    <span className="text-sm text-gray-500">{t.pointsLabel || "очков"} ({t.maxScoreInfo || "макс. ввод"}: {(tournamentSettings.setPointLimit || 25) + 15})</span>
+                                <h5 className="text-sm font-bold text-[#06324F] mb-3 flex items-center">
+                                    <span className="bg-[#C1CBA7]/50 px-2 py-1 rounded mr-2">Skupina</span>
+                                    {t.groupMatchSettings || "Групповые матчи"}
+                                </h5>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs text-gray-600 mb-1">{t.setPointsLabel || "Очков в сете"}</label>
+                                        <input
+                                            type="number" min="10" max="25"
+                                            value={tournamentSettings.groupSetPointLimit || 20}
+                                            onChange={(e) => setTournamentSettings({ ...tournamentSettings, groupSetPointLimit: Math.min(25, Math.max(10, parseInt(e.target.value) || 20)) })}
+                                            className="w-full p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B8E8D]"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-600 mb-1">{t.winDifferenceLabel || "Разница для победы"}</label>
+                                        <select
+                                            value={tournamentSettings.groupWinDifference || 1}
+                                            onChange={(e) => setTournamentSettings({ ...tournamentSettings, groupWinDifference: parseInt(e.target.value) })}
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B8E8D]"
+                                        >
+                                            <option value={1}>1 {t.point || "очко"}</option>
+                                            <option value={2}>2 {t.points || "очка"}</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">{t.setPointLimitInfo || "Стандарт: 25. Некоторые турниры играют до 21 или 15."}</p>
+                            </div>
+
+                            {/* Настройка очков сета - ПЛЕЙ-ОФФ */}
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                <h5 className="text-sm font-bold text-[#06324F] mb-3 flex items-center">
+                                    <span className="bg-[#FDD80F]/30 px-2 py-1 rounded mr-2">Play-off</span>
+                                    {t.playoffMatchSettings || "Плей-офф / Финалы"}
+                                </h5>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs text-gray-600 mb-1">{t.setPointsLabel || "Очков в сете"}</label>
+                                        <input
+                                            type="number" min="15" max="25"
+                                            value={tournamentSettings.playoffSetPointLimit || 25}
+                                            onChange={(e) => setTournamentSettings({ ...tournamentSettings, playoffSetPointLimit: Math.min(25, Math.max(15, parseInt(e.target.value) || 25)) })}
+                                            className="w-full p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FDD80F]"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-600 mb-1">{t.winDifferenceLabel || "Разница для победы"}</label>
+                                        <select
+                                            value={tournamentSettings.playoffWinDifference || 2}
+                                            onChange={(e) => setTournamentSettings({ ...tournamentSettings, playoffWinDifference: parseInt(e.target.value) })}
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FDD80F]"
+                                        >
+                                            <option value={1}>1 {t.point || "очко"}</option>
+                                            <option value={2}>2 {t.points || "очка"}</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="mb-8 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-6 rounded-xl shadow-md border border-[#0B8E8D]/20">
