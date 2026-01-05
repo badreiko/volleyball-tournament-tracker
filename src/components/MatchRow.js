@@ -43,7 +43,6 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
     const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
     const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
 
-    // Считаем выигранные сеты для итогового счета
     const set1Completed = isSetCompleted(match.set1Team1, match.set1Team2, false, false, setLimit, winDiff);
     const set2Completed = isSetCompleted(match.set2Team1, match.set2Team2, false, false, setLimit, winDiff);
     const set3Completed = (match.set3Team1 > 0 || match.set3Team2 > 0) && isSetCompleted(match.set3Team1, match.set3Team2, currentRound === 'final', currentRound !== 'final', setLimit, winDiff);
@@ -89,45 +88,45 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
                 onClick={canOpenDetail ? () => onRowClick(match) : undefined}
             >
                 {/* Header: Meta Info */}
-                <div className="flex justify-between items-center mb-4 border-b border-gray-50 pb-2">
+                <div className="flex justify-between items-center mb-3 border-b border-gray-50 pb-2">
                     <span className={roundClass}>{roundText}</span>
-                    <div className="flex gap-3 text-[10px] font-black uppercase tracking-tighter">
+                    <div className="flex gap-3 text-[10px] font-black uppercase">
                         <span className="flex items-center text-gray-400"><FaMapMarkerAlt className="mr-1 text-[#0B8E8D]" /> К{match.court}</span>
-                        <span className="flex items-center text-[#06324F] bg-gray-100 px-2 py-0.5 rounded-md"><FaCalendarAlt className="mr-1 text-indigo-500" /> {match.time}</span>
+                        <span className="flex items-center text-[#06324F]"><FaCalendarAlt className="mr-1 text-indigo-500" /> {match.time}</span>
                     </div>
                 </div>
 
-                {/* Body: Scoreboard Style */}
-                <div className="flex items-center justify-between gap-2">
+                {/* Body: Scoreboard Style (GRID Layout) */}
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                     {/* Team 1 */}
-                    <div className={`flex-1 text-center min-w-0 ${isTeam1Winner ? 'text-indigo-800' : 'text-[#06324F]'}`}>
-                        <div className={`text-xs md:text-sm font-black uppercase leading-tight truncate px-1 ${isTeam1Winner ? 'underline decoration-2 decoration-[#0B8E8D]' : ''}`}>
+                    <div className="min-w-0">
+                        <div className={`text-[11px] md:text-xs font-black uppercase leading-tight line-clamp-2 text-right ${isTeam1Winner ? 'text-indigo-800 underline decoration-2 decoration-[#0B8E8D]' : 'text-[#06324F]'}`}>
                             {team1Name}
                         </div>
                     </div>
 
                     {/* Central Score Block */}
-                    <div className="flex flex-col items-center shrink-0 px-2">
-                        <div className="text-3xl font-black text-[#06324F] leading-none mb-1">
-                            {team1SetWins} : {team2SetWins}
+                    <div className="flex flex-col items-center px-3 border-x border-gray-50">
+                        <div className="text-2xl font-black text-[#06324F] leading-none mb-1">
+                            {team1SetWins}:{team2SetWins}
                         </div>
                         {/* Small Set Details */}
-                        <div className="flex gap-1.5 text-[9px] font-bold text-gray-400">
-                            <span>{match.set1Team1 ?? 0}:{match.set1Team2 ?? 0}</span>
+                        <div className="flex gap-1 text-[8px] font-bold text-gray-400 whitespace-nowrap">
+                            <span>{match.set1Team1}:{match.set1Team2}</span>
                             <span className="text-gray-200">|</span>
-                            <span>{match.set2Team1 ?? 0}:{match.set2Team2 ?? 0}</span>
+                            <span>{match.set2Team1}:{match.set2Team2}</span>
                             {showThirdSet && (
                                 <>
                                     <span className="text-gray-200">|</span>
-                                    <span className="text-orange-400">{match.set3Team1 ?? 0}:{match.set3Team2 ?? 0}</span>
+                                    <span className="text-orange-400">{match.set3Team1}:{match.set3Team2}</span>
                                 </>
                             )}
                         </div>
                     </div>
 
                     {/* Team 2 */}
-                    <div className={`flex-1 text-center min-w-0 ${isTeam2Winner ? 'text-indigo-800' : 'text-[#06324F]'}`}>
-                        <div className={`text-xs md:text-sm font-black uppercase leading-tight truncate px-1 ${isTeam2Winner ? 'underline decoration-2 decoration-[#0B8E8D]' : ''}`}>
+                    <div className="min-w-0">
+                        <div className={`text-[11px] md:text-xs font-black uppercase leading-tight line-clamp-2 text-left ${isTeam2Winner ? 'text-indigo-800 underline decoration-2 decoration-[#0B8E8D]' : 'text-[#06324F]'}`}>
                             {team2Name}
                         </div>
                     </div>
@@ -135,8 +134,8 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
 
                 {/* Footer: Referee & Status */}
                 <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
-                    <div className="flex items-center text-[9px] font-bold text-gray-400 uppercase tracking-tight">
-                        <FaBullhorn className="mr-1.5 text-gray-300" /> {refereeName}
+                    <div className="flex items-center text-[9px] font-bold text-gray-400 uppercase">
+                        <FaBullhorn className="mr-1 text-gray-300" /> {refereeName}
                     </div>
                     <div className={`text-[10px] font-black uppercase flex items-center gap-1.5 ${statusClass}`}>
                         {statusIcon} {statusText}
