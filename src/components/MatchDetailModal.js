@@ -3,21 +3,22 @@ import { FaCalendarAlt, FaMapMarkerAlt, FaBullhorn, FaSpinner, FaCheck, FaExchan
 import { isSetCompleted } from '../utils';
 import TimePickerModal from './TimePickerModal';
 
-const MatchDetailModal = ({
-    match,
-    matches,
-    teams,
-    t,
-    onClose,
-    onUpdateScore,
-    onUpdateDetails,
-    onResetMatch,
+const MatchDetailModal = ({ 
+    match, 
+    matches, 
+    teams, 
+    t, 
+    onClose, 
+    onUpdateScore, 
+    onUpdateDetails, 
+    onResetMatch, 
     tournamentSettings,
-    isSaving
+    isSaving 
 }) => {
     const [activeSet, setActiveSet] = useState(1);
-    const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);    
-    // Получаем живые данные матча из Firebase через пропс matches
+    const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+    
+    // Живые данные матча из Firebase через пропс matches
     const currentMatchData = matches.find(m => m.id === match.id) || match;
     
     const team1 = teams.find(t => t.code === currentMatchData.team1) || { name: t.tbd };
@@ -87,11 +88,25 @@ const MatchDetailModal = ({
     };
 
     const toggleSides = () => {
-        // Меняем базовое положение сторон для всего матча и сохраняем в Firebase
         onUpdateDetails(currentMatchData.id, 'baseIsSwapped', !baseIsSwapped);
     };
 
-    const showThirdSet = isFinalMatch || currentMatchData.status === 'tie_needs_tiebreak' || ((currentMatchData.set1Team1 > 0 || currentMatchData.set1Team2 > 0) && (currentMatchData.set2Team1 > 0 || currentMatchData.set2Team2 > 0)) || (currentMatchData.set3Team1 ?? 0) || (currentMatchData.set3Team2 ?? 0);
+    // === СТРОГАЯ ЛОГИКА ОТОБРАЖЕНИЯ 3-ГО СЕТА ===
+    const { set1Team1, set1Team2, set2Team1, set2Team2, set3Team1, set3Team2 } = currentMatchData;
+    const isPlayoff = currentRound !== 'group';
+    const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
+    const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
+
+    const set1Done = isSetCompleted(set1Team1, set1Team2, false, false, setLimit, winDiff);
+    const set2Done = isSetCompleted(set2Team1, set2Team2, false, false, setLimit, winDiff);
+    
+    // 3-й сет показываем ТОЛЬКО если:
+    // 1. В нем уже есть очки (матч в процессе или завершен)
+    // 2. ИЛИ система определила, что он нужен (статус tie_needs_tiebreak)
+    // 3. ИЛИ это плей-офф и счет по сетам 1:1
+    const showThirdSet = (set3Team1 > 0 || set3Team2 > 0) || 
+                         (currentMatchData.status === 'tie_needs_tiebreak') ||
+                         (isPlayoff && set1Done && set2Done && (set1Team1 > set1Team2) !== (set2Team1 > set2Team2));
 
     const TeamScoreBlock = ({ teamKey, team }) => {
         const score = currentMatchData[`set${activeSet}${teamKey === 'team1' ? 'Team1' : 'Team2'}`] || 0;
@@ -101,7 +116,7 @@ const MatchDetailModal = ({
         return (
             <div className="flex flex-col items-center flex-1 min-w-0 px-1">
                 <div className={`text-[10px] font-black uppercase mb-1 h-4 ${isServing ? 'text-orange-500 animate-pulse' : 'text-transparent'}`}>
-                    Подача
+                    {t.service || 'Подача'}
                 </div>
                 <div className="text-xs font-black text-[#06324F] text-center mb-4 h-10 flex items-center justify-center leading-tight px-1 uppercase tracking-tight">
                     {team.name}
@@ -138,9 +153,9 @@ const MatchDetailModal = ({
                     
                     {/* Настройки */}
                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-4 shadow-inner text-[#06324F]">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Время</label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t.time || 'Время'}</label>
                                 <button 
                                     onClick={() => setIsTimePickerOpen(true)}
                                     className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm text-sm hover:border-[#0B8E8D] transition-colors"
@@ -150,28 +165,27 @@ const MatchDetailModal = ({
                                 </button>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Корт</label>
-                                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t.court || 'Корт'}</label>
+                                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm text-sm">
                                     <FaMapMarkerAlt className="text-[#0B8E8D]" />
                                     <select value={currentMatchData.court || 1} onChange={(e) => onUpdateDetails(currentMatchData.id, 'court', parseInt(e.target.value))} className="w-full bg-transparent outline-none font-bold">
-                                        <option value={1}>Корт 1</option><option value={2}>Корт 2</option><option value={3}>Корт 3</option>
+                                        <option value={1}>{t.court} 1</option><option value={2}>{t.court} 2</option><option value={3}>{t.court} 3</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Судья</label>
-                            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{t.referee || 'Судья'}</label>
+                            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-2.5 shadow-sm text-sm">
                                 <FaBullhorn className="text-gray-400" />
-                                <select value={currentMatchData.refereeTeamCode || ""} onChange={(e) => onUpdateDetails(currentMatchData.id, 'refereeTeamCode', e.target.value)} className="w-full bg-transparent outline-none font-bold">
-                                    <option value="">-- Выберите судью --</option>
+                                <select value={currentMatchData.refereeTeamCode || ""} onChange={(e) => onUpdateDetails(currentMatchData.id, 'refereeTeamCode', e.target.value)} className="w-full bg-transparent outline-none font-bold text-xs">
+                                    <option value="">{t.selectRefereePlaceholder || '--'}</option>
                                     {availableReferees.map(tm => <option key={tm.code} value={tm.code}>{tm.name}</option>)}
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    {/* Навигация по сетам */}
                     <div className="flex gap-2 justify-center">
                         {[1, 2, 3].map(setNum => {
                             if (setNum === 3 && !showThirdSet) return null;
@@ -181,14 +195,13 @@ const MatchDetailModal = ({
                             return (
                                 <button key={setNum} onClick={() => setActiveSet(setNum)}
                                     className={`flex-1 flex flex-col items-center px-4 py-2 rounded-xl border-2 transition-all min-w-[80px] ${isActive ? 'border-[#0B8E8D] bg-white shadow-md scale-105' : 'border-transparent bg-gray-100 opacity-50'}`}>
-                                    <span className="text-[9px] font-black text-gray-400 uppercase mb-1">{setNum === 3 ? 'ТБ' : `Сет ${setNum}`}</span>
+                                    <span className="text-[9px] font-black text-gray-400 uppercase mb-1">{setNum === 3 ? (t.tiebreak || 'ТБ') : `${t.set || 'Сет'} ${setNum}`}</span>
                                     <span className="text-base font-black text-[#06324F]">{s1}:{s2}</span>
                                 </button>
                             );
                         })}
                     </div>
 
-                    {/* LIVE Табло */}
                     <div className="flex items-start justify-between gap-2 py-2">
                         <TeamScoreBlock 
                             teamKey={isCurrentlySwapped ? 'team2' : 'team1'} 
@@ -197,7 +210,7 @@ const MatchDetailModal = ({
                         
                         <div className="flex flex-col items-center justify-center self-stretch pt-16">
                             <div className="text-gray-200 font-black text-2xl mb-6">:</div>
-                            <button onClick={toggleSides} title="Поменять стороны для всего матча" className="p-3 text-gray-400 hover:text-[#0B8E8D] bg-gray-50 rounded-full border border-gray-100 shadow-sm active:rotate-180 transition-all duration-300">
+                            <button onClick={toggleSides} title={t.swapTeams} className="p-3 text-gray-400 hover:text-[#0B8E8D] bg-gray-50 rounded-full border border-gray-100 shadow-sm active:rotate-180 transition-all duration-300">
                                 <FaExchangeAlt className="text-sm" />
                             </button>
                         </div>
@@ -208,12 +221,11 @@ const MatchDetailModal = ({
                         />
                     </div>
 
-                    {/* Хроника */}
                     <div className="pt-4 border-t border-dashed border-gray-200 overflow-x-auto no-scrollbar">
                         <div className="flex items-center gap-4">
                             <div className="text-[9px] font-black text-gray-300 uppercase shrink-0"><FaHistory /></div>
                             <div className="flex gap-1">
-                                {currentSetHistory.map((event, idx) => {
+                                {currentSetHistory.length > 0 ? currentSetHistory.map((event, idx) => {
                                     const isLeft = (event.team === 'team1' && !isCurrentlySwapped) || (event.team === 'team2' && isCurrentlySwapped);
                                     return (
                                         <div key={idx} className="w-6 h-10 flex flex-col gap-0.5 shrink-0">
@@ -221,8 +233,7 @@ const MatchDetailModal = ({
                                             <div className={`flex-1 rounded flex items-center justify-center text-[10px] font-black ${!isLeft ? 'bg-[#0B8E8D] text-white shadow-sm' : 'bg-gray-50 text-gray-300'}`}>{!isLeft ? event.score : ''}</div>
                                         </div>
                                     );
-                                })}
-                                {currentSetHistory.length === 0 && <span className="text-[10px] text-gray-300 italic">Сет начат...</span>}
+                                }) : <span className="text-[10px] text-gray-300 italic">{t.scoreHistory || 'Сет начат...'}</span>}
                             </div>
                         </div>
                     </div>
@@ -233,7 +244,7 @@ const MatchDetailModal = ({
                         <FaUndo />
                     </button>
                     <button onClick={onClose} className="flex-1 bg-[#06324F] text-white py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-black text-sm uppercase tracking-widest active:scale-95 transition-all">
-                        <FaCheck /> {t.close || 'Готово'}
+                        <FaCheck /> {t.apply || t.close || 'Готово'}
                     </button>
                 </div>
             </div>
@@ -244,6 +255,7 @@ const MatchDetailModal = ({
                 onClose={() => setIsTimePickerOpen(false)}
                 currentTime={currentMatchData.time}
                 onSave={(newTime) => onUpdateDetails(currentMatchData.id, 'time', newTime)}
+                t={t}
             />
         </div>
     );

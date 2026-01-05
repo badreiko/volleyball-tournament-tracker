@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 
-const TimePickerModal = ({ isOpen, onClose, onSave, currentTime }) => {
+const TimePickerModal = ({ isOpen, onClose, onSave, currentTime, t }) => {
     // Парсим текущее время или ставим дефолт
     const [hours, setHours] = useState(currentTime ? currentTime.split(':')[0] : '09');
     const [minutes, setMinutes] = useState(currentTime ? currentTime.split(':')[1] : '00');
@@ -27,7 +27,7 @@ const TimePickerModal = ({ isOpen, onClose, onSave, currentTime }) => {
                         <div className="bg-[#06324F] p-4 text-white flex items-center justify-between">
                             <div className="flex items-center gap-2 font-bold text-sm">
                                 <FaClock className="text-[#0B8E8D]" />
-                                Время начала
+                                {t.timeStart || 'Время начала'}
                             </div>
                             <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
                                 <FaTimes />
@@ -39,7 +39,7 @@ const TimePickerModal = ({ isOpen, onClose, onSave, currentTime }) => {
                             <div className="flex items-center justify-center gap-4 mb-6">
                                 {/* Hours */}
                                 <div className="flex flex-col items-center gap-2">
-                                    <span className="text-[10px] font-black text-gray-400 uppercase">Часы</span>
+                                    <span className="text-[10px] font-black text-gray-400 uppercase">{t.hours || 'Часы'}</span>
                                     <input 
                                         type="number" 
                                         min="0" 
@@ -54,7 +54,7 @@ const TimePickerModal = ({ isOpen, onClose, onSave, currentTime }) => {
 
                                 {/* Minutes */}
                                 <div className="flex flex-col items-center gap-2">
-                                    <span className="text-[10px] font-black text-gray-400 uppercase">Мин</span>
+                                    <span className="text-[10px] font-black text-gray-400 uppercase">{t.minutesShort || 'Мин'}</span>
                                     <input 
                                         type="number" 
                                         min="0" 
@@ -84,7 +84,7 @@ const TimePickerModal = ({ isOpen, onClose, onSave, currentTime }) => {
                                 onClick={handleSave}
                                 className="w-full bg-[#0B8E8D] text-white py-3 rounded-2xl shadow-lg shadow-[#0B8E8D]/20 flex items-center justify-center gap-2 font-black text-sm uppercase tracking-widest active:scale-95 transition-all"
                             >
-                                <FaCheck /> Применить
+                                <FaCheck /> {t.apply || 'Применить'}
                             </button>
                         </div>
                     </motion.div>

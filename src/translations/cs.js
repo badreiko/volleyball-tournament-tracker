@@ -184,4 +184,16 @@ Info o lokalitě: https://hala-slany.cz/`,
   // Индикация сохранения
   saving: 'Ukládání...',
   saved: 'Uloženo',
+
+  // Nové klíče pro Live režim a TimePicker
+  edit: 'Protokol',
+  scoreHistory: 'Historie setu',
+  service: 'PODÁNÍ',
+  apply: 'Použít',
+  hours: 'Hodiny',
+  minutesShort: 'Min',
+  timeStart: 'Čas zahájení',
+  reset: 'Reset',
+  set: 'Set',
+  scores: 'Výsledný protokol',
 };

@@ -184,4 +184,16 @@ Dream team Praha
   // Индикация сохранения
   saving: 'Сохранение...',
   saved: 'Сохранено',
+
+  // Новые ключи для Live-режима и TimePicker
+  edit: 'Протокол',
+  scoreHistory: 'История сета',
+  service: 'ПОДАЧА',
+  apply: 'Применить',
+  hours: 'Часы',
+  minutesShort: 'Мин',
+  timeStart: 'Время начала',
+  reset: 'Сброс',
+  set: 'Сет',
+  scores: 'Итоговый протокол',
 };
