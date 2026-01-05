@@ -63,14 +63,27 @@ function App() {
 
                 if (data) {
                     const matchesArray = Array.isArray(data) ? data : Object.values(data);
+                    let needsMigration = false;
+
                     const mergedMatches = initialMatches.map(initialMatch => {
                         const loadedMatchData = matchesArray.find(lm => lm.id === initialMatch.id);
                         if (loadedMatchData) {
+                            // ПРОВЕРКА: Если в базе нет новых полей, помечаем, что нужна миграция
+                            if (loadedMatchData.baseIsSwapped === undefined || !loadedMatchData.set1History) {
+                                needsMigration = true;
+                            }
                             return { ...initialMatch, ...loadedMatchData };
                         }
                         return initialMatch;
                     });
+
                     setMatches(mergedMatches);
+                    
+                    // Если данные в базе устарели (нет новых полей), принудительно сохраняем новую структуру
+                    if (needsMigration) {
+                        console.log("Migrating matches data to new structure...");
+                        saveData(matchesPath, mergedMatches);
+                    }
                 } else {
                     setMatches(initialMatches);
                     saveData(matchesPath, initialMatches);
