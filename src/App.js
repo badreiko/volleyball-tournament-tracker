@@ -239,7 +239,15 @@ function App() {
         unsubscribers.push(
             subscribeToData(settingsPath, (data) => {
                 if (data) {
-                    setTournamentSettings(data);
+                    // Мержим загруженные настройки с дефолтными значениями
+                    const defaultSettings = {
+                        useTotalPointsForTie: true,
+                        groupSetPointLimit: 20,
+                        groupWinDifference: 1,
+                        playoffSetPointLimit: 25,
+                        playoffWinDifference: 2
+                    };
+                    setTournamentSettings({ ...defaultSettings, ...data });
                 }
             })
         );
