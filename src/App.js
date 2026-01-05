@@ -313,11 +313,10 @@ function App() {
             }
         }, 1000);
 
-        // Cleanup: при размонтировании сохраняем немедленно
+        // Cleanup: очищаем таймер (НЕ сохраняем, чтобы избежать цикла)
         return () => {
             if (saveMatchesRef.current) {
                 clearTimeout(saveMatchesRef.current);
-                saveData(getTournamentPath(currentTournament, 'matches'), matches);
             }
         };
     }, [matches, currentTournament]);
@@ -349,6 +348,33 @@ function App() {
             isInitialLoad.current = false;
         }
     }, [isLoading]);
+
+    // Ref для хранения текущего состояния matches (для beforeunload)
+    const matchesRef = React.useRef(matches);
+    useEffect(() => {
+        matchesRef.current = matches;
+    }, [matches]);
+
+    // Сохранение при размонтировании компонента (закрытие страницы/перезагрузка)
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            if (saveMatchesRef.current) {
+                clearTimeout(saveMatchesRef.current);
+            }
+            // Сохраняем текущие данные перед закрытием
+            if (!isInitialLoad.current) {
+                saveData(getTournamentPath(currentTournament, 'matches'), matchesRef.current);
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            // При размонтировании компонента также сохраняем
+            handleBeforeUnload();
+        };
+    }, [currentTournament]); // Только currentTournament в зависимостях
 
     // --- Пересчет статистики команд ---
     const recalculateAllTeamStats = useCallback((currentMatches) => {
