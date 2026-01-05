@@ -218,6 +218,9 @@ function App() {
         // Подписка на matches
         unsubscribers.push(
             subscribeToData(matchesPath, (data) => {
+                // Устанавливаем флаг что обновление пришло от Firebase
+                isUpdatingFromFirebase.current = true;
+
                 if (data) {
                     const matchesArray = Array.isArray(data) ? data : Object.values(data);
                     const mergedMatches = initialMatches.map(initialMatch => {
@@ -279,12 +282,18 @@ function App() {
 
     // Ref для отслеживания первой загрузки (чтобы не сохранять при инициализации)
     const isInitialLoad = React.useRef(true);
+    // Ref для защиты от зацикливания: игнорируем updates от Firebase пока сами сохраняем
+    const isUpdatingFromFirebase = React.useRef(false);
 
     // Автосохранение matches в Firebase (динамический путь)
     // Используем ref для хранения таймера с debounce для оптимизации
     const saveMatchesRef = React.useRef(null);
     useEffect(() => {
-        if (isInitialLoad.current) return;
+        // Не сохраняем при первой загрузке или если обновление пришло от Firebase
+        if (isInitialLoad.current || isUpdatingFromFirebase.current) {
+            isUpdatingFromFirebase.current = false; // Сбрасываем флаг
+            return;
+        }
 
         // Очищаем предыдущий таймер
         if (saveMatchesRef.current) clearTimeout(saveMatchesRef.current);
