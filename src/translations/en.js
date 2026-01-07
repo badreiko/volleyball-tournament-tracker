@@ -131,6 +131,7 @@ Secretary records the match result on a simple form, which is handed over to the
   // New keys for Live mode and TimePicker
   edit: 'Protocol',
   scoreHistory: 'Set history',
+  scoreHistoryEmpty: 'Set started...',
   service: 'SERVICE',
   apply: 'Apply',
   hours: 'Hours',
@@ -140,14 +141,64 @@ Secretary records the match result on a simple form, which is handed over to the
   set: 'Set',
   scores: 'Final protocol',
   scanQR: 'Scan QR code',
+  shareApp: 'Share app',
   saving: 'Saving...',
   saved: 'Saved',
   swapTeams: 'Swap sides',
   resetMatch: 'Reset',
   selectTournament: 'Tournament',
   leagueStandings: 'League Standings',
+  leagueShort: 'League',
   total: 'Total',
   completed: 'Completed',
   active: 'Active',
   upcoming: 'Upcoming',
+
+  // App name
+  appName: 'RVL Scoreboard',
+
+  // Missing keys
+  vs: 'VS',
+  courtShort: 'C',
+  tiebreakShort: 'TB',
+  playoffLabel: 'Playoff',
+  noMatches: 'No matches found.',
+  noTeams: 'No teams found.',
+  noTeamsInGroup: 'No teams in group',
+  loading: 'Loading...',
+
+  // Table headers
+  winsLosses: 'Wins/Losses',
+  winsLossesShort: 'W/L',
+  setsShort: 'S',
+  setsDifference: 'Sets difference',
+  setsDiffShort: 'SD',
+  balls: 'Balls',
+  ballsShort: 'B',
+  ballsDifference: 'Balls difference',
+  ballsDiffShort: 'BD',
+
+  // Match settings
+  groupMatchSettings: 'Group matches',
+  playoffMatchSettings: 'Playoff / Finals',
+  setPointsLabel: 'Points per set',
+  tiebreakPointsLabel: 'Tiebreak to',
+  winDifferenceLabel: 'Win difference',
+  point: 'point',
+
+  // Tie rules settings
+  tieRulesSettings: {
+    settingsTitle: 'Winner determination settings (at 1:1 sets)',
+    usePointsOption: 'Count total points in 2 sets',
+    usePointsOptionDescription: 'If score is 1:1, the team with more total points wins. If points are equal, a tiebreak is played.',
+    useTiebreakOptionDescription: 'If score is 1:1, a tiebreak is always played.'
+  },
+  scoreDifferenceLabel: '2-point difference',
+  generalRulesTitle: 'General tournament rules',
+
+  // Other
+  tbd: 'TBD',
+  refereeTBD: 'Referee TBD',
+  selectRefereePlaceholder: '--',
+  unknown: 'Unknown',
 };
