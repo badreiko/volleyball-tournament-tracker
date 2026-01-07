@@ -1,0 +1,32 @@
+{
+    "rules": {
+        "league": {
+            "language": {
+                ".read": true,
+                ".write": true
+            }
+        },
+        "tournaments": {
+            "$tournamentId": {
+                "teams": {
+                    ".read": true,
+                    ".write": true
+                },
+                "matches": {
+                    ".read": true,
+                    ".write": true
+                },
+                "settings": {
+                    ".read": true,
+                    ".write": true
+                }
+            }
+        },
+        "tournament": {
+            ".read": true,
+            ".write": true
+        },
+        ".read": false,
+        ".write": false
+    }
+}
