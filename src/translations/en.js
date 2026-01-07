@@ -113,10 +113,14 @@ Secretary records the match result on a simple form, which is handed over to the
   tieRules: {
     title: 'Rules for 1:1 Set Score',
     option1: 'By Total Points',
-    option1Description: 'The team with the higher total points in two sets is considered the winner (with "win 1:1" status). The team with fewer points receives "loss 1:1" status. If the total points are equal, a tiebreak to 5 points is played.',
+    option1Description: 'The team with the higher total points in two sets is considered the winner. If the total points are equal, a tiebreak is played.',
     option2: 'Always with Tiebreak',
-    option2Description: 'When the score is 1:1 in sets, regardless of the number of points scored, a tiebreak to 5 points is always played to determine the winner.',
-    currentRule: 'For this tournament, the following rule is used:'
+    option2Description: 'When the score is 1:1 in sets, a tiebreak is always played to determine the winner.',
+    currentRule: 'For this tournament, the following rule is used:',
+    settingsTitle: 'Settings for determining winner (at 1:1 sets)',
+    usePointsOption: 'Use total points from 2 sets',
+    usePointsOptionDescription: 'If 1:1, the team with more total points wins. If equal, a tiebreak is played.',
+    useTiebreakOptionDescription: 'If 1:1, a tiebreak is always played.'
   },
   referee: 'Referee',
   secretary: 'Secretary',
@@ -185,14 +189,6 @@ Secretary records the match result on a simple form, which is handed over to the
   tiebreakPointsLabel: 'Tiebreak to',
   winDifferenceLabel: 'Win difference',
   point: 'point',
-
-  // Tie rules settings
-  tieRulesSettings: {
-    settingsTitle: 'Winner determination settings (at 1:1 sets)',
-    usePointsOption: 'Count total points in 2 sets',
-    usePointsOptionDescription: 'If score is 1:1, the team with more total points wins. If points are equal, a tiebreak is played.',
-    useTiebreakOptionDescription: 'If score is 1:1, a tiebreak is always played.'
-  },
   scoreDifferenceLabel: '2-point difference',
   generalRulesTitle: 'General tournament rules',
 

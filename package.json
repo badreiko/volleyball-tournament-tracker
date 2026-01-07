@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://rvl-volleyball-tournament.github.io",
   "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
     "@testing-library/dom": "^9.3.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^14.0.0",
