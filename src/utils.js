@@ -3,22 +3,21 @@ export const validateScore = (score, isFinalSet, isTiebreak) => {
     return validated;
 };
 
-export const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak, setPointLimit = 25, winDifference = 2) => {
+export const isSetCompleted = (team1Score, team2Score, isFinalSet, isTiebreak, setPointLimit = 25, winDifference = 2, tiebreakLimit = 5) => {
     const score1 = team1Score ?? 0;
     const score2 = team2Score ?? 0;
 
-    // Тай-брейк группы (до 5, первый достигший побеждает БЕЗ разницы)
+    // Тай-брейк группы (до tiebreakLimit, первый достигший побеждает БЕЗ разницы)
     if (isTiebreak && !isFinalSet) {
-        return score1 === 5 || score2 === 5;
+        return score1 >= tiebreakLimit || score2 >= tiebreakLimit;
     }
 
-    // Тай-брейк финала (до 15, разница 2)
+    // Тай-брейк финала (до tiebreakLimit, разница 2)
     if (isTiebreak && isFinalSet) {
-        return (score1 >= 15 || score2 >= 15) && Math.abs(score1 - score2) >= 2;
+        return (score1 >= tiebreakLimit || score2 >= tiebreakLimit) && Math.abs(score1 - score2) >= 2;
     }
 
     // Обычный сет: setPointLimit + разница winDifference
-    // winDifference берется из настроек (groupWinDifference или playoffWinDifference)
     return (score1 >= setPointLimit || score2 >= setPointLimit) &&
         Math.abs(score1 - score2) >= winDifference;
 };

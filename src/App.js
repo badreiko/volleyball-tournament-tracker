@@ -20,11 +20,13 @@ function App() {
     const [tournamentSettings, setTournamentSettings] = useState({
         useTotalPointsForTie: true,
         // Групповые матчи
-        groupSetPointLimit: 20,    // Сет до X очков
+        groupSetPointLimit: 25,    // Сет до X очков
         groupWinDifference: 1,     // Разница для победы (1 или 2)
+        groupTiebreakLimit: 5,     // Тайбрейк до X очков
         // Плей-офф/Финалы
         playoffSetPointLimit: 25,  // Сет до X очков
-        playoffWinDifference: 2    // Разница для победы
+        playoffWinDifference: 2,   // Разница для победы
+        playoffTiebreakLimit: 15   // Тайбрейк до X очков
     });
     const [view, setView] = useState('matches'); // Начальный вид - матчи
     const [selectedMatch, setSelectedMatch] = useState(null); // Для открытия деталей матча
@@ -97,10 +99,12 @@ function App() {
                 if (data) {
                     const defaultSettings = {
                         useTotalPointsForTie: true,
-                        groupSetPointLimit: 20,
+                        groupSetPointLimit: 25,
                         groupWinDifference: 1,
+                        groupTiebreakLimit: 5,
                         playoffSetPointLimit: 25,
-                        playoffWinDifference: 2
+                        playoffWinDifference: 2,
+                        playoffTiebreakLimit: 15
                     };
                     setTournamentSettings({ ...defaultSettings, ...data });
                 }
@@ -232,7 +236,7 @@ function App() {
                     match.set2Team1 > match.set2Team2 ? team1SetsWonCount++ : team2SetsWonCount++;
                 }
                 const wasTie = team1SetsWonCount === 1 && team2SetsWonCount === 1;
-                if (wasTie && match.status !== 'completed_by_points' && isSetCompleted(match.set3Team1, match.set3Team2, false, true, tournamentSettings.groupSetPointLimit, tournamentSettings.groupWinDifference)) {
+                if (wasTie && match.status !== 'completed_by_points' && isSetCompleted(match.set3Team1, match.set3Team2, false, true, tournamentSettings.groupSetPointLimit, tournamentSettings.groupWinDifference, tournamentSettings.groupTiebreakLimit)) {
                     match.set3Team1 > match.set3Team2 ? team1SetsWonCount++ : team2SetsWonCount++;
                 }
 
@@ -392,12 +396,14 @@ function App() {
                 const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
                 const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
 
+                const tiebreakLimit = isPlayoff ? tournamentSettings.playoffTiebreakLimit : tournamentSettings.groupTiebreakLimit;
+
                 const set1Completed = isSetCompleted(set1Team1, set1Team2, false, false, setLimit, winDiff);
                 const set2Completed = isSetCompleted(set2Team1, set2Team2, false, false, setLimit, winDiff);
                 const needThirdSet = (set1Completed && set2Completed && (set1Team1 > set1Team2 !== set2Team1 > set2Team2)) || isFinal;
                 const isThirdSetTiebreak = needThirdSet && !isFinal;
                 const set3Relevant = needThirdSet || (set3Team1 ?? 0) > 0 || (set3Team2 ?? 0) > 0;
-                const set3Completed = set3Relevant && isSetCompleted(set3Team1, set3Team2, isFinal, isThirdSetTiebreak, setLimit, winDiff);
+                const set3Completed = set3Relevant && isSetCompleted(set3Team1, set3Team2, isFinal, isThirdSetTiebreak, setLimit, winDiff, tiebreakLimit);
                 let team1Wins = 0, team2Wins = 0;
                 if (set1Completed) (set1Team1 > set1Team2) ? team1Wins++ : team2Wins++;
                 if (set2Completed) (set2Team1 > set2Team2) ? team1Wins++ : team2Wins++;

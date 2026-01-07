@@ -33,43 +33,54 @@ const RulesModal = ({
                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm mb-6 border border-gray-200">
                         <h4 className="text-lg font-semibold text-[#06324F] mb-3">{t.tieRules?.settingsTitle || "Настройки определения победителя (при 1:1 по сетам)"}</h4>
                         <div className="flex items-center space-x-3"><input type="checkbox" id="useTotalPointsForTie" checked={tournamentSettings.useTotalPointsForTie} onChange={(e) => handleSettingsChange(e.target.checked)} className="h-5 w-5 rounded text-[#0B8E8D] focus:ring-2 focus:ring-[#0B8E8D]/50 border-gray-300 cursor-pointer" /><label htmlFor="useTotalPointsForTie" className="text-gray-700 select-none cursor-pointer">{t.tieRules?.usePointsOption || "Учитывать общее кол-во очков в 2 сетах"}</label></div>
-                        <p className="text-xs text-gray-500 mt-2">{tournamentSettings.useTotalPointsForTie ? (t.tieRules?.usePointsOptionDescription || "Если счет 1:1, выигрывает команда с большим кол-вом очков за 2 сета. При равенстве очков играется тай-брейк до 5.") : (t.tieRules?.useTiebreakOptionDescription || "Если счет 1:1, всегда играется тай-брейк до 5.")} ({t.scoreDifferenceLabel || "Разница в 2 очка"})</p>
+                        <p className="text-xs text-gray-500 mt-2">{tournamentSettings.useTotalPointsForTie ? (t.tieRules?.usePointsOptionDescription || "Если счет 1:1, выигрывает команда с большим кол-вом очков за 2 сета. При равенстве очков играется тай-брейк.") : (t.tieRules?.useTiebreakOptionDescription || "Если счет 1:1, всегда играется тай-брейк.")}</p>
 
+                        {/* Group Match Settings */}
                         <div className="mt-4 pt-4 border-t border-gray-200">
                             <h5 className="text-sm font-bold text-[#06324F] mb-3 flex items-center">
                                 <span className="bg-[#C1CBA7]/50 px-2 py-1 rounded mr-2">{t.group || 'Skupina'}</span>
                                 {t.groupMatchSettings || "Групповые матчи"}
                             </h5>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs text-gray-600 mb-1">{t.setPointsLabel || "Очков в сете"}</label>
                                     <input
                                         type="number" min="10" max="25"
-                                        value={tournamentSettings.groupSetPointLimit || 20}
-                                        onChange={(e) => setTournamentSettings({ ...tournamentSettings, groupSetPointLimit: Math.min(25, Math.max(10, parseInt(e.target.value) || 20)) })}
+                                        value={tournamentSettings.groupSetPointLimit || 25}
+                                        onChange={(e) => setTournamentSettings({ ...tournamentSettings, groupSetPointLimit: Math.min(25, Math.max(10, parseInt(e.target.value) || 25)) })}
                                         className="w-full p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B8E8D]"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-gray-600 mb-1">{t.winDifferenceLabel || "Разница для победы"}</label>
+                                    <label className="block text-xs text-gray-600 mb-1">{t.winDifferenceLabel || "Разница"}</label>
                                     <select
                                         value={tournamentSettings.groupWinDifference || 1}
                                         onChange={(e) => setTournamentSettings({ ...tournamentSettings, groupWinDifference: parseInt(e.target.value) })}
                                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B8E8D]"
                                     >
-                                        <option value={1}>1 {t.point || "очко"}</option>
-                                        <option value={2}>2 {t.points || "очка"}</option>
+                                        <option value={1}>1</option>
+                                        <option value={2}>2</option>
                                     </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-gray-600 mb-1">{t.tiebreakPointsLabel || "Тайбрейк до"}</label>
+                                    <input
+                                        type="number" min="5" max="25"
+                                        value={tournamentSettings.groupTiebreakLimit || 5}
+                                        onChange={(e) => setTournamentSettings({ ...tournamentSettings, groupTiebreakLimit: Math.min(25, Math.max(5, parseInt(e.target.value) || 5)) })}
+                                        className="w-full p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B8E8D]"
+                                    />
                                 </div>
                             </div>
                         </div>
 
+                        {/* Playoff Match Settings */}
                         <div className="mt-4 pt-4 border-t border-gray-200">
                             <h5 className="text-sm font-bold text-[#06324F] mb-3 flex items-center">
                                 <span className="bg-[#FDD80F]/30 px-2 py-1 rounded mr-2">{t.playoffLabel || 'Play-off'}</span>
                                 {t.playoffMatchSettings || "Плей-офф / Финалы"}
                             </h5>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-xs text-gray-600 mb-1">{t.setPointsLabel || "Очков в сете"}</label>
                                     <input
@@ -80,22 +91,31 @@ const RulesModal = ({
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs text-gray-600 mb-1">{t.winDifferenceLabel || "Разница для победы"}</label>
+                                    <label className="block text-xs text-gray-600 mb-1">{t.winDifferenceLabel || "Разница"}</label>
                                     <select
                                         value={tournamentSettings.playoffWinDifference || 2}
                                         onChange={(e) => setTournamentSettings({ ...tournamentSettings, playoffWinDifference: parseInt(e.target.value) })}
                                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FDD80F]"
                                     >
-                                        <option value={1}>1 {t.point || "очко"}</option>
-                                        <option value={2}>2 {t.points || "очка"}</option>
+                                        <option value={1}>1</option>
+                                        <option value={2}>2</option>
                                     </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-gray-600 mb-1">{t.tiebreakPointsLabel || "Тайбрейк до"}</label>
+                                    <input
+                                        type="number" min="5" max="25"
+                                        value={tournamentSettings.playoffTiebreakLimit || 15}
+                                        onChange={(e) => setTournamentSettings({ ...tournamentSettings, playoffTiebreakLimit: Math.min(25, Math.max(5, parseInt(e.target.value) || 15)) })}
+                                        className="w-full p-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FDD80F]"
+                                    />
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className="mb-8 bg-gradient-to-r from-[#C1CBA7]/30 to-[#0B8E8D]/10 p-6 rounded-xl shadow-md border border-[#0B8E8D]/20">
                         <h3 className="text-xl font-bold text-[#06324F] mb-4">{t.tieRules?.title || "Правила определения победителя (при 1:1 по сетам)"}</h3>
-                        <div className="space-y-4"><div className={`p-4 rounded-lg shadow-sm border transition-all duration-300 ${tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-300 ring-2 ring-green-200' : 'bg-gray-100 border-gray-200 opacity-70'}`}><h4 className="text-lg font-semibold text-[#0B8E8D] mb-2 flex items-center">{tournamentSettings.useTotalPointsForTie && <FaCheck className="text-green-500 mr-2" />} {t.tieRules?.option1 || "Вариант 1: По очкам"}</h4><p className="text-gray-700 text-sm">{t.tieRules?.option1Description || "Побеждает команда, набравшая больше очков в сумме за 2 сета. Если очков поровну, играется тай-брейк до 5 очков (разница 2)."}</p></div><div className={`p-4 rounded-lg shadow-sm border transition-all duration-300 ${!tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-300 ring-2 ring-green-200' : 'bg-gray-100 border-gray-200 opacity-70'}`}><h4 className="text-lg font-semibold text-[#0B8E8D] mb-2 flex items-center">{!tournamentSettings.useTotalPointsForTie && <FaCheck className="text-green-500 mr-2" />} {t.tieRules?.option2 || "Вариант 2: Всегда тай-брейк"}</h4><p className="text-gray-700 text-sm">{t.tieRules?.option2Description || "Всегда играется тай-брейк до 5 очков (разница 2)."}</p></div></div>
+                        <div className="space-y-4"><div className={`p-4 rounded-lg shadow-sm border transition-all duration-300 ${tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-300 ring-2 ring-green-200' : 'bg-gray-100 border-gray-200 opacity-70'}`}><h4 className="text-lg font-semibold text-[#0B8E8D] mb-2 flex items-center">{tournamentSettings.useTotalPointsForTie && <FaCheck className="text-green-500 mr-2" />} {t.tieRules?.option1 || "Вариант 1: По очкам"}</h4><p className="text-gray-700 text-sm">{t.tieRules?.option1Description || "Побеждает команда, набравшая больше очков в сумме за 2 сета. Если очков поровну, играется тай-брейк."}</p></div><div className={`p-4 rounded-lg shadow-sm border transition-all duration-300 ${!tournamentSettings.useTotalPointsForTie ? 'bg-white border-green-300 ring-2 ring-green-200' : 'bg-gray-100 border-gray-200 opacity-70'}`}><h4 className="text-lg font-semibold text-[#0B8E8D] mb-2 flex items-center">{!tournamentSettings.useTotalPointsForTie && <FaCheck className="text-green-500 mr-2" />} {t.tieRules?.option2 || "Вариант 2: Всегда тай-брейк"}</h4><p className="text-gray-700 text-sm">{t.tieRules?.option2Description || "Всегда играется тай-брейк."}</p></div></div>
                     </div>
                     <div className="prose prose-sm max-w-none mt-6"><h3 className="text-xl font-bold text-[#06324F] mb-4">{t.generalRulesTitle || "Общие правила турнира"}</h3><div className="whitespace-pre-wrap font-sans text-sm text-gray-800 bg-gray-50 p-4 rounded border border-gray-200">{t.tournamentRules || "Здесь будут общие правила турнира..."}</div></div>
                 </div>

@@ -36,6 +36,7 @@ const MatchDetailModal = ({
     const isPlayoff = currentRound !== 'group';
     const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
     const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
+    const tiebreakLimit = isPlayoff ? tournamentSettings.playoffTiebreakLimit : tournamentSettings.groupTiebreakLimit;
 
     // === УМНАЯ ЛОГИКА АВТО-ПЕРЕКЛЮЧЕНИЯ СЕТОВ ===
     useEffect(() => {
@@ -81,7 +82,7 @@ const MatchDetailModal = ({
         // ПРОВЕРКА: Если сет уже завершен, блокируем добавление очков
         if (delta > 0) {
             const isTiebreak = set === 3;
-            if (isSetCompleted(s1, s2, isFinalMatch, isTiebreak, setLimit, winDiff)) {
+            if (isSetCompleted(s1, s2, isFinalMatch, isTiebreak, setLimit, winDiff, tiebreakLimit)) {
                 return; // СТОП! Сет уже закончен.
             }
         }
@@ -117,7 +118,7 @@ const MatchDetailModal = ({
         const otherScore = teamKey === 'team1' ? s2 : s1;
 
         const isTiebreak = activeSet === 3;
-        const isFinished = isSetCompleted(s1, s2, isFinalMatch, isTiebreak, setLimit, winDiff);
+        const isFinished = isSetCompleted(s1, s2, isFinalMatch, isTiebreak, setLimit, winDiff, tiebreakLimit);
         const isServing = currentSetHistory[currentSetHistory.length - 1]?.team === teamKey;
 
         return (

@@ -42,10 +42,11 @@ const MatchRow = React.memo(({ match, teams, t, onRowClick, tournamentSettings }
     const isPlayoff = currentRound !== 'group';
     const setLimit = isPlayoff ? tournamentSettings.playoffSetPointLimit : tournamentSettings.groupSetPointLimit;
     const winDiff = isPlayoff ? tournamentSettings.playoffWinDifference : tournamentSettings.groupWinDifference;
+    const tiebreakLimit = isPlayoff ? tournamentSettings.playoffTiebreakLimit : tournamentSettings.groupTiebreakLimit;
 
     const set1Completed = isSetCompleted(match.set1Team1, match.set1Team2, false, false, setLimit, winDiff);
     const set2Completed = isSetCompleted(match.set2Team1, match.set2Team2, false, false, setLimit, winDiff);
-    const set3Completed = (match.set3Team1 > 0 || match.set3Team2 > 0) && isSetCompleted(match.set3Team1, match.set3Team2, currentRound === 'final', currentRound !== 'final', setLimit, winDiff);
+    const set3Completed = (match.set3Team1 > 0 || match.set3Team2 > 0) && isSetCompleted(match.set3Team1, match.set3Team2, currentRound === 'final', currentRound !== 'final', setLimit, winDiff, tiebreakLimit);
 
     const team1SetWins = (set1Completed && match.set1Team1 > match.set1Team2 ? 1 : 0) +
         (set2Completed && match.set2Team1 > match.set2Team2 ? 1 : 0) +

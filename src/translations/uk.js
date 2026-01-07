@@ -198,6 +198,7 @@ Dream team Praha
   playoffMatchSettings: 'Плей-офф / Фінали',
   playoffLabel: 'Плей-офф',
   setPointsLabel: 'Очок у сеті',
+  tiebreakPointsLabel: 'Тайбрейк до',
   winDifferenceLabel: 'Різниця для перемоги',
   point: 'очко',
   points: 'очка',
