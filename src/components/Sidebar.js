@@ -22,19 +22,11 @@ const Sidebar = ({
             <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky md:top-0 z-40 border-b md:border-b-0 md:border-r border-gray-200 shrink-0">
                 {/* Шапка Sidebar */}
                 <div className="p-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                        <h1 className="text-xl font-bold text-[#06324F] flex items-center">
-                            <img src={RVLLogo} alt="RVL" className="w-10 h-10 mr-2 rounded-full shadow-sm" /> {t.appName || 'RVL Scoreboard'}
-                        </h1>
-                        <button
-                            onClick={() => setShowQRModal(true)}
-                            className="p-2 text-gray-400 hover:text-[#0B8E8D] hover:bg-[#0B8E8D]/10 rounded-lg transition-all"
-                            title={t.scanQR || 'QR kód'}
-                        >
-                            <FaQrcode className="text-lg" />
-                        </button>
+                    <div className="flex items-center mb-3">
+                        <img src={RVLLogo} alt="RVL" className="w-14 h-14 mr-3 rounded-full shadow-md" />
+                        <h1 className="text-xl font-bold text-[#06324F]">{t.appName || 'RVL Scoreboard'}</h1>
                     </div>
-                    <div className="flex gap-1 flex-wrap">
+                    <div className="flex gap-1 flex-wrap items-center">
                         {Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (
                             <button
                                 key={lang}
@@ -45,6 +37,13 @@ const Sidebar = ({
                                 {lang.toUpperCase()}
                             </button>
                         ))}
+                        <button
+                            onClick={() => setShowQRModal(true)}
+                            className="ml-auto p-2 text-gray-400 hover:text-[#0B8E8D] hover:bg-[#0B8E8D]/10 rounded-lg transition-all"
+                            title={t.scanQR || 'QR kód'}
+                        >
+                            <FaQrcode className="text-lg" />
+                        </button>
                     </div>
                 </div>
                 {/* Навигация Sidebar */}
