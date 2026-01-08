@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaVolleyballBall, FaTrophy, FaCalendarAlt, FaMapMarkerAlt, FaLink, FaUsers, FaChartBar, FaGlobe, FaQrcode, FaTimes } from 'react-icons/fa';
 import { TOURNAMENTS } from '../constants';
+import RVLLogo from '../RVL.png';
 
 const Sidebar = ({
     t,
@@ -23,7 +24,7 @@ const Sidebar = ({
                 <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <h1 className="text-xl font-bold text-[#06324F] flex items-center">
-                            <FaVolleyballBall className="mr-2 text-[#0B8E8D]" /> {t.appName || 'RVL Scoreboard'}
+                            <img src={RVLLogo} alt="RVL" className="w-10 h-10 mr-2 rounded-full shadow-sm" /> {t.appName || 'RVL Scoreboard'}
                         </h1>
                         <button
                             onClick={() => setShowQRModal(true)}
