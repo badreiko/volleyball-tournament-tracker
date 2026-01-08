@@ -21,8 +21,8 @@ const Sidebar = ({
         <>
             <aside className="w-full md:w-64 bg-white shadow-md md:h-screen md:sticky md:top-0 z-40 border-b md:border-b-0 md:border-r border-gray-200 shrink-0">
                 {/* Шапка Sidebar */}
-                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
+                <div className="p-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
                         <h1 className="text-xl font-bold text-[#06324F] flex items-center">
                             <img src={RVLLogo} alt="RVL" className="w-10 h-10 mr-2 rounded-full shadow-sm" /> {t.appName || 'RVL Scoreboard'}
                         </h1>
@@ -34,7 +34,18 @@ const Sidebar = ({
                             <FaQrcode className="text-lg" />
                         </button>
                     </div>
-                    <div className="hidden md:flex flex-wrap gap-1 max-w-[100px]">{Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (<button key={lang} onClick={() => changeLanguage(lang)} className={`px-2 py-1 text-xs rounded transition-colors duration-150 ${language === lang ? 'bg-[#0B8E8D] text-white shadow-sm font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`} title={languageNames[lang]}>{lang.toUpperCase()}</button>))}</div>
+                    <div className="flex gap-1 flex-wrap">
+                        {Object.keys(languageNames).filter(lang => translations[lang]).map(lang => (
+                            <button
+                                key={lang}
+                                onClick={() => changeLanguage(lang)}
+                                className={`px-3 py-1 text-xs rounded transition-colors duration-150 ${language === lang ? 'bg-[#0B8E8D] text-white shadow-sm font-semibold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                                title={languageNames[lang]}
+                            >
+                                {lang.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
                 </div>
                 {/* Навигация Sidebar */}
                 <div className="p-4 space-y-2">
