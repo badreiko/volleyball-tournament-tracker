@@ -38,54 +38,42 @@ export const cs = {
   showRules: 'Zobrazit pravidla',
   hideRules: 'Skrýt pravidla',
   // tournamentRules - обновлено для зимнего турнира 11.1.2026
-  tournamentRules: `Rozdělení do skupin
-
-Přihlášené týmy jsou rozděleny do dvou skupin:
+  tournamentRules: `Přihlášeno je 10 týmů.
+Týmy jsou rozděleny do 2 základních skupin. V nich se hraje systémem každý s každým.
 
 Skupina A
-Lážo Plážo Děčín
+Kondor Slaný
 Zlatý jádro Kladno
-Spořilov Praha
-Dobrá Parta Plzeň
 Prajd Pardubice
+Dobrá Parta Plzeň
+UB Mongolsko
 
 Skupina B
 Sokol Benešov
-Kondor Slaný
+Spořilov Praha
 Všude zdejší Tuchlovice
-UB Mongolsko
+AVA Praha
 Dream team Praha
 
-
-Časový harmonogram na neděli 11.1.:
-
-08:00 – 08:30    Příjezd a registrace (účastnický poplatek 1000 Kč)
-08:30 – 08:55    Rozcvičení
-09:00                   Zahájení
-09:05 – 15:45     Zápasy (hrajeme na 3 hřištích současně)
-15:50 – 15:55     Vyhlášení výsledků a předání cen
-
-
-Organizace turnaje
-Základní kola se odehrají ve dvou 5-členných skupinách, každý s každým. Celkem tedy na každý tým čekají 4 zápasy.
-První 3 týmy každé skupiny pak ještě odehrají vzájemný zápas o celkové 1.- 2.,  3.- 4. a 5.- 6. místo v turnaji.
-
 Pravidla zápasů
-Každý zápas ve skupinové fázi se hraje na 2 sety do 25 bodů. Při dosažení 25. bodu je konec setu (výhra o 2 body tedy není nutná). V případě nerozhodného stavu 1:1 a stejném poměru míčů v obou setech se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
+Každý zápas se hraje na 2 vítězné sety. První dva sety se hrají každý do 25 bodů (Při dosažení 25. bodu je konec setu. Výhra o 2 body tedy není nutná.). V případě nerozhodného stavu 1:1 se hraje 3.set (tiebreak) do 5 bodů. Dosažením 5.bodu tento set končí.
 
 Bodování zápasu:
 Výhra   2 : 0 … 3 body
-Výhra   1 : 1 … 2 body
-Prohra 1 : 1 … 1 bod
+Výhra   2 : 1 … 2 body
+Prohra 1 : 2 … 1 bod
 Prohra 0 : 2 … 0 bodů
 
-Získané body v zápasu určí pořadí v tabulce. V případě rovnosti bodů rozhoduje počet vítězných setů. V případě stejného počtu setů pak více vítězných míčů.
+Získané body v zápasu určí pořadí v tabulce (A / B). V případě rovnosti bodů rozhoduje počet vítězných setů. V případě stejného počtu setů pak více vítězných míčů.
+V základní skupině tak každý tým odehraje 4 zápasy.
 
-Finále turnaje
-Finálový zápas o 1.-2. místo se hraje na 2 vítězné sety, přičemž případný rozhodující třetí set se hraje do 15 bodů.
+Finálová fáze
+Do finálové fáze turnaje postupují vždy první 3 týmy z každé skupiny, které se následně spolu utkají o 1.- 2., 3.- 4. a 5.- 6. místo v turnaji.
+Všechny tyto zápasy se hrají stejným způsobem jako zápasy ve skupině. Tedy na 2 vítězné sety, případný třetí set – tiebreak do 5 bodů.
 
 Rozhodčí a zapisovatel
-Funkci rozhodčího a zapisovatele obsazují vždy týmy, které aktuálně nehrají, dle uvedeného rozpisu. Rozhodnutí rozhodčího je konečné. (Připomínáme, že se jedná o turnaj amatérských hráčů.)
+Funkci rozhodčího a zapisovatele obsazují vždy týmy, které aktuálně nehrají, dle uvedeného rozpisu. Rozhodnutí rozhodčího je konečné. (Připomínám, že se jedná o turnaj amatérských hráčů.)
+Zapisovatel zaznamenává výsledek utkání na jednoduchý formulář, který po skončení zápasu předá ke stolku organizátorů.
 
 Další informace
 Webové stránky RVL: https://rvl.hala-slany.cz/

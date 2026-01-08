@@ -47,57 +47,55 @@ export const AUTUMN_STANDINGS = [
 ];
 
 export const initialTeams = [
-    { code: 'A1', name: 'Lážo Plážo Děčín', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'A1', name: 'Kondor Slaný', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
     { code: 'A2', name: 'Zlatý jádro Kladno', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
-    { code: 'A3', name: 'Spořilov Praha', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'A3', name: 'Prajd Pardubice', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
     { code: 'A4', name: 'Dobrá Parta Plzeň', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
-    { code: 'A5', name: 'Prajd Pardubice', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'A5', name: 'UB Mongolsko', group: 'A', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
     { code: 'B1', name: 'Sokol Benešov', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
-    { code: 'B2', name: 'Kondor Slaný', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'B2', name: 'Spořilov Praha', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
     { code: 'B3', name: 'Všude zdejší Tuchlovice', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
-    { code: 'B4', name: 'UB Mongolsko', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
+    { code: 'B4', name: 'AVA Praha', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
     { code: 'B5', name: 'Dream team Praha', group: 'B', points: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, ballsWon: 0, ballsLost: 0 },
 ];
 
 export const initialMatches = [
-    // === РАУНД 1 (09:00) ===
-    { id: 'A1-A2', court: 1, time: '09:00', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'A3-A4', court: 2, time: '09:00', team1: 'A3', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'B1-B2', court: 3, time: '09:00', team1: 'B1', team2: 'B2', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    // === РАУНД 1 (09:02) ===
+    { id: 'A1-A2', court: 1, time: '09:02', team1: 'A1', team2: 'A2', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B3-B5', court: 2, time: '09:02', team1: 'B3', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B1-B4', court: 3, time: '09:02', team1: 'B1', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
 
-    // === РАУНД 2 (09:30) ===
-    { id: 'A1-A3', court: 1, time: '09:30', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'A2-A5', court: 2, time: '09:30', team1: 'A2', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'B3-B4', court: 3, time: '09:30', team1: 'B3', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    // === РАУНД 2 (09:50) ===
+    { id: 'A3-A4', court: 1, time: '09:50', team1: 'A3', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'A1-A5', court: 2, time: '09:50', team1: 'A1', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B2-B4', court: 3, time: '09:50', team1: 'B2', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
 
-    // === РАУНД 3 (10:00) ===
-    { id: 'A1-A4', court: 1, time: '10:00', team1: 'A1', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'A3-A5', court: 2, time: '10:00', team1: 'A3', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'B1-B3', court: 3, time: '10:00', team1: 'B1', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    // === РАУНД 3 (10:40) ===
+    { id: 'A2-A5', court: 1, time: '10:40', team1: 'A2', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B2-B5', court: 2, time: '10:40', team1: 'B2', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B1-B3', court: 3, time: '10:40', team1: 'B1', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
 
-    // === РАУНД 4 (10:30) ===
-    { id: 'A1-A5', court: 1, time: '10:30', team1: 'A1', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'A2-A4', court: 2, time: '10:30', team1: 'A2', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'B2-B5', court: 3, time: '10:30', team1: 'B2', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    // === РАУНД 4 (11:30) ===
+    { id: 'A2-A3', court: 1, time: '11:30', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B1-B2', court: 2, time: '11:30', team1: 'B1', team2: 'B2', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B3-B4', court: 3, time: '11:30', team1: 'B3', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
 
-    // === РАУНД 5 (11:00) ===
-    { id: 'A2-A3', court: 1, time: '11:00', team1: 'A2', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'A4-A5', court: 2, time: '11:00', team1: 'A4', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'B1-B4', court: 3, time: '11:00', team1: 'B1', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    // === РАУНД 5 (12:20) ===
+    { id: 'A1-A4', court: 1, time: '12:20', team1: 'A1', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'A3-A5', court: 2, time: '12:20', team1: 'A3', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B3', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B1-B5', court: 3, time: '12:20', team1: 'B1', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B2', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
 
-    // === РАУНД 6 (11:30) ===
-    { id: 'B1-B5', court: 1, time: '11:30', team1: 'B1', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'B2-B3', court: 2, time: '11:30', team1: 'B2', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A2', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    // === РАУНД 6 (13:10) ===
+    { id: 'A1-A3', court: 1, time: '13:10', team1: 'A1', team2: 'A3', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'A2-A4', court: 2, time: '13:10', team1: 'A2', team2: 'A4', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B2-B3', court: 3, time: '13:10', team1: 'B2', team2: 'B3', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
 
-    // === РАУНД 7 (12:00) ===
-    { id: 'B2-B4', court: 1, time: '12:00', team1: 'B2', team2: 'B4', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A3', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'B3-B5', court: 2, time: '12:00', team1: 'B3', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A4', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    // === РАУНД 7 (14:00) ===
+    { id: 'A4-A5', court: 1, time: '14:00', team1: 'A4', team2: 'A5', group: 'A', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'B4-B5', court: 3, time: '14:00', team1: 'B4', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'B1', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
 
-    // === РАУНД 8 (12:30) ===
-    { id: 'B4-B5', court: 1, time: '12:30', team1: 'B4', team2: 'B5', group: 'B', set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'not_started', round: 'group', refereeTeamCode: 'A5', refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-
-    // === ФИНАЛЫ (13:00) ===
-    { id: 'F-1A-1B', court: 1, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'F3-2A-2B', court: 2, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
-    { id: 'F5-3A-3B', court: 3, time: '13:00', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'fifth_place', refereeTeamCode: null, refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] }
+    // === ФИНАЛЫ (14:55) ===
+    { id: 'F-1A-1B', court: 1, time: '14:55', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'final', refereeTeamCode: null, refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'F3-2A-2B', court: 2, time: '14:55', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'third_place', refereeTeamCode: null, refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] },
+    { id: 'F5-3A-3B', court: 3, time: '14:55', team1: null, team2: null, group: null, set1Team1: 0, set1Team2: 0, set2Team1: 0, set2Team2: 0, set3Team1: 0, set3Team2: 0, winner: null, status: 'waiting', round: 'fifth_place', refereeTeamCode: null, refereeRule: null, baseIsSwapped: false, set1History: [], set2History: [], set3History: [] }
 ];
